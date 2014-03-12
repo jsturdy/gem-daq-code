@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<connections>
+ <connection id="dummy.udp.0"
+	     uri="ipbusudp-2.0://192.168.0.175:50001"
+             address_table="file:///home/sturdy/xdaqgem/glib_dev/uhal-cmake/myaddress.xml" />
+ <connection id="dummy.udp.1"
+	     uri="ipbusudp-2.0://192.168.0.175:50001"
+             address_table="file:///home/sturdy/xdaqgem/glib_dev/uhal-cmake/extraregs.xml" />
+ <connection id="i2cregs.udp"
+	     uri="ipbusudp-2.0://192.168.0.175:50001"
+             address_table="file:///home/sturdy/xdaqgem/glib_dev/uhal-cmake/i2cregs.xml" />
+ <connection id="spiregs.udp"
+	     uri="ipbusudp-2.0://192.168.0.175:50001"
+             address_table="file:///home/sturdy/xdaqgem/glib_dev/uhal-cmake/spiregs.xml" />
+ <connection id="vfattest.udp"
+	     uri="ipbusudp-2.0://192.168.0.175:50001"
+             address_table="file:///home/sturdy/xdaqgem/glib_dev/uhal-cmake/vfatslaves.xml" />
+</connections>
+

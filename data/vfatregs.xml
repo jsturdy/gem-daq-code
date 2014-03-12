@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<node id="top">
+  <node id="ContReg0"     address="0x00"  mask="0xff"  permission="rw"
+	description=""/>
+  <node id="ContReg1"     address="0x01"  mask="0xff"  permission="rw"
+	description=""/>
+  <node id="IPreampIn"    address="0x02"  mask="0xff"  permission="rw"
+	description=""/>
+  <node id="IPreampFeed"  address="0x03"  mask="0xff"  permission="rw"
+	description=""/>
+  <node id="IPreampOut"   address="0x04"  mask="0xff"  permission="rw"
+	description=""/>
+  <node id="IShaper"      address="0x05"  mask="0xff"  permission="rw"
+	description=""/>
+  <node id="IShaperFeed"  address="0x06"  mask="0xff"  permission="rw"
+	description=""/>
+  <node id="IComp"        address="0x07"  mask="0xff"  permission="rw"
+	description=""/>
+  
+  <node id="ChipID0"      address="0x08"  mask="0xff"  permission="r"
+	description=""/>
+  <node id="ChipID1"      address="0x09"  mask="0xff"  permission="r"
+	description=""/>
+  
+  <node id="UpsetReg"     address="0x0A"  mask="0xff"  permission="r"
+	description=""/>
+  
+  <node id="HitCount0"    address="0x0B"  mask="0xff"  permission="r"
+	description=""/>
+  <node id="HitCount1"    address="0x0C"  mask="0xff"  permission="r"
+	description=""/>
+  <node id="HitCount2"    address="0x0D"  mask="0xff"  permission="r"
+	description=""/>
+  
+  <node id="ExtRegPointer"  address="0x0E"  mask="0xff"  permission="rw"
+	description="Pointer to one of the extended registers"/>
+  <node id="ExtRegData"     address="0x0F"  mask="0xff"  permission="rw"
+	description="Data to be written to the extended register
+		     pointed to by ExtRegPointer"/>
+</node>
+<!--Extended registers, addressed by ExtRegPointer and ExtRegData
+	     <node id="Lat"            address="0x0F"  mask="0xff"  permission="rw"
+		   description="*0"/>
+	     <node id="ChanReg1to128"  address="0x0F"  mask="0xff"  permission="rw"
+		   description="*1 to *128"/>
+	     <node id="VCal"           address="0x0F"  mask="0xff"  permission="rw"
+		   description="*129"/>
+	     <node id="VThreshold1"    address="0x0F"  mask="0xff"  permission="rw"
+		   description="*130"/>
+	     <node id="VThreshold2"    address="0x0F"  mask="0xff"  permission="rw"
+		   description="*131"/>
+	     <node id="CalPhase"       address="0x0F"  mask="0xff"  permission="rw"
+		   description="*132"/>
+	     <node id="ContReg2"       address="0x0F"  mask="0xff"  permission="rw"
+		   description="*133"/>
+	     <node id="ContReg3"       address="0x0F"  mask="0xff"  permission="rw"
+		   description="*134"/>
+	     <node id="Spare"          address="0x0F"  mask="0xff"  permission="rw"
+		   description="*135"/>
+	     -->
