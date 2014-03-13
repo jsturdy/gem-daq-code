@@ -1,0 +1,42 @@
+#Instructions to compile and run the program
+
+#ENVIRONMENT VARIABLES
+Code requires two environment variables to be set:
+One called uHALROOT, Set it to uHAL installation directory
+By default uHAL get installed in /opt/cactus directory
+
+export uHALROOT=/opt/cactus
+
+The second is to make the code run more smoothly out of the box
+and is called GLIBTEST
+Set it to the root working directory of the package you checked
+out from git.
+
+#COMPILING THE PROGRAM
+From the source directory just execute compile.sh file
+./compile.sh
+
+This will compile and build program and the all the executables
+will go to the bin directory.
+
+[VERY VERY IMPORTANT]
+Set the LD_LIBRARY_PATH variable as given by the output of above script 
+
+#RUNNING THE PROGRAM 
+Executable should be run from the directory where "connection" and
+"address" xml files are present
+
+In the default case it is in source directory itself, so the executable
+can be run as follows:
+./bin/sturdy 
+
+#OUTPUTS
+Expected output from the "sturdy" sample program
+=======================================
+system_REG_1 = 117
+=======================================
+
+"system" executable in the bin directory give the information about the 
+sytem, board, and the firware version and date
+"uTCA","GLIB","3.1.0 : 15/2/13"
+
