@@ -87,38 +87,6 @@ int main()
       //std::cout<<macInfo.c_str()<<std::endl;
       std::cout<< ipInfo<<std::endl;
 
-      /////////
-      //ValWord< uint32_t > user_ipb_regs      = hw2.getNode("user_ipb_regs").read();
-      //ValWord< uint32_t > user_ipb_stat_regs = hw2.getNode("user_ipb_stat_regs").read();
-      //ValWord< uint32_t > user_ipb_ctrl_regs = hw2.getNode("user_ipb_ctrl_regs").read();
-      //ValWord< uint32_t > user_wb_regs       = hw2.getNode("user_wb_regs").read();
-      //hw2.dispatch();
-      //
-      //std::cout<<"user_ipb_regs:"<<user_ipb_regs.value()<<"  "
-      //	       <<"user_ipb_stat_regs:"<<user_ipb_regs.value()<<"  "
-      //	       <<"user_ipb_ctrl_regs:"<<user_ipb_regs.value()<<"  "
-      //	       <<"user_wb_regs:"<<user_ipb_regs.value()<<"  "
-      //	       <<std::endl;
-      //
-      ////hw2.getNode("user_ipb_regs").write(0x1);
-      ////hw2.getNode("user_ipb_stat_regs:").write(0x2);
-      ////hw2.getNode("user_ipb_ctrl_regs:").write(0x3);
-      ////hw2.getNode("user_wb_regs:").write(0x4);
-      ////hw2.dispatch();
-      ////
-      ////user_ipb_regs   = hw2.getNode("user_ipb_regs").read();
-      ////user_ipb_stat_regs   = hw2.getNode("user_ipb_stat_regs").read();
-      ////user_ipb_ctrl_regs   = hw2.getNode("user_ipb_ctrl_regs").read();
-      ////user_wb_regs   = hw2.getNode("user_wb_regs").read();
-      ////hw2.dispatch();
-      ////
-      ////std::cout<<"user_ipb_regs:"<<user_ipb_regs.value()<<"  "
-      ////	       <<"user_ipb_stat_regs:"<<user_ipb_regs.value()<<"  "
-      ////	       <<"user_ipb_ctrl_regs:"<<user_ipb_regs.value()<<"  "
-      ////	       <<"user_wb_regs:"<<user_ipb_regs.value()<<"  "
-      ////	       <<std::endl;
-      ////
-
       ValWord< uint32_t > test     = hw2.getNode("test").read() ;
       hw2.dispatch();
       std::cout<<"test:"<<test.value()<<std::endl;
@@ -132,63 +100,6 @@ int main()
       hw2.dispatch();
       std::cout<<"status_2:"<<status_2.value()<<std::endl;
 
-
-      /*****
-      std::vector<std::string> ids = hw.getNodes();
-      std::cout << "getNodes(): ";
-      std::copy(ids.begin(),
-		ids.end(),
-		std::ostream_iterator<std::string>(std::cout,", "));
-      
-      std::cout << std::endl << std::endl;
-      
-      ids = hw.getNodes(".*MEM.*");
-      std::cout << "getNodes(\".*MEM.*\").getNodes(): ";
-      std::copy(ids.begin(),
-		ids.end(),
-		std::ostream_iterator<std::string>(std::cout,", "));
-      
-      std::cout << std::endl << std::endl;
-      
-      ids = hw.getNode("SUBSYSTEM1").getNodes();
-      std::cout << "getNode("SUBSYSTEM1").getNodes(): ";
-      std::copy(ids.begin(),
-		ids.end(),
-		std::ostream_iterator<std::string>(std::cout,", "));
-      
-      std::cout << std::endl;
-      *****/
-      //
-
-      std::cout<<"testing bitshifting"<<std::endl;
-      char num0 = 3;
-      char num1 = 7;
-      char num2 = 11;
-      std::cout<<"num2 = "<<int(num2)<<"  "
-	       <<"num1 = "<<int(num1)<<"  "
-	       <<"num0 = "<<int(num0)<<"  "
-	       <<std::endl;
-      std::cout<<"num2 = "<<std::hex<<int(num2)<<std::dec<<"  "
-	       <<"num1 = "<<std::hex<<int(num1)<<std::dec<<"  "
-	       <<"num0 = "<<std::hex<<int(num0)<<std::dec<<"  "
-	       <<std::endl;
-      
-      uint32_t num = 0x0000;
-      std::cout<<"num = "<<num<<"("<<std::hex<<num<<std::dec<<")"<<std::endl;
-      //num = (((num<<8)+num2)<<8+num1)<<8+num0;
-      num = (num2<<16)+(num1<<8)+num0;
-      std::cout<<"num = "<<num<<"("<<std::hex<<num<<std::dec<<")"<<std::endl;
-      num = 0x0000;
-      num = (num<<8)+num2;
-      std::cout<<"num = "<<num<<"("<<std::hex<<num<<std::dec<<")"<<std::endl;
-      num = (num<<8)+num1;
-      std::cout<<"num = "<<num<<"("<<std::hex<<num<<std::dec<<")"<<std::endl;
-      num = (num<<8)+num0;
-      std::cout<<"num = "<<num<<"("<<std::hex<<num<<std::dec<<")"<<std::endl;
-      std::cout<<"num = "<<num<<" or "<<((num2<<16) | (num1<<8) | num0)<<std::endl;
-      std::cout<<"num = "<<std::hex<<num<<std::dec
-	       <<" or "<<std::hex<<((num2<<16) | (num1<<8) | num0)
-	       <<std::dec<<std::endl;
     }
   catch ( const std::exception& e )
     {
