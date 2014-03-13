@@ -12,6 +12,10 @@ and is called GLIBTEST
 Set it to the root working directory of the package you checked
 out from git.
 
+Depending on your shell, use one of the two provided scripts
+(setup.csh or setup.sh) making the necessary modifications
+for your usernam and directory structure
+
 #COMPILING THE PROGRAM
 From the source directory just execute compile.sh file
 ./compile.sh
@@ -23,12 +27,9 @@ will go to the bin directory.
 Set the LD_LIBRARY_PATH variable as given by the output of above script 
 
 #RUNNING THE PROGRAM 
-Executable should be run from the directory where "connection" and
-"address" xml files are present
-
-In the default case it is in source directory itself, so the executable
-can be run as follows:
-./bin/sturdy 
+The executable can be run as follows (if PATH is set to include
+$GLIBTEST/glib-testing/bin):
+sturdy
 
 #OUTPUTS
 Expected output from the "sturdy" sample program
