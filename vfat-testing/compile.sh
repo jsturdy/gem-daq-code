@@ -6,4 +6,4 @@ echo ${CXXFLAGS}
 make CXXFLAGS="-O0 -g3 -fno-inline"
 echo "Deleting Temporary File created during compilation"
 cd ..
-#rm -rf build 
+rm -rf build 
