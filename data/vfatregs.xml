@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <node id="top">
   <node id="ContReg0"     address="0x00"  mask="0xff"  permission="rw"
-	description=""/>
+	description="VFAT control register 0"/>
   <node id="ContReg1"     address="0x01"  mask="0xff"  permission="rw"
-	description=""/>
+	description="VFAT control register 1"/>
   <node id="IPreampIn"    address="0x02"  mask="0xff"  permission="rw"
 	description=""/>
   <node id="IPreampFeed"  address="0x03"  mask="0xff"  permission="rw"

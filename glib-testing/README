@@ -30,14 +30,3 @@ Set the LD_LIBRARY_PATH variable as given by the output of above script
 The executable can be run as follows (if PATH is set to include
 $GLIBTEST/glib-testing/bin):
 sturdy
-
-#OUTPUTS
-Expected output from the "sturdy" sample program
-=======================================
-system_REG_1 = 117
-=======================================
-
-"system" executable in the bin directory give the information about the 
-sytem, board, and the firware version and date
-"uTCA","GLIB","3.1.0 : 15/2/13"
-
