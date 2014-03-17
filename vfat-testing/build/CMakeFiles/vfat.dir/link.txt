@@ -1,1 +1,0 @@
-/usr/bin/c++  -fPIC -g  -shared -Wl,-soname,libvfat.so -o ../lib/libvfat.so CMakeFiles/vfat.dir/src/vfat.cpp.o -L /opt/cactus/lib -lcactus_uhal_uhal 

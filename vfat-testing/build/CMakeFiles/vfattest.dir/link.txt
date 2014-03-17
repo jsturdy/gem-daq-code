@@ -1,1 +1,0 @@
-/usr/bin/c++   -g  -fPIC CMakeFiles/vfattest.dir/tests/vfattest.cpp.o  -o ../bin/vfattest -rdynamic -L /home/sturdy/xdaqgem/glib_dev/gem-daq-code/vfat-testing/lib -L /home/sturdy/xdaqgem/glib_dev/gem-daq-code/glib-testing/lib -lvfat -lclassTest 
