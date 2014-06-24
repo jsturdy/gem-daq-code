@@ -25,8 +25,11 @@ This will compile and build program and the all the executables will go to the b
 set the LD_LIBRARY_PATH variable as given by the output of above script 
 
 #RUNNING THE PROGRAM 
+##N.B. this program depends on having built ../glib-testing
 The executable can be run as follows (if PATH is set to include
 $GLIBTEST/vfat-testing/bin):
+vfattest
+othwise, specify the relative path:
 ./bin/vfattest
 
 ##if you run into a problem with the connection, try changing
