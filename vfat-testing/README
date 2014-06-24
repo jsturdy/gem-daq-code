@@ -5,7 +5,10 @@ Code requires two environment variables to be set:
 One called uHALROOT, Set it to uHAL installation directory
 By default uHAL get installed in /opt/cactus directory
 
+##for sh style shells
 export uHALROOT=/opt/cactus
+##for csh style shells
+setenv uHALROOT /opt/cactus
 
 The second is to make the code run more smoothly out of the box
 and is called GLIBTEST
@@ -26,3 +29,7 @@ The executable can be run as follows (if PATH is set to include
 $GLIBTEST/vfat-testing/bin):
 ./bin/vfattest
 
+##if you run into a problem with the connection, try changing
+data/myconnections.xml
+Latest firmware with GLIB to Optical link uses 192.168.0.115
+instead of 129.168.0.175
