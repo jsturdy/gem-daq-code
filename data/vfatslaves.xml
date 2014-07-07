@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <node id="top">
-  <node id="VFAT2_C_E"  address="0x4000CE00"
+  <node id="VFAT2_C_E"  address="0x4001CE00"
 	module="file://${GLIBTEST}/data/vfatregs.xml"
 	description="column C, eta E VFAT chip"/>
   
-  <node id="VFAT2_0_0"  address="0x40000000"  
+  <node id="VFAT2_0_0"  address="0x40010000"  
+	module="file://${GLIBTEST}/data/vfatregs.xml"
+	description="column 0, eta 0 VFAT chip"/>
+
+  <node id="VFAT5_0_0"  address="0x40010500"  
+	module="file://${GLIBTEST}/data/vfatregs.xml"
+	description="column 0, eta 0 VFAT chip"/>
+
+  <node id="VFAT5_0_1"  address="0x40010501"  
+	module="file://${GLIBTEST}/data/vfatregs.xml"
+	description="column 0, eta 0 VFAT chip"/>
+
+  <node id="VFAT5_0_2"  address="0x40010502"  
 	module="file://${GLIBTEST}/data/vfatregs.xml"
 	description="column 0, eta 0 VFAT chip"/>
 </node>

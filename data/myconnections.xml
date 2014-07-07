@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <connections>
+ <connection id="gemsupervisor.udp.0"
+	     uri="ipbusudp-2.0://192.168.0.115:50001"
+             address_table="file://${GLIBTEST}/data/allregsnonfram.xml" />
  <connection id="dummy.udp.0"
 	     uri="ipbusudp-2.0://192.168.0.115:50001"
              address_table="file://${GLIBTEST}/data/myaddress.xml" />
