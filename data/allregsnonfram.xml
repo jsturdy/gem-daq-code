@@ -209,7 +209,8 @@
      <node id="user_wb_regs"        address="0x80000000"  mask="0xffffffff"  permission="rw"
 	   description="User wishbone registers"/>
      -->
-  <node id="vfatregs"
+  <node id="vfats"
+	address="0x40010000"
 	module="file://${GLIBTEST}/data/vfatslaves.xml"
 	description="VFAT registers controled by the GLIB user registers"
 	/>

@@ -1,22 +1,39 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <node id="top">
-  <node id="VFAT2_C_E"  address="0x4001CE00"
+  <node id="CMS_hybrid_J8"
+	address="0x500"  
 	module="file://${GLIBTEST}/data/vfatregs.xml"
-	description="column C, eta E VFAT chip"/>
+	description="column 1, CMS hybrid VFAT chip adjacent to J8 connector"/>
   
-  <node id="VFAT2_0_0"  address="0x40010000"  
+  <node id="CMS_hybrid_J26"
+	address="0x300"  
 	module="file://${GLIBTEST}/data/vfatregs.xml"
-	description="column 0, eta 0 VFAT chip"/>
-
-  <node id="VFAT5_0_0"  address="0x40010500"  
+	description="column 1, CMS hybrid VFAT chip adjacent to J26 connector"/>
+  
+  <node id="CMS_hybrid_J44"
+	address="0x100"  
 	module="file://${GLIBTEST}/data/vfatregs.xml"
-	description="column 0, eta 0 VFAT chip"/>
-
-  <node id="VFAT5_0_1"  address="0x40010501"  
+	description="column 1, CMS hybrid VFAT chip adjacent to J44 connector"/>
+  
+  <node id="TOTEM_hybrid_J58"
+	address="0x600"  
 	module="file://${GLIBTEST}/data/vfatregs.xml"
-	description="column 0, eta 0 VFAT chip"/>
-
-  <node id="VFAT5_0_2"  address="0x40010502"  
+	description="column 1, TOTEM hybrid VFAT chip J58 connector"/>
+  
+  <node id="TOTEM_hybrid_J55"
+	address="0x400"  
 	module="file://${GLIBTEST}/data/vfatregs.xml"
-	description="column 0, eta 0 VFAT chip"/>
+	description="column 1, TOTEM hybrid VFAT chip J55 connector"/>
+  
+  <node id="TOTEM_hybrid_J57"
+	address="0x200"  
+	module="file://${GLIBTEST}/data/vfatregs.xml"
+	description="column 1, TOTEM hybrid VFAT chip J57 connector"/>
+  
+  <node id="vfat_response"
+	address="0x2000"
+	mask="0xffffffff"
+	permission="r"
+	description="read the response from the VFAT transaction"/>
+  
 </node>

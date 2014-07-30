@@ -3,6 +3,9 @@
  <connection id="gemsupervisor.udp.0"
 	     uri="ipbusudp-2.0://192.168.0.115:50001"
              address_table="file://${GLIBTEST}/data/allregsnonfram.xml" />
+ <connection id="gemsupervisor.controlhub.0"
+	     uri="chtcp-2.0://localhost:10203?target=192.168.0.115:50001"
+             address_table="file://${GLIBTEST}/data/allregsnonfram.xml" />
  <connection id="dummy.udp.0"
 	     uri="ipbusudp-2.0://192.168.0.115:50001"
              address_table="file://${GLIBTEST}/data/myaddress.xml" />
@@ -15,8 +18,11 @@
  <connection id="spiregs.udp"
 	     uri="ipbusudp-2.0://192.168.0.115:50001"
              address_table="file://${GLIBTEST}/data/spiregs.xml" />
- <connection id="vfattest.udp"
+ <connection id="vfattest.udp.0"
 	     uri="ipbusudp-2.0://192.168.0.115:50001"
+             address_table="file://${GLIBTEST}/data/vfatslaves.xml" />
+ <connection id="vfattest.controlhub.0"
+	     uri="chtcp-2.0://localhost:10203?target=192.168.0.115:50001"
              address_table="file://${GLIBTEST}/data/vfatslaves.xml" />
 </connections>
 <!--
