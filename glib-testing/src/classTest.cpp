@@ -18,6 +18,7 @@ TEST::TEST(){
   char connectionPath[128];
   sprintf(connectionPath,"file://%s/data/myconnections.xml;",dirVal.c_str());
   manager = new ConnectionManager( connectionPath );
+  //*hw=manager->getDevice ( "gemsupervisor.udp.0" );
 
 }
 
@@ -36,13 +37,14 @@ TEST::~TEST(){
 
 void TEST::FetchFirmWare()
 {
-  HwInterface hw=manager->getDevice ( "dummy.udp.0" );
+  HwInterface hw2=manager->getDevice ( "dummy.udp.0" );
+  //*hw=manager->getDevice ( "dummy.udp.0" );
   char regName[12];
   for(int i=1 ; i<=6 ; i++)
     {
       sprintf(regName,"firmware_REG_%d",i);
-      mem = hw.getNode ( regName ).read();
-      hw.dispatch();
+      mem = hw2.getNode ( regName ).read();
+      hw2.dispatch();
       char *pEnd;
       char firmChar[1];
       sprintf(firmChar,"%d",int(mem.value()));
@@ -78,4 +80,45 @@ void TEST::FetchFirmWare()
   std::cout<<"FW::ver:"<<_firmWareVersion
 	   <<"  date:"<<_firmWareDate
 	   <<std::endl;
+}
+
+uint32_t TEST::getTestReg()
+{
+  HwInterface hw2=manager->getDevice ( "gemsupervisor.udp.0" );
+  uint32_t testReg_;
+  try {
+    r_test = hw2.getNode ( "test" ).read();
+    hw2.dispatch();
+    testReg_ = r_test.value();
+  }
+  catch (const std::exception& e) {
+    std::cout << "Something went wrong reading the test register: " << e.what() << std::endl;
+  }
+  return testReg_;
+  
+}
+
+uint32_t TEST::setTestReg(uint32_t setVal)
+{
+  HwInterface hw2=manager->getDevice ( "gemsupervisor.udp.0" );
+  uint32_t testReg_ = setVal;
+  
+  try {
+    hw2.getNode ( "test" ).write(testReg_);
+    hw2.dispatch();
+  }
+  catch (const std::exception& e) {
+    std::cout << "Something went wrong writing the test register: " << e.what() << std::endl;
+  }
+  
+  try {
+    r_test = hw2.getNode ( "test" ).read();
+    hw2.dispatch();
+    testReg_ = r_test.value();
+  }
+  catch (const std::exception& e) {
+    std::cout << "Something went wrong reading the test register: " << e.what() << std::endl;
+  }
+  return testReg_;
+
 }

@@ -58,7 +58,7 @@
   
   <!--Extended registers, addressed by ExtRegPointer and ExtRegData
 	       (should be taken care of in the GLIB-Optohybrid firmware-->
-  <node id="Lat"            address="0x10"  mask="0xff"  permission="rw"
+  <node id="Latency"       address="0x10"  mask="0xff"  permission="rw"
 	description="Programs the L1A latency, each bit is a single clock
 		     cycle (0-255 clock cycles, up to 6.4us)
 		     Hardwired sleep value 0x80

@@ -40,22 +40,22 @@ int main()
       conf.connectionFile = tmpString;
       
       TEST::TEST myglib;
-      //myglib.FetchFirmWare();
+      myglib.FetchFirmWare();
 
-      gem::base::vfat testing(conf);
-      testing.PrintRegisters();
-
-      testing.SetLatency(24);
-      testing.PrintRegisters();
-
-      testing.SetDACMode(6);
-      testing.PrintRegisters();
-      
-      testing.SetHitCounterMode(3);
-      testing.PrintRegisters();
-
-      testing.SendDFTestPattern();
-      testing.PrintRegisters();
+      //gem::base::vfat testing(conf);
+      //testing.PrintRegisters();
+      //
+      //testing.SetLatency(24);
+      //testing.PrintRegisters();
+      //
+      //testing.SetDACMode(6);
+      //testing.PrintRegisters();
+      //
+      //testing.SetHitCounterMode(3);
+      //testing.PrintRegisters();
+      //
+      //testing.SendDFTestPattern();
+      //testing.PrintRegisters();
       
     }
   catch ( const std::exception& e )

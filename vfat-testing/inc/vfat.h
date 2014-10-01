@@ -23,74 +23,92 @@ namespace gem {
     class vfat
     {
     public:
-    typedef struct channel {
-      int channelID;
-      //bits set in the vfat channel registers
-      bool calChan; //only channels 2-128, bit 6
-      bool calChan0;// only channel 1, bit 7
-      bool calChan1;// only channel 1, bit 6
+      typedef struct channel {
+	//defines a VFAT channel and the bits that can be set on a per-channel basis
+
+	int channelID;
+	//bits set in the vfat channel registers
+	bool calChan; //only channels 2-128, bit 6
+	bool calChan0;// only channel 1, bit 7
+	bool calChan1;// only channel 1, bit 6
       
-      bool mask;    //bit 5
+	bool mask;    //bit 5
       
-      int trimDAC;  //5 bits [4:0]
-    } channel;
+	int trimDAC;  //5 bits [4:0]
+      } channel;
     
-    typedef struct configuration {
-      std::string connectionFile;
-      std::string deviceID;
-      int trigMode;
-      int calibMode;
-      int calibPol;
-      int latency;
+      typedef struct configuration {
+	//configuration object for initializing a VFAT connection
       
-    } configuration;
+	std::string connectionFile;
+	std::string deviceID;
+	int trigMode;
+	int calibMode;
+	int calibPol;
+	int latency;
+      
+      } configuration;
     
-    typedef struct chipID {
-      //identifying information for a specific vfat chip
-      //relative position on the GEB wrt OptoHybrid?
-      std::string hwConnection;
-      std::string name;
-      int row;
-      int col;
-    } chipID;
+      typedef struct chipID {
+	//identifying information for a specific vfat chip
+	//relative position on the GEB wrt OptoHybrid?
+
+	std::string hwConnection;
+	std::string name;
+	int row; //on the GEM chamber
+	int col; //on the GEM chamber
+      } chipID;
     
     public:
+      //constructor from configuration object
       vfat(gem::base::vfat::configuration);
+      ////constructor from configuration file
+      //vfat(char *fileName);
+      ////no-argument constructor
       //vfat();	
       ~vfat();	
-      //vfat(char *fileName);
       
-    public:
+    private:
       //initialization functions from configuration parameters
+      void initialize(gem::base::vfat::configuration);
+      //set which VFAT is being communicated with
       void SetChipID(gem::base::vfat::configuration);
-      //HwManager GetHwManager();
       
     public:
       //Core functions to set register values
+      //set control bit to on
       void TurnOn();
+      //set control bit to off
       void TurnOff();
+
+      //set various running modes
       void SetTriggerMode(int);
-      void SetCalibrationMode(int,int);
+      void SetCalibrationMode(int mode,int pol);
       void SetLatency(int);
       void SetHitCounterMode(int);
       void SetDACMode(int);
+      void SetMSPulseLength(int);
 
+      //get and read back the curent register values
       void GetRegisterValues();
       void PrintRegisters();
       void PrintRegister(std::string);
       //void PrintExtRegister(gem::base::vfat::extReg, int);
 
+      //get the VFAT reported chip ID
       int GetChipID();
-      void SendDFTestPattern();
-      void SetMSPulseLength(int);
-
-      //vfat::data ReadData();
-    
-      void initialize(gem::base::vfat::configuration);
+      
+      //get the reported hit count
       int GetHitCount();
 
+      //tell VFAT to send predefined test pattern to the data out
+      void SendDFTestPattern();
+
+      ////read the data from a specific VFAT chip
+      //vfat::data ReadData();
+    
     public:
-      //individual channel functions
+      //individual per-channel functions
       void GetChannelStatus(gem::base::vfat::channel&);
       void SetChannelStatus(gem::base::vfat::channel&);
     

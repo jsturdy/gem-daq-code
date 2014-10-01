@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <node id="top">
-  <node id="ChanReg0"  address="0x00"  mask="0xff"  permission="rw" 
-	description="Register for VFAT channel 0"/>
   <node id="ChanReg1"  address="0x01"  mask="0xff"  permission="rw" 
 	description="Register for VFAT channel 1"/>
   <node id="ChanReg2"  address="0x02"  mask="0xff"  permission="rw" 
@@ -256,4 +254,6 @@
 	description="Register for VFAT channel 126"/>
   <node id="ChanReg127"  address="0x7f"  mask="0xff"  permission="rw" 
 	description="Register for VFAT channel 127"/>
+  <node id="ChanReg128"  address="0x80"  mask="0xff"  permission="rw" 
+	description="Register for VFAT channel 128"/>
 </node>
