@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--  The tags attribute is a free test attribute which meaning is defined by the uHAL user -->
+<node id="fastcontrols"
+      address="0x40030000"
+      description="Fast signal registers controled by the GLIB user registers">
+  
+  <node id="LV1A"             address="0x0" permission="rw"/>
+  <node id="CalPulse)"        address="0x1" permission="rw"/>
+  <node id="Resync"           address="0x2" permission="rw"/>
+  <node id="BC0"              address="0x3" permission="rw"/>
+  <node id="OptoHybrid_reset" address="0x4" permission="rw"/>
+  <node id="VFAT2_HReset"     address="0x5" permission="rw"/>
+  <node id="VFAT2_BReset"     address="0x6" permission="rw"/>
+</node>
