@@ -95,6 +95,7 @@
   <node id="status_2"   address="0x00000007"  mask="0xffffffff"  permission="r"
 	description="Currently unused"/>
 
+
   <node id="ctrl_sram" address="0x00000008"  permission="rw"
 	description="SRAM interface control register">
     <node id="sram1_user_logic"	mask="0x00000001"/>

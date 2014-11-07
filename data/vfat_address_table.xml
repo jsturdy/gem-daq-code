@@ -3,5 +3,5 @@
 <node id="vfats"
       address="0x40010000"
       module="file://${GLIBTEST}/data/vfatslaves.xml"
-      description="VFAT registers controled by the GLIB user registers"
-      />
+      description="VFAT registers controled by the GLIB user registers">
+</node>
