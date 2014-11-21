@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<node id="top">
+  <node id="DATA_RDY"  address="0x00"  mask="0xFFFFFFFF"  permission="r"
+	description="Populate the other registers with the data"/>
+  <node id="DATA"  address="0x01"  permission="r"
+	mode="incremental"  size="7"
+	description="Six data words (D32), seventh is BX counter from OptoHybrid"/>
+  <!-- node id="BXCnt"  address="0x07"  mask="0xFFFFFFFF"  permission="r"
+	description="BX counter from OptoHybrid (maybe implement this way?"/-->
+</node> <!-- end top block -->
