@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<node id="top">
+  <node id="L1A"  address="0x4003015A"
+	description="L1A counters">
+    <node id="External"  address="0x0"  mask="0xFFFFFFFF"  permission="r"
+	  description="counts number of received external L1A signals"/>
+    <node id="Internal"  address="0x1"  mask="0xFFFFFFFF"  permission="r"
+	  description="counts number of received external L1A signals"/>
+    <node id="Delayed"   address="0x2"  mask="0xFFFFFFFF"  permission="r"
+	  description="counts number of received external L1A signals"/>
+    <node id="Total"     address="0x3"  mask="0xFFFFFFFF"  permission="r"
+	  description="counts total number of received L1A signals"/>
+  </node>
+  
+  <node id="CalPulse"  address="0x4003015E"
+	description="CalPulse counters">
+    <node id="External"  address="0x0"  mask="0xFFFFFFFF"  permission="r"
+	  description="counts number of received external CalPulse signals"/>
+    <node id="Internal"  address="0x1"  mask="0xFFFFFFFF"  permission="r"
+	  description="counts number of received external CalPulse signals"/>
+    <node id="Total"     address="0x2"  mask="0xFFFFFFFF"  permission="r"
+	  description="counts total number of received CalPulse signals"/>
+  </node>
+  
+  <node id="Resync"   address="0x40030161"  mask="0xFFFFFFFF"  permission="r"
+	description="counts number of received Resync signals"/>  
+  <node id="BC0"      address="0x40030162"  mask="0xFFFFFFFF"  permission="r"
+	description="counts number of received BC0 signals"/>  
+  <node id="BXCount"  address="0x40030163"  mask="0xFFFFFFFF"  permission="r"
+	description="BX counter on the OptoHybrid"/> 
+  
+  <node id="RESETS"
+	module="file://${BUILD_HOME}/data/counter_reset_registers.xml"
+	description="resets for all the counters"/>
+  
+</node> <!-- end trigger setup definitions -->
