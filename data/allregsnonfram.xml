@@ -35,24 +35,24 @@
 
     <node id="ctrl"  address="0x00000004"  permission="rw"
 	  description="Controls the external clocking circuitry">
-      <node id="pcie_clk_fsel"	    mask="0x00000001"/>
-      <node id="pcie_clk_mr"	    mask="0x00000002"/>
-      <node id="pcie_clk_oe"	    mask="0x00000004"/>
-      <node id="cdce_powerup"	    mask="0x00000010"/>
-      <node id="cdce_refsel"	    mask="0x00000020"/>
-      <node id="cdce_sync"	    mask="0x00000040"/>
+      <node id="pcie_clk_fsel"	      mask="0x00000001"/>
+      <node id="pcie_clk_mr"	      mask="0x00000002"/>
+      <node id="pcie_clk_oe"	      mask="0x00000004"/>
+      <node id="cdce_powerup"	      mask="0x00000010"/>
+      <node id="cdce_refsel"	      mask="0x00000020"/>
+      <node id="cdce_sync"	      mask="0x00000040"/>
       <node id="cdce_ctrl_sel"        mask="0x00000080"/>
-      <node id="tclkb_dr_en"	    mask="0x00000200"/>
-      <node id="xpoint2_s10"	    mask="0x00001000"/>
-      <node id="xpoint2_s11"	    mask="0x00002000"/>
-      <node id="xpoint1_s10"	    mask="0x00010000"/>
-      <node id="xpoint1_s11"	    mask="0x00020000"/>
-      <node id="xpoint1_s20"	    mask="0x00040000"/>
-      <node id="xpoint1_s21"	    mask="0x00080000"/>
-      <node id="xpoint1_s30"	    mask="0x00100000"/>
-      <node id="xpoint1_s31"	    mask="0x00200000"/>
-      <node id="xpoint1_s40"	    mask="0x00400000"/>
-      <node id="xpoint1_s41"	    mask="0x00800000"/>
+      <node id="tclkb_dr_en"	      mask="0x00000200"/>
+      <node id="xpoint2_s10"	      mask="0x00001000"/>
+      <node id="xpoint2_s11"	      mask="0x00002000"/>
+      <node id="xpoint1_s10"	      mask="0x00010000"/>
+      <node id="xpoint1_s11"	      mask="0x00020000"/>
+      <node id="xpoint1_s20"	      mask="0x00040000"/>
+      <node id="xpoint1_s21"	      mask="0x00080000"/>
+      <node id="xpoint1_s30"	      mask="0x00100000"/>
+      <node id="xpoint1_s31"	      mask="0x00200000"/>
+      <node id="xpoint1_s40"	      mask="0x00400000"/>
+      <node id="xpoint1_s41"	      mask="0x00800000"/>
       <node id="gbt_phase_mon_reset"  mask="0x04000000"/>
       <node id="fpga_program_b_trst"  mask="0x10000000"/>
     </node> <!--end ctrl-->
