@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<node id="top">
+  
+  <node id="OptoHybrid"
+	description="Optohybrid registers, divided into global and local (per optical link)">
+    <node id="OPTICAL_LINKS"  address="0x40030000"
+	  description="Optohybrid registers">
+      <node id="LINK0"  address="0x000"
+	    module="file://${BUILD_HOME}/data/optical_link_registers.xml"
+	    description="optical link status counters and resets"/>
+      
+      <node id="LINK1"  address="0x100"
+	    module="file://${BUILD_HOME}/data/optical_link_registers.xml"
+	    description="optical link status counters and resets"/>
+      
+      <node id="LINK2"  address="0x200"
+	    module="file://${BUILD_HOME}/data/optical_link_registers.xml"
+	    description="optical link status counters and resets"/>
+    </node>
+    
+    <node id="FAST_COM"
+	  module="file://${BUILD_HOME}/data/fast_signals_address_table.xml"
+	  description="global fast commands registers"/>
+    
+    <node id="TRIGGER"
+	  module="file://${BUILD_HOME}/data/trigger_registers.xml"
+	  description="global ttrigger setup"/>
+    
+    <node id="CLOCKING"
+	  module="file://${BUILD_HOME}/data/clocking_registers.xml"
+	  description="global clocking registers"/>
+    
+    <node id="COUNTERS"
+	  module="file://${BUILD_HOME}/data/counter_registers.xml"
+	  description="global counter registers"/>
+    
+    <node id="GEB"
+	  module="file://${BUILD_HOME}/data/geb_vfat_address_table.xml"
+	  description="complete GEB address table"/>
+
+    <node id="FIRMWARE"  address="0x40030157"  mask="0xFFFFFFFF"  permission="r"
+	  description="version of the optohybrid firmware"/>
+  </node> <!-- end of the optohybrid specific registers -->
+  
+  <node id="GLIB"  address="0x40040000">
+    <node id="LINK0"  address="0x000"
+	  module="file://${BUILD_HOME}/data/glib_optical_links.xml"
+	  description="optical link status counters and resets"/>
+    
+    <node id="LINK1"  address="0x100"
+	  module="file://${BUILD_HOME}/data/glib_optical_links.xml"
+	  description="optical link status counters and resets"/>
+    
+    <node id="LINK2"  address="0x200"
+	  module="file://${BUILD_HOME}/data/glib_optical_links.xml"
+	  description="optical link status counters and resets"/>
+    
+    <node id="TRG_DATA"
+	  description="registers for the trigger data sent to the GLIB">
+      <node id="DATA"  address="0x40050000"  mask="0xFFFFFFFF"  permission="rw"
+	    description="VFAT trigger data register
+			 Read: 28 MSB are the BX counter, 6 LSB, one fbit per VFAT2 (logical OR of all S-bits)
+			 Write: empty the buffer"/>
+      
+      <node id="FIFO_OCC"  address="0x40040180"  mask="0xFFFFFFFF"  permission="w"
+	    description="empty the trigger data FIFO"/>
+      
+      <node id="FIFO_FLUSH"  address="0x40040180"  mask="0xFFFFFFFF"  permission="w"
+	    description="empty the trigger data FIFO"/>
+    </node>
+    <node id="TDC_SBits"  address="0x40040181"  mask="0xFFFFFFFF"  permission="rw"
+	  description="select which VFAT will send SBits to send to the TDC (0-5)"/>
+  </node><!--end GLIB_LINKS-->
+
+  
+  <node id="TEST">
+    <node id="GLIB"        address="0x4004010A"
+	  description="is the GLIB accessible"/>
+    <node id="OptoHybrid"  address="0x40030100"
+	  description="is the OH accessible"/>
+    <node id="VFATs"       address="0x40010808"
+	  description="are the VFAT2s accessible"/>
+  </node> <!-- end TEST registers -->
+
+</node> <!-- end top block -->
