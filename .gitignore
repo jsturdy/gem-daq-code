@@ -18,8 +18,10 @@ gemBase
 gemCore
 gemManager
 gemSupervisor
+gemRCMS
 glib-testing
 test
 vfat
 rcms
 vfat-testing
+setup
