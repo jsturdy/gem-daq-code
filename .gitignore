@@ -19,6 +19,7 @@ gemCore
 gemManager
 gemSupervisor
 gemRCMS
+glib
 glib-testing
 test
 vfat
