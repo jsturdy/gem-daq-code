@@ -199,4 +199,27 @@
   
   <node id="icap"  address="0x00000200"  mask="0xffffffff"  permission="rw"
 	description="ICAP memory space (seems to not work at the moment)"/>
+
+  <node id="GLIB_LINKS"  address="0x40040000">
+    <node id="LINK0"  address="0x000"
+	  module="file://${BUILD_HOME}/data/glib_optical_links.xml"
+	  description="optical link status counters and resets"/>
+    
+    <node id="LINK1"  address="0x100"
+	  module="file://${BUILD_HOME}/data/glib_optical_links.xml"
+	  description="optical link status counters and resets"/>
+    
+    <node id="LINK2"  address="0x200"
+	  module="file://${BUILD_HOME}/data/glib_optical_links.xml"
+	  description="optical link status counters and resets"/>
+  </node><!--end GLIB_LINKS-->
+  
+  <node id="TEST">
+    <node id="GLIB"  address="0x4004010A"
+	  description="is the GLIB accessible"/>
+    <node id="OptoHybrid"  address="0x40030100"
+	  description="is the OH accessible"/>
+    <node id="VFATs"  address="0x40010808"
+	  description="are the VFAT2s accessible"/>
+  </node> <!-- end TEST registers -->
 </node> <!--end glib_regs-->
