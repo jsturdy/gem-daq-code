@@ -14,6 +14,8 @@
 #*/linux/
 */lib
 */src/linux
+*.sh
+*.csh
 gemBase
 gemCore
 gemManager
