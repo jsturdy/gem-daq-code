@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <node id="top">
-  <node id="CMS_hybrid_J8"
+  <node id="VFAT9"
 	address="0x900"  
 	module="file://${BUILD_HOME}/data/vfatregs.xml"
 	description="column 1, CMS hybrid VFAT chip adjacent to J8 connector"/>
   
-  <node id="CMS_hybrid_J26"
+  <node id="VFAT11"
 	address="0xb00"  
 	module="file://${BUILD_HOME}/data/vfatregs.xml"
 	description="column 1, CMS hybrid VFAT chip adjacent to J26 connector"/>
   
-  <node id="CMS_hybrid_J44"
+  <node id="VFAT13"
 	address="0xd00"  
 	module="file://${BUILD_HOME}/data/vfatregs.xml"
 	description="column 1, CMS hybrid VFAT chip adjacent to J44 connector"/>
   
-  <node id="TOTEM_hybrid_J58"
+  <node id="VFAT8"
 	address="0x800"  
 	module="file://${BUILD_HOME}/data/vfatregs.xml"
 	description="column 1, TOTEM hybrid VFAT chip J58 connector"/>
   
-  <node id="TOTEM_hybrid_J55"
+  <node id="VFAT10"
 	address="0xa00"  
 	module="file://${BUILD_HOME}/data/vfatregs.xml"
 	description="column 1, TOTEM hybrid VFAT chip J55 connector"/>
   
-  <node id="TOTEM_hybrid_J57"
+  <node id="VFAT12"
 	address="0xc00"  
 	module="file://${BUILD_HOME}/data/vfatregs.xml"
 	description="column 1, TOTEM hybrid VFAT chip J57 connector"/>
