@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <node id="top">
-  <node id="CMS_hybrid_J8"
+  <node id="VFAT9"
 	address="0x900"  
-	module="file://${BUILD_HOME}/data/vfatregs.xml"
+	module="file:///home/mdalchen/test/data/vfatregs.xml"
 	description="column 1, CMS hybrid VFAT chip adjacent to J8 connector"/>
   
   <node id="CMS_hybrid_J26"
