@@ -7,11 +7,11 @@
     <!--<properties xmlns="urn:xdaq-application:gem::hwMonitor::gemHwMonitorWeb"
 		  xsi:type="soapenc:Struct">
 	<device xsi:type="xsd:string">VFAT9</device>
-	<settingsFile xsi:type="xsd:string">/home/mdalchen/test/gem-daq-code/gemdaq-testing/gemHwMonitor/xml/gemHwMonitor.xml</settingsFile>
+	<settingsFile xsi:type="xsd:string">${BULID_HOME}/gemdaq-testing/gemHwMonitor/xml/gemHwMonitor.xml</settingsFile>
       </properties>
       -->
     </xc:Application>
-    <xc:Module>/home/mdalchen/private/gem-daq-code/gemdaq-testing/gemHwMonitor/lib/linux/x86_64_slc6/libgem_hwMonitor.so</xc:Module>
-    <xc:Module>/home/mdalchen/private/gem-daq-code/gemdaq-testing/gembase/lib/linux/x86_64_slc6/libgem_base.so</xc:Module>
+    <xc:Module>${BUILD_HOME}/gemdaq-testing/gemHwMonitor/lib/linux/x86_64_slc6/libgem_hwMonitor.so</xc:Module>
+    <xc:Module>${BUILD_HOME}/gemdaq-testing/gembase/lib/linux/x86_64_slc6/libgem_base.so</xc:Module>
   </xc:Context>
 </xc:Partition>

@@ -6,7 +6,7 @@
 gem::hwMonitor::gemHwMonitorBase::gemHwMonitorBase()
     throw (xdaq::exception::Exception)
 {
-    this->setXMLconfigFile("/home/mdalchen/private/gem-daq-code/gemdaq-testing/gembase/xml/gem_conf.xml");
+    this->setXMLconfigFile("${BUILD_HOME}/gemdaq-testing/gembase/xml/gem_conf.xml");
     this->setCurrentCrate("N/A");
 }
 
