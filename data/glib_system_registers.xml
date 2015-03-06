@@ -79,10 +79,14 @@
 	description="firmware version 5.3 and above has different values, as in the description">
     <node id="IP_SOURCE"  address="0x0"  mask="0x0fff0000"
 	  description=""/>
+    <node id="UPPER"      address="0x0"  mask="0x0000ffff"
+	  description="5.3 and up this is B1"/>
     <node id="B5"         address="0x0"  mask="0x0000ff00"
 	  description="5.3 and up this is B1"/>
     <node id="B4"         address="0x0"  mask="0x000000ff"
 	  description="5.3 and up this is B2"/>
+    <node id="LOWER"      address="0x1"  mask="0xffffffff"
+	  description="5.3 and up this is B1"/>
     <node id="B3"         address="0x1"  mask="0xff000000"
 	  description="5.3 and up this is B3"/>
     <node id="B2"         address="0x1"  mask="0x00ff0000"
