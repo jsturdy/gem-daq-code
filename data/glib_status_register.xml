@@ -1,25 +1,40 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <node id="top">
-  <node id="GLIB_SFP1_STATUS"      mask="0x00000007"
-	description="SFP1 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>   
-  <node id="GLIB_SFP1_Mod_abs"     mask="0x00000001"/>   
-  <node id="GLIB_SFP1_RxLOS" 	   mask="0x00000002"/>   
-  <node id="GLIB_SFP1_TxFault"     mask="0x00000004"/>   
-  <node id="GLIB_SFP2_STATUS"      mask="0x00000070"
-	description="SFP2 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>
-  <node id="GLIB_SFP2_Mod_abs"     mask="0x00000010"/>
-  <node id="GLIB_SFP2_RxLOS" 	   mask="0x00000020"/>
-  <node id="GLIB_SFP2_TxFault"     mask="0x00000040"/>
-  <node id="GLIB_SFP3_STATUS"      mask="0x00000700"
-	description="SFP3 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>
-  <node id="GLIB_SFP3_Mod_abs"     mask="0x00000100"/>
-  <node id="GLIB_SFP3_RxLOS" 	   mask="0x00000200"/>
-  <node id="GLIB_SFP3_TxFault"     mask="0x00000400"/>
-  <node id="GLIB_SFP4_STATUS"      mask="0x00007000"
-	description="SFP4 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>
-  <node id="GLIB_SFP4_Mod_abs"     mask="0x00001000"/>
-  <node id="GLIB_SFP4_RxLOS" 	   mask="0x00002000"/>
-  <node id="GLIB_SFP4_TxFault"     mask="0x00004000"/>
+  <node id="SFP1"
+	description="status bits for SFP cage 1">
+    <node id="STATUS"      mask="0x00000007"
+	  description="SFP1 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>   
+    <node id="Mod_abs"     mask="0x00000001"/>   
+    <node id="RxLOS" 	   mask="0x00000002"/>   
+    <node id="TxFault"     mask="0x00000004"/>   
+  </node>
+
+  <node id="SFP2"
+	description="status bits for SFP cage 2">
+    <node id="STATUS"      mask="0x00000070"
+	  description="SFP2 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>
+    <node id="Mod_abs"     mask="0x00000010"/>
+    <node id="RxLOS" 	   mask="0x00000020"/>
+    <node id="TxFault"     mask="0x00000040"/>
+  </node>
+
+  <node id="SFP3"
+	description="status bits for SFP cage 3">
+    <node id="STATUS"      mask="0x00000700"
+	  description="SFP3 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>
+    <node id="Mod_abs"     mask="0x00000100"/>
+    <node id="RxLOS" 	   mask="0x00000200"/>
+    <node id="TxFault"     mask="0x00000400"/>
+  </node>
+
+  <node id="SFP4"
+	description="status bits for SFP cage 4">
+    <node id="STATUS"      mask="0x00007000"
+	  description="SFP4 status, bit 1 Mod_abs, bit 2 RxLOS, bit 3 TxFault"/>
+    <node id="Mod_abs"     mask="0x00001000"/>
+    <node id="RxLOS" 	   mask="0x00002000"/>
+    <node id="TxFault"     mask="0x00004000"/>
+  </node>
 
   <node id="GBE_INT" 		   mask="0x00010000"
 	description="GBE Phy interrupt"/>
@@ -33,12 +48,20 @@
 	description="state of the 6-bit bus between the FPGA and the CPLD"/>
   <node id="CDCE_LOCK"             mask="0x08000000"
 	description="State of the CDCE"/>
-  <node id="SFP_PHASE_MON_DONE"    mask="0x10000000"
-	description=""/>
-  <node id="SFP_PHASE_MON_OK"      mask="0x20000000"
-	description=""/>
-  <node id="FMC1_PHASE_MON_DONE"   mask="0x40000000"
-	description=""/>
-  <node id="FMC1_PHASE_MON_OK"     mask="0x80000000"
-	description=""/>
+
+  <node id="SFP_PHASE_MON"
+	description="">
+    <node id="DONE"    mask="0x10000000"
+	  description=""/>
+    <node id="OK"      mask="0x20000000"
+	  description=""/>
+  </node>
+
+  <node id="FMC1_PHASE_MON"
+	description="">
+    <node id="DONE"   mask="0x40000000"
+	  description=""/>
+    <node id="OK"     mask="0x80000000"
+	  description=""/>
+  </node>
 </node>
