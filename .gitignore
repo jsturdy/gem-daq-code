@@ -16,6 +16,8 @@
 */src/linux
 *.sh
 *.csh
+*.dat
+*.err
 gemBase
 gemCore
 gemManager
@@ -33,3 +35,8 @@ data/createVFATChanRegs.py
 data/vfat2_address_table.xml
 data/vfatchanregs_v2.xml
 !gemrcms/gemLevelOneFM/src/rcms/fm/*
+*#*
+cachegrind.out.*
+callgrind.out.*
+perf.data
+xdaq.prof.*
