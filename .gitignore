@@ -40,3 +40,5 @@ cachegrind.out.*
 callgrind.out.*
 perf.data
 xdaq.prof.*
+perf.output.*
+xdaqexamples
