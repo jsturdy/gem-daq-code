@@ -28,7 +28,7 @@
 	  description="optical link status counters and resets"/>
     
     <node id="TRG_DATA"
-	  description="registers for the trigger data sent to the GLIB">
+	  description="registers for the trigger data sent from the OH to the GLIB">
       <node id="DATA"  address="0x10000"  mask="0xFFFFFFFF"  permission="r"
 	    description="VFAT trigger data register
 			 Read: 28 MSB are the BX counter, 6 LSB, one fbit per VFAT2 (logical OR of all S-bits)
@@ -37,8 +37,12 @@
       <node id="FIFO_FLUSH"  address="0x180"  mask="0xFFFFFFFF"  permission="w"
 	    description="empty the trigger data FIFO"/>
     </node>
-    <node id="TDC_SBits"  address="0x181"  mask="0xFFFFFFFF"  permission="rw"
-	  description="select which VFAT will send SBits to send to the TDC (0-5)"/>
+    <node id="TRIGGER">
+      <node id="SOURCE"  address="0x10D"  mask="0xFFFFFFFF"  permission="rw"
+	    description="select the trigger source, GLIB(0), TTC(1), both(2)"/>
+      <node id="TDC_SBits"  address="0x181"  mask="0xFFFFFFFF"  permission="rw"
+	    description="select which VFAT will send SBits to send to the TDC (0-5)"/>
+    </node>
   </node><!--end GLIB_LINKS-->
   
   <node id="TEST">
