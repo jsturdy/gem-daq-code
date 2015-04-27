@@ -24,10 +24,10 @@ gemCore
 gemManager
 gemSupervisor
 gemRCMS
-glib
+#glib
 glib-testing
 test
-vfat
+#vfat
 rcms
 vfat-testing
 setup
