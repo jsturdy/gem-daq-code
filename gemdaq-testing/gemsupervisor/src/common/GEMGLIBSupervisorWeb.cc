@@ -449,6 +449,7 @@ throw (toolbox::fsm::exception::Exception)
 
         vfatDevice_->setAddressTableFileName("testbeam_registers.xml");
         vfatDevice_->setDeviceIPAddress(confParams_.bag.deviceIP);
+
         vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.VFATS."+confParams_.bag.deviceName[i].toString());
 
 	vfatDevice_->connectDevice();

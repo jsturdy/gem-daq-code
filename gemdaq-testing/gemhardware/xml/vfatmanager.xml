@@ -9,7 +9,7 @@
       <properties xmlns="urn:xdaq-application:gem::hw::vfat::VFAT2Manager"
 		  xsi:type="soapenc:Struct">
 	<device xsi:type="xsd:string">VFAT13</device>
-	<ipAddr xsi:type="xsd:string">192.168.0.175</ipAddr>
+	<ipAddr xsi:type="xsd:string">192.168.0.164</ipAddr>
 	<settingsFile xsi:type="xsd:string">${BUILD_HOME}/gemdaq-testing/gemhardware/xml/vfat/vfat_settings.xml</settingsFile>
       </properties>
     </xc:Application>
@@ -38,10 +38,13 @@
       </properties>
     </xc:Application>
 
+    <xc:Module>${XDAQ_ROOT}/lib/libxdaq2rc.so</xc:Module>
+
     <xc:Module>${BUILD_HOME}/gemdaq-testing/gembase/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgem_base.so</xc:Module>
     <xc:Module>${BUILD_HOME}/gemdaq-testing/gemutils/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgem_utils.so</xc:Module>
     <xc:Module>${BUILD_HOME}/gemdaq-testing/gemhardware/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgem_hw.so</xc:Module>
     <xc:Module>${BUILD_HOME}/gemdaq-testing/gemsupervisor/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgem_supervisor.so</xc:Module>
+
   </xc:Context>
 
   <!--
