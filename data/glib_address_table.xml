@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--  The tags attribute is a free test attribute which meaning is defined by the uHAL user -->
+<node id="top">
 <node id="GLIB">
   <node id="SYSTEM"  address="0x00000000"  description="GLIB system registers"
 	module="file://${BUILD_HOME}/data/glib_system_registers.xml">
@@ -54,3 +55,4 @@
 	  description="are the VFAT2s accessible"/>
   </node> <!-- end TEST registers -->
 </node> <!--end glib_regs-->
+</node>
