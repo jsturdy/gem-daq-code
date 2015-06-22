@@ -106,8 +106,8 @@
 	  description="column 2, position 7"/>
     
     
-    <node id="RESPONSE"  address="0x20000"  mask="0xFFFFFFFF"  permission="r"
-	  description="read the response from the VFAT transaction (OBSOLETE!!!)"/>
+    <!--node id="RESPONSE"  address="0x20000"  mask="0xFFFFFFFF"  permission="r"
+	  description="read the response from the VFAT transaction (OBSOLETE!!!)"/-->
   </node> <!-- end VFATS block -->
 
   <!-- registers for the VFAT tracking data -->
