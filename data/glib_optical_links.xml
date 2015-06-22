@@ -12,4 +12,13 @@
     <node id="FLUSH"  address="0x1"  mask="0xFFFFFFFF"  permission="w"
 	  description="empty the tracking data FIFO"/>
   </node>
+
+  <node id="TRIGGER">
+    <node id="SOURCE"      address="0x0D"  mask="0xFFFFFFFF"  permission="rw"
+	  description="select the trigger source, GLIB(0), TTC(1), both(2)"/>
+    <node id="FIFO_FLUSH"  address="0x80"  mask="0xFFFFFFFF"  permission="w"
+	  description="empty the trigger data FIFO"/>
+    <node id="TDC_SBits"   address="0x81"  mask="0xFFFFFFFF"  permission="rw"
+	  description="select which VFAT will send SBits to send to the TDC (0-5)"/>
+  </node>
 </node> <!-- end top block -->

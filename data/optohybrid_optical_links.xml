@@ -22,4 +22,11 @@
   <node id="FIRMWARE"  address="0x57"  mask="0xFFFFFFFF"  permission="r"
 	description="version of the optohybrid firmware"/>
 
+  <node id="VFAT_ADC"  address="0x40030155"
+	description="VFAT2 ADC values">
+    <node id="Voltage"  address="0x0"  mask="0xFFFFFFFF"  permission="r"
+	  description="read the voltage ADC off the VFAT chip" />
+    <node id="Current"  address="0x1"  mask="0xFFFFFFFF"  permission="r"
+	  description="send CalPulse command to system" />
+  </node> <!-- end ADC block -->
 </node> <!-- end top block -->
