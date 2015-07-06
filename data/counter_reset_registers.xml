@@ -7,10 +7,10 @@
 	  description="resets number of received external L1A signals
 		       0x40030X66"/>
     <node id="Internal"  address="0x1"  mask="0xFFFFFFFF"  permission="w"
-	  description="resets number of received external L1A signals
+	  description="resets number of received internal L1A signals
 		       0x40030X67"/>
     <node id="Delayed"   address="0x2"  mask="0xFFFFFFFF"  permission="w"
-	  description="resets number of received external L1A signals
+	  description="resets number of received delayed L1A signals
 		       0x40030X68"/>
     <node id="Total"     address="0x3"  mask="0xFFFFFFFF"  permission="w"
 	  description="resets total number of received L1A signals
@@ -19,11 +19,11 @@
   
   <node id="CalPulse"  address="0x4"
 	description="CalPulse resets">
-    <node id="External"  address="0x0"  mask="0xFFFFFFFF"  permission="w"
-	  description="resets number of received external CalPulse signals
+    <node id="Internal"  address="0x0"  mask="0xFFFFFFFF"  permission="w"
+	  description="resets number of received internal CalPulse signals
 		       0x40030X6A"/>
-    <node id="Internal"  address="0x1"  mask="0xFFFFFFFF"  permission="w"
-	  description="resets number of received external CalPulse signals
+    <node id="Delayed"  address="0x1"  mask="0xFFFFFFFF"  permission="w"
+	  description="resets number of received delayed CalPulse signals
 		       0x40030X6B"/>
     <node id="Total"     address="0x2"  mask="0xFFFFFFFF"  permission="w"
 	  description="resets total number of received CalPulse signals
