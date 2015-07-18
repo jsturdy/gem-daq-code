@@ -26,31 +26,35 @@
     #include "Event.h"
 #endif
 /**
-* ... Threshold Scan ROOT based application, could be used for analisys of XDAQ GEM data ...
+* GEM Tree Composer (gtc) application provides translation of the GEM output HEX file to ROOT-based TTree with GEM Events
 */
 
 /*! \file */
 /*! 
-  \mainpage Threshold Scan ROOT based application.
+  \mainpage GEM Tree Composer application.
 
-  VFAT2 data reading example for Threshold Scan XDAQ GEM application, ROOT based analysis.
+  HEX data reading module for light DQM package. Converts HEX data to ROOT TTree.
 
   \section Installation
 
-  you can make a data file by XDAQ Threshold Scan appliaction or get example from the CERN web:
+  Getting source code:
 
-  wget https://baranov.web.cern.ch/baranov/xdaq/threshold/vfat2_9/ThresholdScan_Fri_Jan_16_14-17-59_2015.dat <br>
-  ln -s ThresholdScan_Fri_Jan_16_14-17-59_2015.dat ThresholdScan.dat
+  git clone https://github.com/mexanick/gem-daq-code.git <br>
+  cd gem-daq-code/
+  git checkout lightDQM
 
-  You need a ROOT code for analysis:
+  Make the executable:
+  cd gem-light-dqm/gemtreewriter/
+  make all -j4
 
-  git clone git@github.com:sergueibaranov/gem-root-application.git <br>
+  Now you will have executable bin/gtc
+  In order to run the application you have to provide input and output filenames:
+  ./bin/gtc inputHEXdata.dat outputROOTtree.root
 
-  gem-root-application/scripts/with_root_compile.sh gem-root-application/src/tbutils/thldread.cc
+  You can download sample HEX data file:
+  wget https://baranov.web.cern.ch/baranov/xdaq/threshold/vfat2_9/ThresholdScan_Fri_Jan_16_14-17-59_2015.dat
 
-  That is all. You will have a root file with 128 threshold scan histograms for one VFAT2 chip.
-
-  \author Sergey.Baranov@cern.ch
+  \author Sergey.Baranov@cern.ch, Mykhailo.Dalchenko@cern.ch
 */
 
 using namespace std;
@@ -78,7 +82,7 @@ class GEMOnline {
          */
     
         struct VFATData {
-            uint16_t BC;      /*!<Banch Crossing number "BC" 16 bits, : 1010:4 (control bits), BC:12 */
+            uint16_t BC;      /*!<Bunch Crossing number "BC" 16 bits, : 1010:4 (control bits), BC:12 */
             uint16_t EC;      /*!<Event Counter "EC" 16 bits: 1100:4(control bits) , EC:8, Flag:4 */
             uint32_t bxExp;   
             uint16_t bxNum;   /*!<Event Number & SBit, 16 bits : bxNum:6, SBit:6 */
@@ -278,24 +282,28 @@ int main(int argc, char** argv)
         Online.readGEBheader(inpf, geb);
         if(ievent <= ieventPrint) Online.printGEBheader(geb);
 
-        uint64_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
-        uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
-        uint64_t sumVFAT = (0x000000000fffffff & geb.header);
+        uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
+        uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
+        uint32_t sumVFAT = (0x000000000fffffff & geb.header);
 
-        GEBdata *GEBdata_ = new GEBdata(ZSFlag, ChamID);
+        GEBdata *GEBdata_ = new GEBdata(ZSFlag, ChamID, sumVFAT);
 
         for(int ivfat=0; ivfat<sumVFAT; ivfat++)
         {
             Online.readEvent(inpf, ievent, vfat);
 
             uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
+            uint16_t  BC     = (0x0fff & vfat.BC);
             uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
+            uint8_t   EC     = (0x0fff & vfat.EC) >> 4;
             uint8_t   Flag   = (0x000f & vfat.EC);
             uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
             uint16_t  ChipID = (0x0fff & vfat.ChipID);
             uint16_t  CRC    = vfat.crc;
+            uint64_t lsData = vfat.lsData;
+            uint64_t msData = vfat.lsData;
 
-            VFATdata *VFATdata_ = new VFATdata(b1010, b1100, Flag, b1110, ChipID, CRC);
+            VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 
@@ -308,13 +316,14 @@ int main(int argc, char** argv)
         // read Event Chamber Header 
         Online.readGEBtrailer(inpf, geb);
 
-        uint64_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
-        uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
-        uint64_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
+        uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
+        uint16_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
+        uint16_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
+        uint16_t GEBres     = (0x000000000000ffff & geb.trailer);
 
-        GEBdata_->setTrailer(OHcrc, OHwCount, ChamStatus);
+        GEBdata_->setTrailer(OHcrc, OHwCount, ChamStatus, GEBres);
 
-        ev->Build(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        ev->Build(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
         ev->Clear();
