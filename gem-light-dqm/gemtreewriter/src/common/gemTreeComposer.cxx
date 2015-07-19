@@ -45,14 +45,23 @@
 
   Make the executable:
   cd gem-light-dqm/gemtreewriter/
-  make all -j4
+  make -j4
 
-  Now you will have executable bin/gtc
-  In order to run the application you have to provide input and output filenames:
+  Now you will have executables:
+  - GEM Tree Writer bin/gtc
+  - Example of GEMtree reader bin/reader
+  In order to run the writer application you have to provide input and output filenames:
   ./bin/gtc inputHEXdata.dat outputROOTtree.root
-
   You can download sample HEX data file:
-  wget https://baranov.web.cern.ch/baranov/xdaq/threshold/vfat2_9/ThresholdScan_Fri_Jan_16_14-17-59_2015.dat
+  wget https://baranov.web.cern.ch/baranov/xdaq/DataParker/GEM_DAQ_Tue_Jul_14_10-13-10_2015.dat
+
+  After producing the outputROOTtree.root you can run the tree reader example, which should serve as basis for future analyzers:
+  ./bin/reader outputROOTtree.root outputAnalyzer.root
+
+  The source code for the reader you can find here:
+  ./src/common/treeReaderExample.cxx
+
+  All the compilation settings you can find in the Makefile
 
   \author Sergey.Baranov@cern.ch, Mykhailo.Dalchenko@cern.ch
 */

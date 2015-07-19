@@ -28,25 +28,19 @@ typedef char __signed;
 #include "TBits.h"
 #include "TMath.h"
 
-//#include "/usr/include/sys/_types/_int8_t.h"
-//#include "stdint.h"
-
-
-class TDirectory;
-
 //class VFATdata : public TObject {
 class VFATdata {
     private:
-        uint8_t b1010;                    // 1010:4 Control bits, shoud be 1010
-        uint16_t BC;                      // Bunch Crossing number, 12 bits
-        uint8_t b1100;                    // 1100:4, Control bits, shoud be 1100
-        uint16_t EC;                      // Event Counter, 8 bits
-        uint8_t Flag;                     // Control Flags: 4 bits, Hamming Error/AFULL/SEUlogic/SUEI2C
-        uint8_t b1110;                    // 1110:4 Control bits, shoud be 1110
-        uint16_t ChipID;                  // Chip ID, 12 bits
-        uint64_t lsData;                  // channels from 1to64 
-        uint64_t msData;                  // channels from 65to128
-        uint16_t crc;                     // Check Sum value, 16 bits
+        uint8_t fb1010;                    // 1010:4 Control bits, shoud be 1010
+        uint16_t fBC;                      // Bunch Crossing number, 12 bits
+        uint8_t fb1100;                    // 1100:4, Control bits, shoud be 1100
+        uint16_t fEC;                      // Event Counter, 8 bits
+        uint8_t fFlag;                     // Control Flags: 4 bits, Hamming Error/AFULL/SEUlogic/SUEI2C
+        uint8_t fb1110;                    // 1110:4 Control bits, shoud be 1110
+        uint16_t fChipID;                  // Chip ID, 12 bits
+        uint64_t flsData;                  // channels from 1to64 
+        uint64_t fmsData;                  // channels from 65to128
+        uint16_t fcrc;                     // Check Sum value, 16 bits
 
     public:
         VFATdata(){}
@@ -60,43 +54,65 @@ class VFATdata {
                 const uint64_t &lsData_, 
                 const uint64_t &msData_, 
                 const uint16_t &crc_) : 
-            b1010(b1010_),
-            BC(BC_),
-            b1100(b1100_),
-            EC(EC_),
-            Flag(Flag_),
-            b1110(b1110_),
-            ChipID(ChipID_),
-            lsData(lsData_),
-            msData(msData_),
-            crc(crc_) {}
+            fb1010(b1010_),
+            fBC(BC_),
+            fb1100(b1100_),
+            fEC(EC_),
+            fFlag(Flag_),
+            fb1110(b1110_),
+            fChipID(ChipID_),
+            flsData(lsData_),
+            fmsData(msData_),
+            fcrc(crc_) {}
         ~VFATdata(){}
+
+        uint8_t   b1010  (){ return  fb1010;  }
+        uint16_t  BC     (){ return  fBC;     }
+        uint8_t   b1100  (){ return  fb1100;  }
+        uint16_t  EC     (){ return  fEC;     }
+        uint8_t   Flag   (){ return  fFlag;   }
+        uint8_t   b1110  (){ return  fb1110;  }
+        uint16_t  ChipID (){ return  fChipID; }
+        uint64_t  lsData (){ return  flsData; }
+        uint64_t  msData (){ return  fmsData; }
+        uint16_t  crc    (){ return  fcrc;    }
+
 };
 
 //class GEBdata : public TObject {
 class GEBdata {
     private:
-        uint32_t ZSFlag;                // ZeroSuppresion flags, 24 bits
-        uint16_t ChamID;                // Chamber ID, 12 bits
-        uint32_t sumVFAT;               // Rest part of the header, reserved for the moment
-        std::vector<VFATdata> vfats;
-        uint16_t OHcrc;                 // OH Check Sum, 16 bits
-        uint16_t OHwCount;              // OH Counter, 16 bits
-        uint16_t ChamStatus;            // Chamber Status, 16 bits
-        uint16_t GEBres;                // Reserved part of trailer
+        uint32_t fZSFlag;                // ZeroSuppresion flags, 24 bits
+        uint16_t fChamID;                // Chamber ID, 12 bits
+        uint32_t fsumVFAT;               // Rest part of the header, reserved for the moment
+        std::vector<VFATdata> fvfats;
+        uint16_t fOHcrc;                 // OH Check Sum, 16 bits
+        uint16_t fOHwCount;              // OH Counter, 16 bits
+        uint16_t fChamStatus;            // Chamber Status, 16 bits
+        uint16_t fGEBres;                // Reserved part of trailer
 
     public:
         GEBdata(){}
         GEBdata(const uint32_t &ZSFlag_, const uint16_t &ChamID_, const uint32_t &sumVFAT_) : 
-            ZSFlag(ZSFlag_),
-            ChamID(ChamID_),
-            sumVFAT(sumVFAT_){}
+            fZSFlag(ZSFlag_),
+            fChamID(ChamID_),
+            fsumVFAT(sumVFAT_){}
         ~GEBdata(){}
 
-        void addVFATData(const VFATdata &vfat_){vfats.push_back(vfat_);}
+        void addVFATData(const VFATdata &vfat_){fvfats.push_back(vfat_);}
 
         void setTrailer(const uint16_t &OHcrc_, const uint16_t &OHwCount_, const uint16_t &ChamStatus_, const uint16_t &GEBres_)
-        {OHcrc = OHcrc_; OHwCount = OHwCount_; ChamStatus = ChamStatus_; GEBres = GEBres_;}
+        {fOHcrc = OHcrc_; fOHwCount = OHwCount_; fChamStatus = ChamStatus_; fGEBres = GEBres_;}
+
+        uint32_t ZSFlag    (){ return fZSFlag;     }       
+        uint16_t ChamID    (){ return fChamID;     }       
+        uint32_t sumVFAT   (){ return fsumVFAT;    }       
+        uint16_t OHcrc     (){ return fOHcrc;      }       
+        uint16_t OHwCount  (){ return fOHwCount;   }       
+        uint16_t ChamStatus(){ return fChamStatus; }       
+        uint16_t GEBres    (){ return fGEBres;     }       
+        std::vector<VFATdata> vfats(){ return fvfats;}
+
 };
 
 class EventHeader {
@@ -123,30 +139,30 @@ class Event : public TObject {
         EventHeader    fEvtHdr;
         
         //uint64_t header1;             // AmcNo:4      0000:4     LV1ID:24   BXID:12     DataLgth:20 
-        uint8_t AmcNo;
-        uint8_t b0000;
-        uint32_t LV1ID;                    // What is this? Which var format should be used?
-        uint16_t BXID;                     // Is it Bunch crossing ID? Should it be Int_t?
-        uint32_t DataLgth;                 // What is this?
+        uint8_t fAmcNo;
+        uint8_t fb0000;
+        uint32_t fLV1ID;                    // What is this? Which var format should be used?
+        uint16_t fBXID;                     // Is it Bunch crossing ID? Should it be Int_t?
+        uint32_t fDataLgth;                 // What is this?
         //uint64_t header2;             // User:32      OrN:16     BoardID:16
-        uint16_t OrN;                   // What is this?
-        uint16_t BoardID;
+        uint16_t fOrN;                   // What is this?
+        uint16_t fBoardID;
         //uint64_t header3;               // DAVList:24   BufStat:24 DAVCount:5 FormatVer:3 MP7BordStat:8 
-        uint32_t DAVList;
-        uint32_t BufStat;
-        uint8_t DAVCount;
-        uint8_t FormatVer;
-        uint8_t MP7BordStat;
+        uint32_t fDAVList;
+        uint32_t fBufStat;
+        uint8_t fDAVCount;
+        uint8_t fFormatVer;
+        uint8_t fMP7BordStat;
 
-        std::vector<GEBdata> gebs;      // Should we use vector or better have TClonesArray here?
+        std::vector<GEBdata> fgebs;      // Should we use vector or better have TClonesArray here?
         //uint64_t trailer2;            // EventStat:32 GEBerrFlag:24  
-        uint32_t EventStat;
-        uint32_t GEBerrFlag;
+        uint32_t fEventStat;
+        uint32_t fGEBerrFlag;
         //uint64_t trailer1;            // crc:32       LV1IDT:8   0000:4     DataLgth:20 
-        uint32_t crc;
-        uint8_t LV1IDT;
-        uint8_t b0000T;
-        uint32_t DataLgthT;
+        uint32_t fcrc;
+        uint8_t fLV1IDT;
+        uint8_t fb0000T;
+        uint32_t fDataLgthT;
 
     public:
         Event();
@@ -170,8 +186,29 @@ class Event : public TObject {
             const uint8_t &LV1IDT_, 
             const uint8_t &b0000T_, 
             const uint32_t &DataLgthT_);
-        void addGEBdata(const GEBdata &geb){gebs.push_back(geb);}
+        void addGEBdata(const GEBdata &geb){fgebs.push_back(geb);}
         void Clear();
+
+        uint8_t AmcNo(){ return fAmcNo; }
+        uint8_t b0000(){ return fb0000; }
+        uint32_t LV1ID(){ return fLV1ID;}       
+        uint16_t BXID(){ return fBXID; }        
+        uint32_t DataLgth(){ return fDataLgth;  }     
+        uint16_t OrN(){ return fOrN;       }    
+        uint16_t BoardID(){ return fBoardID;   }
+        uint32_t DAVList(){ return fDAVList;   }
+        uint32_t BufStat(){ return fBufStat;   }
+        uint8_t DAVCount(){ return fDAVCount;   }
+        uint8_t FormatVer(){return fFormatVer;  }
+        uint8_t MP7BordStat(){ return fMP7BordStat;}
+
+        std::vector<GEBdata> gebs(){ return fgebs;}
+        uint32_t EventStat(){ return fEventStat;       }
+        uint32_t GEBerrFlag(){ return fGEBerrFlag;      }
+        uint32_t crc(){ return fcrc;             }
+        uint8_t LV1IDT(){ return fLV1IDT;           }
+        uint8_t b0000T(){ return fb0000T;           }
+        uint32_t DataLgthT(){ return fDataLgthT;       }
 
         ClassDef(Event,1)               //Event structure
 };

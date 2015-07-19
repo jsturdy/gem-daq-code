@@ -126,24 +126,24 @@ void Event::Build(const uint8_t &AmcNo_,
     //Save current Object count
     Int_t ObjectNumber = TProcessID::GetObjectCount();
     Clear();
-    AmcNo = AmcNo_;
-    b0000 = b0000_;
-    LV1ID = LV1ID_;
-    BXID = BXID_;
-    DataLgth = DataLgth_;
-    OrN = OrN_;
-    BoardID = BoardID_;
-    DAVList = DAVList_;
-    BufStat = BufStat_;
-    DAVCount = DAVCount_;
-    FormatVer = FormatVer_;
-    MP7BordStat = MP7BordStat_;
-    EventStat = EventStat_;
-    GEBerrFlag = GEBerrFlag_;
-    crc = crc_;
-    LV1IDT = LV1IDT_;
-    b0000T = b0000T_;
-    DataLgthT = DataLgthT_;
+    fAmcNo = AmcNo_;
+    fb0000 = b0000_;
+    fLV1ID = LV1ID_;
+    fBXID = BXID_;
+    fDataLgth = DataLgth_;
+    fOrN = OrN_;
+    fBoardID = BoardID_;
+    fDAVList = DAVList_;
+    fBufStat = BufStat_;
+    fDAVCount = DAVCount_;
+    fFormatVer = FormatVer_;
+    fMP7BordStat = MP7BordStat_;
+    fEventStat = EventStat_;
+    fGEBerrFlag = GEBerrFlag_;
+    fcrc = crc_;
+    fLV1IDT = LV1IDT_;
+    fb0000T = b0000T_;
+    fDataLgthT = DataLgthT_;
 
     //Restore Object count 
     //To save space in the table keeping track of all referenced objects
@@ -161,23 +161,23 @@ void Event::SetHeader(Int_t i, Int_t run, Int_t date)
 //______________________________________________________________________________
 void Event::Clear()
 {
-    AmcNo = 0;
-    b0000 = 0;
-    LV1ID = 0;
-    BXID = 0;
-    DataLgth = 0;
-    OrN = 0;
-    BoardID = 0;
-    DAVList = 0;
-    BufStat = 0;
-    DAVCount = 0;
-    FormatVer = 0;
-    MP7BordStat = 0;
-    gebs.clear();
-    EventStat = 0;
-    GEBerrFlag = 0;
-    crc = 0;
-    LV1IDT = 0;
-    b0000T = 0;
-    DataLgthT = 0;
+    fAmcNo = 0;
+    fb0000 = 0;
+    fLV1ID = 0;
+    fBXID = 0;
+    fDataLgth = 0;
+    fOrN = 0;
+    fBoardID = 0;
+    fDAVList = 0;
+    fBufStat = 0;
+    fDAVCount = 0;
+    fFormatVer = 0;
+    fMP7BordStat = 0;
+    fgebs.clear();
+    fEventStat = 0;
+    fGEBerrFlag = 0;
+    fcrc = 0;
+    fLV1IDT = 0;
+    fb0000T = 0;
+    fDataLgthT = 0;
 }

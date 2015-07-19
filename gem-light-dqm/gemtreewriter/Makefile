@@ -36,14 +36,6 @@ Headers= Event.h EventLinkDef.h
 Objects= $(OBJ)/Event.o $(OBJ)/EventDict.o
 #SRCDIC=$(SourceDic:%=$(BUILD_HOME)/$(Project)/$(Package)/include/%)
 
-event:
-	mkdir -p $(OBJ)
-	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(SRC)/Event.cxx -o $(OBJ)/Event.o
-	mkdir -p $(DIC)
-	$(RC) -f $(DIC)/EventDict.cxx -c $(INC) $(Headers)
-	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(DIC)/EventDict.cxx -o $(OBJ)/EventDict.o
-	mkdir -p $(LIB)
-	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
 all:
 	mkdir -p $(OBJ)
 	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(SRC)/Event.cxx -o $(OBJ)/Event.o
@@ -54,5 +46,16 @@ all:
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gemTreeComposer.cxx -L$(LIB) -lEvent -o $(BIN)/gtc
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx -L$(LIB) -lEvent -o $(BIN)/reader
+event:
+	mkdir -p $(OBJ)
+	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(SRC)/Event.cxx -o $(OBJ)/Event.o
+	mkdir -p $(DIC)
+	$(RC) -f $(DIC)/EventDict.cxx -c $(INC) $(Headers)
+	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(DIC)/EventDict.cxx -o $(OBJ)/EventDict.o
+	mkdir -p $(LIB)
+	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
+reader:
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx -L$(LIB) -lEvent -o $(BIN)/reader
 clean:
 	rm -rf $(BIN) $(OBJ) $(DIC) $(LIB)
