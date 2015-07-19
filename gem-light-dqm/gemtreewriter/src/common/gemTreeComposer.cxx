@@ -50,7 +50,9 @@
   Now you will have executables:
   - GEM Tree Writer bin/gtc
   - Example of GEMtree reader bin/reader
-  In order to run the writer application you have to provide input and output filenames:
+  In order to run the writer application you have to add the new library path to your system:
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib
+  Then run the executable providing input and output filenames:
   ./bin/gtc inputHEXdata.dat outputROOTtree.root
   You can download sample HEX data file:
   wget https://baranov.web.cern.ch/baranov/xdaq/DataParker/GEM_DAQ_Tue_Jul_14_10-13-10_2015.dat
