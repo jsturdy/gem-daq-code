@@ -133,7 +133,6 @@ TFile* thldread(Int_t get=0)
   TApplication App("App", &argc, argv);
 #endif
  
-  //  GEMOnline            Online;   
   gem::readout::GEBData   geb;
   gem::readout::VFATData vfat;
 
@@ -289,7 +288,6 @@ TFile* thldread(Int_t get=0)
         if(OKpri){
           gem::readout::printVFATdataBits(ievent, vfat);
           //gem::readout::printVFATdata(ievent, vfat);
-          //gem::readout::PrintChipID(ievent,vfat);
         }
     
       }// if 1010,1100,1110, ChipID
@@ -317,7 +315,6 @@ TFile* thldread(Int_t get=0)
 
       cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
-
     if(OKpri) cout<<"ievent "<< ievent <<endl;
   }
   inpf.close();
