@@ -223,7 +223,7 @@ TFile* thldread(Int_t get=0)
      /*
       *  GEM Event Reading
       */
-      gem::readout::readEvent(inpf, ievent, vfat);
+      gem::readout::readVFATdata(inpf, ievent, vfat);
   
       uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
       uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
