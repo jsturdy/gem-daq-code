@@ -22,32 +22,37 @@
 #include <TApplication.h>
 #include <TString.h>
 
+#include "gem/readout/GEMDataAMCformat.h"
+
 /**
 * ... Threshold Scan ROOT based application, could be used for analisys of XDAQ GEM data ...
 */
 
 /*! \file */
 /*! 
-  \mainpage Threshold Scan ROOT based application.
+  \mainpage DQM Light ROOT based application.
 
-  VFAT2 data reading example for Threshold Scan XDAQ GEM application, ROOT based analysis.
+  GEM events data reading program for any GEM DQM light application, needs for ROOT analysis.
 
   \section Installation
 
-  you can make a data file by XDAQ Threshold Scan appliaction or get example from the CERN web:
+  It's possible to make a GEM data file by xDAQ GEMGLIBsuprvisor or get as example from CERN web:
 
-  wget https://baranov.web.cern.ch/baranov/xdaq/threshold/vfat2_9/ThresholdScan_Fri_Jan_16_14-17-59_2015.dat <br>
-  ln -s ThresholdScan_Fri_Jan_16_14-17-59_2015.dat ThresholdScan.dat
+  ln -s /afs/cern.ch/user/b/baranov/www/xdaq/Testing/15.July.2015/GEM_DAQ_Fri_Jul_17_14-46-56_2015.dat GEMDQMRawData.dat
 
   You need a ROOT code for analysis:
 
-  git clone git@github.com:sergueibaranov/gem-root-application.git <br>
+  git clone git@github.com:cms-gem-daq-project/gem-daq-code.git <br>
+  git clone git@github.com:sergueibaranov/gem-daq-code.git <br>
 
-  gem-root-application/scripts/with_root_compile.sh gem-root-application/src/tbutils/thldread.cc
+  cd gem-daq-code
+    cd dqm-light
+    mkdir work
+    ../scripts/compile_code_for_root.sh ../src/common/gem-read-events.cc
 
-  That is all. You will have a root file with 128 threshold scan histograms for one VFAT2 chip.
+  That is all. You will have a root file DQMlight.root with few monitoring data histograms.
 
-  \author Sergey.Baranov@cern.ch
+  \author Sergey.Baranov@cern.ch, Mykhailo Dalchenko <mexxxanick@gmail.com> 
 */
 
 using namespace std;
@@ -59,189 +64,11 @@ using namespace std;
   \author Sergey.Baranov@cern.ch
 */
 
-class GEMOnline {
-  public:
-
-      //! VFAT2 Channel data.
-      /*!
-        contents VFAT2 128 channels data in two 64 bits words.
-       */
-    
-      //! GEM Event Data Format (one chip data)
-      /*! 
-        Uncoding of VFAT2 data for one chip, data format.
-        \image html vfat2.data.format.png
-        \author Sergey.Baranov@cern.ch
-       */
-    
-      struct VFATData {
-        uint16_t BC;      /*!<Banch Crossing number "BC" 16 bits, : 1010:4 (control bits), BC:12 */
-        uint16_t EC;      /*!<Event Counter "EC" 16 bits: 1100:4(control bits) , EC:8, Flag:4 */
-        uint32_t bxExp;   
-        uint16_t bxNum;   /*!<Event Number & SBit, 16 bits : bxNum:6, SBit:6 */
-        uint16_t ChipID;  /*!<ChipID 16 bits, 1110:4 (control bits), ChipID:12 */
-        uint64_t lsData;  /*!<lsData value, bits from 1to64. */ 
-        uint64_t msData;  /*!<msData value, bits from 65to128. */
-        uint16_t crc;     /*!<Checksum number, CRC:16 */
-      };    
-    
-      struct GEBData {
-        uint64_t header;      // ZSFlag:24 ChamID:12 
-        std::vector<VFATData> vfats;
-        uint64_t trailer;     // OHcrc: 16 OHwCount:16  ChamStatus:16
-      };
-
-      struct GEMData {
-        uint64_t header1;      // AmcNo:4      0000:4     LV1ID:24   BXID:12     DataLgth:20 
-        uint64_t header2;      // User:32      OrN:16     BoardID:16
-        uint64_t header3;      // DAVList:24   BufStat:24 DAVCount:5 FormatVer:3 MP7BordStat:8 
-        std::vector<GEBData> gebs;
-        uint64_t trailer2;     // EventStat:32 GEBerrFlag:24  
-        uint64_t trailer1;     // crc:32       LV1IDT:8   0000:4     DataLgth:20 
-      };
-
-      //! Print Event, "hex" format.
-      /*! 
-        Print VFAT2 event.
-       */
-    
-      //
-      // Useful printouts 
-      //
-      void show4bits(uint8_t x) {
-        int i;
-        const unsigned long unit = 1;
-        for(i=(sizeof(uint8_t)*4)-1; i>=0; i--)
-          (x & ((unit)<<i))?putchar('1'):putchar('0');
-     	//printf("\n");
-      }
-
-      bool printVFATdata(int event, const VFATData& vfat){
-        if( event<0) return(false);
-          cout << "Received tracking data word:" << endl;
-          cout << "BC      :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.BC     << dec << endl;
-  	  cout << "EC      :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.EC     << dec << endl;
-	  /*
-          cout << "BxExp   :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.bxExp  << dec << endl; // do we need here?
-          cout << "BxNum   :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.bxNum  << dec << endl; // do we need here?
-          */
-  	  cout << "ChipID  :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.ChipID << dec << endl;
-          cout << "<127:64>:: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.msData << dec << endl;
-          cout << "<63:0>  :: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.lsData << dec << endl;
-          cout << "crc     :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.crc    << dec <<"\n"<< endl;
-        return(true);
-      };
-
-      bool printVFATdataBits(int event, int ivfat, const VFATData& vfat){
-          if( event<0) return(false);
-	  cout << "\nReceived VFAT data word: event " << event << " ivfat  " << ivfat << endl;
-  
-          uint8_t   b1010 = (0xf000 & vfat.BC) >> 12;
-          show4bits(b1010); cout << " BC     0x" << hex << (0x0fff & vfat.BC) << dec << endl;
-  
-          uint8_t   b1100 = (0xf000 & vfat.EC) >> 12;
-          uint16_t   EC   = (0x0ff0 & vfat.EC) >> 4;
-          uint8_t   Flag  = (0x000f & vfat.EC);
-          show4bits(b1100); cout << " EC     0x" << hex << EC << dec << endl; 
-          show4bits(Flag);  cout << " Flag  " << endl;
-  
-          uint8_t   b1110 = (0xf000 & vfat.ChipID) >> 12;
-          uint16_t ChipID = (0x0fff & vfat.ChipID);
-          show4bits(b1110); cout << " ChipID 0x" << hex << ChipID << dec << " " << endl;
-	  /*
-          cout << "     bxExp  0x" << std::setfill('0') << std::setw(4) << hex << vfat.bxExp << dec << " " << endl;
-  	  cout << "     bxNum  0x" << std::setfill('0') << std::setw(2) << hex << ((0xff00 & vfat.bxNum) >> 8) << dec << endl;
-  	  cout << "     SBit   0x" << std::setfill('0') << std::setw(2) << hex <<  (0x00ff & vfat.bxNum)       << dec << endl;
-	  */
-          cout << " <127:64>:: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.msData << dec << endl;
-          cout << " <63:0>  :: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.lsData << dec << endl;
-          cout << "     crc    0x" << hex << vfat.crc << dec << endl;
-  
-          //cout << " " << endl; show16bits(vfat.EC);
-  
-          return(true);
-      };
-  
-      //! Print ChipID.
-      /*! 
-          Print ChipID "hex" number and control bits "1110"
-       */
-    
-      bool PrintChipID(int event, const VFATData& vfat){
-        if( event<0 ) return(false);
-          cout << "\nevent " << event << endl;
-          uint8_t bitsE = ((vfat.ChipID&0xF000)>>12);
-          showbits(bitsE);
-          cout << hex << "1110 0x0" << ((vfat.ChipID&0xF000)>>12) << " ChipID 0x" << (vfat.ChipID&0x0FFF) << dec << endl;
-      };
-    
-      //! showbits function.
-      /*!
-       show bits function, needs for debugging
-       */
-    
-      void showbits(uint8_t x)
-        { int i; 
-          for(i=(sizeof(uint8_t)*8)-1; i>=0; i--)
-            (x&(1<<i))?putchar('1'):putchar('0');
-          printf("\n");
-        };
-
-      bool readGEBheader(ifstream& inpf, GEBData& geb){
-	inpf >> hex >> geb.header;
-        return(true);
-      };	  
-
-      bool printGEBheader(const GEBData& geb){
-	cout << hex << geb.header << " ChamID " << ((0x000000fff0000000 & geb.header) >> 28) 
-             << dec << " sumVFAT " << (0x000000000fffffff & geb.header) << endl;
-        return(true);
-      };	  
-
-      bool readGEBtrailer(ifstream& inpf, GEBData& geb){
- 	inpf >> hex >> geb.trailer;
-        return(true);
-      };	  
-
-      bool printGEBtrailer(const GEBData& geb){
-        uint64_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
-        uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
-        uint64_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
-        cout << "GEM Camber Treiler: OHcrc " << hex << OHcrc << " OHwCount " << OHwCount << " ChamStatus " << ChamStatus << dec 
-             << endl;
-        return(true);
-      };	  
-
-      //! Read 1-128 channels data
-      /*!
-        reading two 64 bits words (lsData & msData) with data from all channels for one VFAT2 chip 
-       */
-    
-      //! Read GEM event data
-      /*!
-        reading GEM VFAT2 data (BC,EC,bxNum,ChipID,(lsData & msData), crc.
-       */
-    
-      bool readEvent(ifstream& inpf, int event, VFATData& vfat){
-        if(event<0) return(false);
-          inpf >> hex >> vfat.BC;
-          inpf >> hex >> vfat.EC;
-          /* inpf >> hex >> vfat.bxExp;
-          inpf >> hex >> vfat.bxNum;
-          */
-	  inpf >> hex >> vfat.ChipID;
-          inpf >> hex >> vfat.lsData;
-          inpf >> hex >> vfat.msData;
-          inpf >> hex >> vfat.crc;
-        return(true);
-      };	  
-
-};// end of GEMOnline
-
 /*
  *  CRC ******************************************************************
  */
       uint16_t dataVFAT[11];
+
       uint16_t crc_calc(uint16_t crc_in, uint16_t dato){
       uint16_t v = 0x0001;
       uint16_t mask = 0x0001;    
@@ -264,10 +91,12 @@ class GEMOnline {
       uint16_t crc_fin = 0xffff;
       for (int i = 11; i >= 1; i--){
         crc_fin = crc_calc(crc_fin, dataVFAT[i]);
+	/*
 	if(OKprint){
           cout << " dataVFAT[" << std::setfill('0') << std::setw(2) << i << "] " << hex << std::setfill('0') << std::setw(4) << dataVFAT[i]
                << " crc_temp " << std::setfill('0') << std::setw(4) << crc_fin << dec << endl;
         }
+	*/
       }
       return(crc_fin);
     }
@@ -304,11 +133,11 @@ TFile* thldread(Int_t get=0)
   TApplication App("App", &argc, argv);
 #endif
  
-  GEMOnline         Online;   
-  GEMOnline::VFATData vfat;
-  GEMOnline::GEBData   geb;
+  //  GEMOnline            Online;   
+  gem::readout::GEBData   geb;
+  gem::readout::VFATData vfat;
 
-  string file="DataParker.dat";
+  string file="GEMDQMRawData.dat";
 
   ifstream inpf(file.c_str());
   if(!inpf.is_open()) {
@@ -330,7 +159,7 @@ TFile* thldread(Int_t get=0)
   TFile* hfile = NULL;
   hfile = new TFile(filename,"RECREATE","Threshold Scan ROOT file with histograms");
 
-  TH1F* hiVFAT = new TH1F("VFAT", "Number VFAT per event", 100,  0., 1000. );
+  TH1F* hiVFAT = new TH1F("VFAT", "Number VFAT per event", 100,  0., 100. );
   hiVFAT->SetFillColor(48);
 
   TH1C* hi1010 = new TH1C("1010", "Control Bits 1010", 100, 0x0, 0xf );
@@ -382,8 +211,8 @@ TFile* thldread(Int_t get=0)
     if(OKpri) cout << "\nievent " << ievent << endl;
 
     // read Event Chamber Header 
-    Online.readGEBheader(inpf, geb);
-    if(OKpri) Online.printGEBheader(geb);
+    gem::readout::readGEBheader(inpf, geb);
+    if(OKpri) gem::readout::printGEBheader(ievent,geb);
 
     uint64_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
@@ -394,7 +223,7 @@ TFile* thldread(Int_t get=0)
      /*
       *  GEM Event Reading
       */
-      Online.readEvent(inpf, ievent, vfat);
+      gem::readout::readEvent(inpf, ievent, vfat);
   
       uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
       uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
@@ -458,17 +287,17 @@ TFile* thldread(Int_t get=0)
         }
     
         if(OKpri){
-          Online.printVFATdataBits(ievent, ivfat, vfat);
-          //Online.printVFATdata(ievent, vfat);
-          //Online.PrintChipID(ievent,vfat);
+          gem::readout::printVFATdataBits(ievent, vfat);
+          //gem::readout::printVFATdata(ievent, vfat);
+          //gem::readout::PrintChipID(ievent,vfat);
         }
     
       }// if 1010,1100,1110, ChipID
     }//end ivfat
 
     // read Event Chamber Header 
-    Online.readGEBtrailer(inpf, geb);
-    if(OKpri) Online.printGEBtrailer(geb);
+    gem::readout::readGEBtrailer(inpf, geb);
+    if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
 
     uint64_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
     uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
