@@ -22,7 +22,8 @@ ROOTLIBS   =$(shell root-config --libs)
 ROOTGLIBS  =$(shell root-config --glibs) 
 
 Sources1 = gem-read-events.cxx
-Sources2 = dqm-read-make-ttree.cxx
+Sources2 = dqm-read-make-ttree.cxx 
+##Sources2+= Event.cxx
 
 IncludeDirs = /usr/include/root
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
@@ -41,7 +42,7 @@ reader:
 	$(LS) $(BIN)
 reader-simple:
 	mkdir -p $(OBJ) $(LIB) $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $(INC) $(SRC)/$(Sources2) -o $(BIN)/mySimpleDQMlight
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $(INC) $(SRC)/$(Sources2) $(SRC)/Event.cxx -o $(BIN)/mySimpleDQMlight
 	$(LS) $(BIN)
 all:
 	$(MAKE) $(reader) $(reader-simple)
@@ -52,5 +53,6 @@ print-env:
 	@echo BUILD_HOME    $(BUILD_HOME)
 	@echo XDAQ_OS       $(XDAQ_OS)
 	@echo XDAQ_PLATFORM $(XDAQ_PLATFORM)
+	@echo INC           $(INC)
 	@echo reader        $(Sources1)
 	@echo reader-simple $(Sources2)
