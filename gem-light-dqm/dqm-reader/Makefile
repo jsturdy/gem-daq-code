@@ -43,7 +43,8 @@ reader-simple:
 	mkdir -p $(OBJ) $(LIB) $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $(INC) $(SRC)/$(Sources2) -o $(BIN)/mySimpleDQMlight
 	$(LS) $(BIN)
-
+all:
+	$(MAKE) $(reader) $(reader-simple)
 clean:
 	rm -rf $(BIN) $(OBJ)
 
