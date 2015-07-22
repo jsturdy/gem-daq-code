@@ -28,8 +28,8 @@ IncludeDirs+= ${BUILD_HOME}/gemdaq-testing/gemreadout/include
 INC=$(IncludeDirs:%=-I%)
 
 SRC=$(BUILD_HOME)/$(Project)/$(Package)/src/common
-OBJ=$(BUILD_HOME)/$(Project)/$(Package)/src/$(XDAQ_OS)/$(XDAQ_PLATFORM) 
-DIC=$(BUILD_HOME)/$(Project)/$(Package)/src/dic/$(XDAQ_OS)/$(XDAQ_PLATFORM)
+OBJ=$(BUILD_HOME)/$(Project)/$(Package)/src/obj
+DIC=$(BUILD_HOME)/$(Project)/$(Package)/src/dic
 LIB=$(BUILD_HOME)/$(Project)/$(Package)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 BIN=$(BUILD_HOME)/$(Project)/$(Package)/bin/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 
@@ -38,8 +38,6 @@ Headers= Event.h EventLinkDef.h
 Objects= $(OBJ)/Event.o $(OBJ)/EventDict.o
 #SRCDIC=$(SourceDic:%=$(BUILD_HOME)/$(Project)/$(Package)/include/%)
 
-kkk:
-	mkdir -p $(OBJ) $(DIC)
 all:
 	mkdir -p $(OBJ)
 	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(SRC)/Event.cxx -o $(OBJ)/Event.o
