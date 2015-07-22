@@ -23,43 +23,24 @@
 #include <TString.h>
 #include <TObject.h>
 
-/*
-#if defined(__CINT__) && !defined(__MAKECINT__)
-#include "libEvent.so"
-#else
-#include "Event.h"
-#endif
-*/
+#include "TClonesArray.h"
+#include "TRefArray.h"
+#include "TRef.h"
+#include "TBits.h"
+#include "TMath.h"
 
-/**
-* ... 
-*/
-
-/*! \file */
-/*! 
-  \mainpage ...
-  ...
-
-  \section Installation
-  ...
-
-  \author Sergey.Baranov@cern.ch, Mykhailo Dalchenko <mexxxanick@gmail.com> 
-*/
+#include "gem/readout/GEMDataAMCformat.h"
 
 using namespace std;
 
-#include "gem/readout/GEMDataAMCformat.h"
-#include "dqm/Event.h"
-
-    // Ok printing
-    bool OKprint(int ievent, int iMaxPrint ){
-      if( ievent <= iMaxPrint ){
-        return (true);
-      } else { 
-        return (false);
-      }
-    }
-    
+// Ok printing
+bool OKprint(int ievent, int iMaxPrint ){
+  if( ievent <= iMaxPrint ){
+    return (true);
+  } else { 
+    return (false);
+  }
+}
 
 TROOT root("",""); // static TROOT object
 
@@ -75,7 +56,6 @@ TFile* thldread(Int_t get=0)
  
   gem::readout::GEBData   geb;
   gem::readout::VFATData vfat;
-  //dqm::Event            Event;
 
   string file="GEMDQMRawData.dat";
 
@@ -99,15 +79,11 @@ TFile* thldread(Int_t get=0)
   TFile* hfile = NULL;
   hfile = new TFile(filename,"RECREATE","ROOT file with histograms");
 
-  TTree GEMtree("GEMtree","A Tree with GEM Events");
-
   const Int_t ieventPrint = 2;
   const Int_t ieventMax   = 90000;
   const Int_t kUPDATE     = 50;
   bool OKpri = false;
 
-  //dqm::Event *ev = new dqm::Event(); 
-  //GEMtree.Branch("GEMEvents", &ev);
 
   for(int ievent=0; ievent<ieventMax; ievent++){
     OKpri = OKprint(ievent,ieventPrint);
@@ -124,8 +100,6 @@ TFile* thldread(Int_t get=0)
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
 
-    dqm::GEBdata *GEBdata_ = new dqm::GEBdata(ZSFlag, ChamID);
-
     for(int ivfat=0; ivfat<sumVFAT; ivfat++){
      /*
       *  GEM Event Reading
@@ -138,18 +112,18 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
-  
+
+      uint16_t  BC     = (0x0fff & vfat.BC);
+      uint8_t   EC     = (0x0fff & vfat.EC) >> 4;
+      uint64_t  lsData = vfat.lsData;
+      uint64_t  msData = vfat.lsData;
+
       if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) ){
-
-        // dqm::VFATdata *VFATdata_ = new dqm::VFATdata(b1010, b1100, Flag, b1110, ChipID, CRC);
-        // GEBdata_->addVFATData(*VFATdata_);
-	// delete VFATdata_;
-
         if(OKpri){
           gem::readout::printVFATdataBits(ievent, vfat);
         }
-    
       }// if 1010,1100,1110, ChipID
+
     }//end ivfat
 
     // read Event Chamber Header 
@@ -160,11 +134,7 @@ TFile* thldread(Int_t get=0)
     uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
     uint64_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
 
-    //GEBdata_->setTrailer(OHcrc, OHwCount, ChamStatus);
-    //ev->Build(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-    //ev->addGEBdata(*GEBdata_);
-    //GEMtree.Fill();
-    //ev->Clear();
+    uint16_t GEBres     = (0x000000000000ffff & geb.trailer);
 
     if(OKpri){
       cout << "GEM Camber Treiler: OHcrc " << hex << OHcrc << " OHwCount " << OHwCount << " ChamStatus " << ChamStatus << dec 

@@ -23,7 +23,6 @@ ROOTGLIBS  =$(shell root-config --glibs)
 
 Sources1 = gem-read-events.cxx
 Sources2 = dqm-read-make-ttree.cxx 
-##Sources2+= Event.cxx
 
 IncludeDirs = /usr/include/root
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
@@ -32,8 +31,8 @@ INC=$(IncludeDirs:%=-I%)
 
 SRC=$(BUILD_HOME)/$(Project)/$(Package)/src/common
 OBJ=$(BUILD_HOME)/$(Project)/$(Package)/src/$(XDAQ_OS)/$(XDAQ_PLATFORM) 
-#DIC=$(BUILD_HOME)/$(Project)/$(Package)/src/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-#LIB=$(BUILD_HOME)/$(Project)/$(Package)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
+DIC=$(BUILD_HOME)/$(Project)/$(Package)/src/$(XDAQ_OS)/$(XDAQ_PLATFORM)
+LIB=$(BUILD_HOME)/$(Project)/$(Package)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 BIN=$(BUILD_HOME)/$(Project)/$(Package)/bin/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 
 reader:
@@ -42,7 +41,7 @@ reader:
 	$(LS) $(BIN)
 reader-simple:
 	mkdir -p $(OBJ) $(LIB) $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $(INC) $(SRC)/$(Sources2) $(SRC)/Event.cxx -o $(BIN)/mySimpleDQMlight
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $(INC) $(SRC)/$(Sources2) -o $(BIN)/mySimpleDQMlight
 	$(LS) $(BIN)
 all:
 	$(MAKE) $(reader) $(reader-simple)
