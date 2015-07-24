@@ -165,7 +165,7 @@ int main(int argc, char** argv)
     const Int_t ieventPrint = 3;
     const Int_t ieventMax   = 9000000;
     const Int_t kUPDATE     = 10;
-    bool OKpri = false;
+    bool OKpri = true;
 
     for(int ievent=0; ievent<ieventMax; ievent++)
     {

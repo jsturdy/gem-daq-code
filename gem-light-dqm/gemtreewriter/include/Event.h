@@ -69,7 +69,7 @@ class VFATdata {
         uint8_t   b1010  (){ return  fb1010;  }
         uint16_t  BC     (){ return  fBC;     }
         uint8_t   b1100  (){ return  fb1100;  }
-        uint16_t  EC     (){ return  fEC;     }
+        uint8_t  EC     (){ return  fEC;     }
         uint8_t   Flag   (){ return  fFlag;   }
         uint8_t   b1110  (){ return  fb1110;  }
         uint16_t  ChipID (){ return  fChipID; }
