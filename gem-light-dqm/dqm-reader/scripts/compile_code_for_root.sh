@@ -1,7 +1,14 @@
 #!/bin/bash
 
-if [ -r myexe ]; then
-  /bin/rm -rf myDQMlight
+if [[ -z "$BUILD_HOME" ]]; then
+  echo BUILD_HOME should be defined !!!
+  exit
+else
+  echo BUILD_HOME  ${BUILD_HOME}
+fi
+
+if [ -r myDQMlight ]; then
+  /bin/rm -rf ./myDQMlight
 fi
 
 if [ -r $1 ]; then
