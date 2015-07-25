@@ -149,7 +149,7 @@ TFile* thldread(Int_t get=0)
   const TString filename = "DQMlight.root";
 
   // Create a new canvas.
-  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,990,990);
+  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,950,950);
   gROOT->SetStyle("Plain");
   gStyle->GetAttDate()->SetTextColor(1);
   gStyle->SetOptStat(111111);
@@ -205,12 +205,15 @@ TFile* thldread(Int_t get=0)
   hiFlag->GetXaxis()->CenterTitle();
   hiFlag->GetYaxis()->SetTitle("Number of Events");
   hiFlag->GetYaxis()->CenterTitle();
-
+  /*
   TH1C* hiCRC = new TH1C("CRC",     "CRC",             100, 0x0, 0xffff );
   hiCRC->SetFillColor(48);
+  */
 
-  TH1C* hiDiffCRC = new TH1C("DiffCRC", "CRC Diff",    100, 0xffff, 0xffff );
-  hiDiffCRC->SetFillColor(48);
+  TH2C* hiVsCRC = new TH2C("CRC", "CRC vs calCRC",   100, 0xffff, 0xffff, 100, 0xffff, 0xffff);
+  hiVsCRC->SetFillColor(48);
+  hiVsCRC->GetXaxis()->SetTitle("CRC vs Calculated CRC Value, max 0xffff");
+  hiVsCRC->GetXaxis()->CenterTitle();
 
   TH1C* hiFake = new TH1C("iFake", "Fake Events",      100, 0., 100. );
   hiFake->SetFillColor(48);
@@ -303,8 +306,8 @@ TFile* thldread(Int_t get=0)
         hiFlag->Fill(Flag);
         hi1110->Fill(b1110);
         hiChip->Fill(ChipID);
-        hiCRC->Fill(CRC);
-        hiDiffCRC->Fill(CRC-checkedCRC);
+        //hiCRC->Fill(CRC);
+        hiVsCRC->Fill(CRC,checkedCRC);
     
         //I think it would be nice to time this...
         uint8_t chan0xf = 0;
@@ -351,9 +354,8 @@ TFile* thldread(Int_t get=0)
       c1->cd(6)->SetLogy(); hi1110->Draw();
 
       c1->cd(7)->SetLogy(); hiFlag->Draw();
-      //c1->cd(7)->SetLogy(); hiCRC->Draw();
       c1->cd(8)->SetLogy(); hiCh128->Draw();
-      c1->cd(9)->SetLogy(); hiDiffCRC->Draw();
+      c1->cd(9); hiVsCRC->Draw();
       c1->Update();
       cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
