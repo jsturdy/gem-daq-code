@@ -205,9 +205,14 @@ TFile* thldread(Int_t get=0)
   hiFlag->GetXaxis()->CenterTitle();
   hiFlag->GetYaxis()->SetTitle("Number of Events");
   hiFlag->GetYaxis()->CenterTitle();
+
   /*
   TH1C* hiCRC = new TH1C("CRC",     "CRC",             100, 0x0, 0xffff );
   hiCRC->SetFillColor(48);
+  hiCRC->GetXaxis()->SetTitle("CRC value, max 0xffff");
+  hiCRC->GetXaxis()->CenterTitle();
+  hiCRC->GetYaxis()->SetTitle("Number of Events");
+  hiCRC->GetYaxis()->CenterTitle();
   */
 
   TH2C* hiVsCRC = new TH2C("CRC", "CRC vs calCRC",   100, 0xffff, 0xffff, 100, 0xffff, 0xffff);
@@ -354,7 +359,7 @@ TFile* thldread(Int_t get=0)
       c1->cd(6)->SetLogy(); hi1110->Draw();
 
       c1->cd(7)->SetLogy(); hiFlag->Draw();
-      c1->cd(8)->SetLogy(); hiCh128->Draw();
+      c1->cd(8); hiCh128->Draw();
       c1->cd(9); hiVsCRC->Draw();
       c1->Update();
       cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
