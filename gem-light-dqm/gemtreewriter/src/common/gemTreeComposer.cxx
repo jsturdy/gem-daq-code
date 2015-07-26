@@ -91,6 +91,7 @@ using namespace std;
         else crc_temp = crc_temp>>1;
         v<<=1;
       }
+      std::cout << "[CRC checker] crc_temp " << std::hex << crc_temp << std::endl;
       return(crc_temp);
     }
 
@@ -98,6 +99,8 @@ using namespace std;
     uint16_t checkCRC(bool OKprint){
       uint16_t crc_fin = 0xffff;
       for (int i = 11; i >= 1; i--){
+                          std::cout << "[CRC checker] dataVFAT["<<i<<"] " << std::hex << dataVFAT[i] << std::endl;
+                          std::cout << "[CRC checker] crc_fin " << std::hex << crc_fin << std::endl;
         crc_fin = crc_calc(crc_fin, dataVFAT[i]);
 	/*
 	if(OKprint){
@@ -197,7 +200,10 @@ int main(int argc, char** argv)
             uint16_t  ChipID = (0x0fff & vfat.ChipID);
             uint16_t  CRC    = vfat.crc;
             uint64_t lsData = vfat.lsData;
-            uint64_t msData = vfat.lsData;
+            uint64_t msData = vfat.msData;
+
+            std::cout << "ls data read " << std::hex << vfat.lsData << std::endl;
+            std::cout << "ls data write " << std::hex << lsData << std::endl;
 
             // CRC check
             dataVFAT[11] = vfat.BC;
@@ -213,12 +219,13 @@ int main(int argc, char** argv)
             dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
     
             uint16_t checkedCRC = checkCRC(OKpri);
-            if(OKpri){
+            //if(OKpri){
                cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
                     << "     crc " << std::setfill('0') << std::setw(4) << checkedCRC << dec << "\n" << endl;
-            }
+            //}
     
             VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
+            std::cout << "ls data read back " << std::hex << VFATdata_->lsData() << std::endl;
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 

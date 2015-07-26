@@ -126,16 +126,16 @@ int main(int argc, char** argv)
                         dataVFAT[11] = (0xf000 & (b1010 << 12)) | (0x0fff & v_vfat.at(k).BC());
                         dataVFAT[10] = ((0xf000 & (b1100 << 12)) | (0x0ff0 & (ec << 4))) | (0x000f & flag);
                         dataVFAT[9]  = (0xf000 & (b1110 << 12)) | (0x0fff & v_vfat.at(k).ChipID());
-                        std::cout << "Control bit b1010  " << std::hex << b1010 << std::endl;
-                        std::cout << "Control bit BC     " << std::hex << v_vfat.at(k).BC() << std::endl;
-                        std::cout << "data vfat 11       " << std::hex << dataVFAT[11] << std::endl;
-                        std::cout << "Control bit b1100  " << std::hex << b1100 << std::endl;
-                        std::cout << "Control bit ec     " << std::hex << ec    << std::endl;
-                        std::cout << "Control bit flag   " << std::hex << flag  << std::endl;
-                        std::cout << "data vfat 10       " << std::hex << dataVFAT[10] << std::endl;
-                        std::cout << "Control bit b1110  " << std::hex << b1110 << std::endl;
-                        std::cout << "Control bit ChipID " << std::hex << v_vfat.at(k).ChipID() << std::endl;
-                        std::cout << "data vfat 9        " << std::hex << dataVFAT[9] << std::endl;
+//                        std::cout << "Control bit b1010  " << std::hex << b1010 << std::endl;
+//                        std::cout << "Control bit BC     " << std::hex << v_vfat.at(k).BC() << std::endl;
+//                        std::cout << "data vfat 11       " << std::hex << dataVFAT[11] << std::endl;
+//                        std::cout << "Control bit b1100  " << std::hex << b1100 << std::endl;
+//                        std::cout << "Control bit ec     " << std::hex << ec    << std::endl;
+//                        std::cout << "Control bit flag   " << std::hex << flag  << std::endl;
+//                        std::cout << "data vfat 10       " << std::hex << dataVFAT[10] << std::endl;
+//                        std::cout << "Control bit b1110  " << std::hex << b1110 << std::endl;
+//                        std::cout << "Control bit ChipID " << std::hex << v_vfat.at(k).ChipID() << std::endl;
+//                        std::cout << "data vfat 9        " << std::hex << dataVFAT[9] << std::endl;
                         dataVFAT[8]  = (0xffff000000000000 & v_vfat.at(k).msData()) >> 48;
                         dataVFAT[7]  = (0x0000ffff00000000 & v_vfat.at(k).msData()) >> 32;
                         dataVFAT[6]  = (0x00000000ffff0000 & v_vfat.at(k).msData()) >> 16;
@@ -153,9 +153,11 @@ int main(int argc, char** argv)
                         std::cout << "data vfat 2        " << std::hex << dataVFAT[2] << std::endl;
                         std::cout << "data vfat 1        " << std::hex << dataVFAT[1] << std::endl;
                         std::cout << "ls data            " << std::hex << v_vfat.at(k).lsData() << std::endl;
-                        std::cout << "ms data            " << std::hex << v_vfat.at(k).msData() << std::endl;
+//                        std::cout << "ms data            " << std::hex << v_vfat.at(k).msData() << std::endl;
                         dataChecker *dc = new dataChecker();
                         uint16_t checkedCRC = dc->checkCRC(dataVFAT, 0);
+                        std::cout << "read  crc            " << std::hex << v_vfat.at(k).crc() << std::endl;
+                        std::cout << "check crc            " << std::hex << checkedCRC << std::endl;
                         hiDiffCRC->Fill(v_vfat.at(k).crc()-checkedCRC);
                         hi2DCRC->Fill(v_vfat.at(k).crc(), checkedCRC);
                         delete dc;
@@ -164,12 +166,12 @@ int main(int argc, char** argv)
                         for (int chan = 0; chan < 128; ++chan) {
                           if (chan < 64){
                             chan0xf = ((v_vfat.at(k).lsData() >> chan) & 0x1);
-                            std::cout << "chan0xf             " << std::hex << chan0xf << std::endl;
-                            std::cout << "chan0xf             " << std::hex << ((v_vfat.at(k).lsData() >> chan) & 0x1) << std::endl;
+//                            std::cout << "chan0xf             " << std::hex << chan0xf << std::endl;
+//                            std::cout << "chan0xf             " << std::hex << ((v_vfat.at(k).lsData() >> chan) & 0x1) << std::endl;
                             //histos[chan]->Fill(chan0xf);
                           if(!chan0xf) {
                              hiCh128->Fill(chan);
-                             std::cout << "ls data hiCh128    " << std::hex << v_vfat.at(k).lsData() << std::endl;
+//                             std::cout << "ls data hiCh128    " << std::hex << v_vfat.at(k).lsData() << std::endl;
                           }
                           } else {
                             chan0xf = ((v_vfat.at(k).msData() >> (chan-64)) & 0x1);

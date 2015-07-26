@@ -13,8 +13,9 @@ class dataChecker {
                 else d = 0;
                 if ((crc_temp & mask)^d) crc_temp = crc_temp>>1 ^ 0x8408;
                 else crc_temp = crc_temp>>1;
-                v<<=1;
+                v=v<<1;
             }
+                std::cout << "[CRC checker] crc_temp " << std::hex << crc_temp << std::endl;
             return(crc_temp);
         }
 
@@ -27,6 +28,8 @@ class dataChecker {
             uint16_t crc_fin = 0xffff;
             for (int i = 11; i >= 1; i--)
             {
+                std::cout << "[CRC checker] dataVFAT["<<i<<"] " << std::hex << dataVFAT[i] << std::endl;
+                std::cout << "[CRC checker] crc_fin " << std::hex << crc_fin << std::endl;
                 crc_fin = this->crc_calc(crc_fin, dataVFAT[i]);
         	    /*
         	    if(OKprint){
