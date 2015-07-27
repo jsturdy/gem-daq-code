@@ -185,6 +185,9 @@ int main(int argc, char** argv)
     gROOT->SetStyle("ZZStyle");
     gROOT->ForceStyle();
     printHistograms("pdf", "data/hist/");
+    printHistograms("png", "data/hist/");
+    printHistograms("C", "data/hist/");
+    printHistograms("root", "data/hist/");
     
     return 0;
 }
