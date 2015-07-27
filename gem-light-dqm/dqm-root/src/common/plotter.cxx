@@ -1,7 +1,7 @@
 /**
  * A collection of simple ROOT macros.
  *
- * N. Amapane, G. Cerminara
+ * N. Amapane, G. Cerminara, M. Dalchenko
  */
 
 #include <sstream>
