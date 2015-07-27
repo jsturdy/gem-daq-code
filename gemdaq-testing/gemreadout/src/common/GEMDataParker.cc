@@ -1,6 +1,6 @@
 #include "gem/readout/GEMDataParker.h"
 #include "gem/readout/GEMDataAMCformat.h"
-#include "gem/hw/vfat/HwVFAT2.h"
+#include "gem/hw/glib/HwGLIB.h"
 
 #include <boost/utility/binary.hpp>
 #include <bitset>
@@ -22,38 +22,40 @@ bool dumpGEMevent_ = false;
 uint64_t ZSFlag=0;
 
 // Main constructor
-gem::readout::GEMDataParker::GEMDataParker(gem::hw::vfat::HwVFAT2& vfatDevice, std::string& outFileName, std::string& outputType) :
+gem::readout::GEMDataParker::GEMDataParker(gem::hw::glib::HwGLIB& glibDevice,
+					   std::string const& outFileName,
+					   std::string const& outputType) :
   gemLogger_(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("gem:readout:GEMDataParker")))
 {
   //gemLogger_   = log4cplus::Logger::getInstance("gem:readout:GEMDataParker");
-  vfatDevice_  = &vfatDevice;
+  glibDevice_  = &glibDevice;
   outFileName_ = outFileName;
   outputType_  = outputType;
   counter_ = 0;
 }
 
-  int gem::readout::GEMDataParker::dumpDataToDisk()
-  {
-    // Book GEM Data format
-    gem::readout::GEMData  gem;
-    gem::readout::GEBData  geb;
-    gem::readout::VFATData vfat;
-
-    // get GLIB data from one VFAT chip, as it's (update that part for MP7 when it'll be)
-    dumpGEMevent_ = false;
-    counter_ = gem::readout::GEMDataParker::getGLIBData(gem, geb, vfat);
-
-    // Write GEM Data to Disk, when GEM event is off
-    if( dumpGEMevent_ ){
-      event_++;
-      DEBUG(" dumpDataToDisk:: dumpGEMevent: event_ " << event_ 
-	    << " counter_ " << counter_
-	    << " counterVFATs " << counterVFATs_);
-      gem::readout::GEMDataParker::writeGEMevent(gem, geb, vfat);
-    }
-
-    return counter_;
+int gem::readout::GEMDataParker::dumpDataToDisk()
+{
+  // Book GEM Data format
+  gem::readout::GEMData  gem;
+  gem::readout::GEBData  geb;
+  gem::readout::VFATData vfat;
+  
+  // get GLIB data from one VFAT chip, as it's (update that part for MP7 when it'll be)
+  dumpGEMevent_ = false;
+  counter_ = gem::readout::GEMDataParker::getGLIBData(gem, geb, vfat);
+  
+  // Write GEM Data to Disk, when GEM event is off
+  if( dumpGEMevent_ ){
+    event_++;
+    DEBUG(" dumpDataToDisk:: dumpGEMevent: event_ " << event_ 
+	  << " counter_ " << counter_
+	  << " counterVFATs " << counterVFATs_);
+    gem::readout::GEMDataParker::writeGEMevent(gem, geb, vfat);
   }
+  
+  return counter_;
+}
 
 int gem::readout::GEMDataParker::getGLIBData(gem::readout::GEMData& gem, gem::readout::GEBData& geb, gem::readout::VFATData& vfat)
 {
@@ -67,18 +69,21 @@ int gem::readout::GEMDataParker::getGLIBData(gem::readout::GEMData& gem, gem::re
   // GLIB data buffer validation
   boost::format linkForm("LINK%d");
   uint32_t fifoDepth[3];
-  vfatDevice_->setDeviceBaseNode("GLIB");
-  fifoDepth[0] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
-  fifoDepth[1] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
-  fifoDepth[2] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
+  fifoDepth[0] = glibDevice_->getFIFOOccupancy(0x0);
+  fifoDepth[1] = glibDevice_->getFIFOOccupancy(0x1);
+  fifoDepth[2] = glibDevice_->getFIFOOccupancy(0x2);
 
-  if(fifoDepth[0])INFO(vfatDevice_->getDeviceBaseNode() << "." << boost::str(linkForm%(0))+".TRK_FIFO.DEPTH -- " <<
-       "bufferDepth[0] = " << std::hex << fifoDepth[0] << std::dec);
-  if(fifoDepth[1])INFO(vfatDevice_->getDeviceBaseNode() << "." << boost::str(linkForm%(1))+".TRK_FIFO.DEPTH -- " <<
-       "bufferDepth[1] = " << std::hex << fifoDepth[1] << std::dec);
-  if(fifoDepth[2])INFO(vfatDevice_->getDeviceBaseNode() << "." << boost::str(linkForm%(2))+".TRK_FIFO.DEPTH -- " <<
-       "bufferDepth[2] = " << std::hex << fifoDepth[2] << std::dec);
+  if(fifoDepth[0])
+    INFO(glibDevice_->getDeviceBaseNode() << "." << boost::str(linkForm%(0))+".TRK_FIFO.DEPTH -- " <<
+	 "bufferDepth[0] = " << std::hex << fifoDepth[0] << std::dec);
+  if(fifoDepth[1])
+    INFO(glibDevice_->getDeviceBaseNode() << "." << boost::str(linkForm%(1))+".TRK_FIFO.DEPTH -- " <<
+	 "bufferDepth[1] = " << std::hex << fifoDepth[1] << std::dec);
+  if(fifoDepth[2])
+    INFO(glibDevice_->getDeviceBaseNode() << "." << boost::str(linkForm%(2))+".TRK_FIFO.DEPTH -- " <<
+	 "bufferDepth[2] = " << std::hex << fifoDepth[2] << std::dec);
 
+  /** the FIFO depth is not reliable */
   int bufferDepth = 0;
   /*
   if ( fifoDepth[0] != fifoDepth[1] || fifoDepth[0] != fifoDepth[2] || fifoDepth[1] != fifoDepth[2] ) {
@@ -94,26 +99,39 @@ int gem::readout::GEMDataParker::getGLIBData(gem::readout::GEMData& gem, gem::re
   INFO("OHv " << OHv << " bufferDepth = " << std::hex << bufferDepth << std::dec);
 
   // For each event in GLIB data buffer
-  vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
-  while (vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"DATA_RDY")) {
-    
-    vfatDevice_->setDeviceBaseNode("GLIB");
-    fifoDepth[0] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
-    fifoDepth[1] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
-    fifoDepth[2] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
-    
-    vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
+  // should probably switch this while with the next if, to ensure that there is actually a value in the vector
+  while (bufferDepth) {
     std::vector<uint32_t> data;
-      for (int word = 0; word < 7; ++word) {
-	std::stringstream ss9;
-	ss9 << "DATA." << word;
-	uint32_t tmpword = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),ss9.str());
-	data.push_back(tmpword);
-      }
+
+    if (glibDevice_->hasTrackingData(0x1)) {
+
+      data = glibDevice_->getTrackingData(0x1);
+      //for (int word = 0; word < 7; ++word) {
+      //	std::stringstream ss9;
+      //	ss9 << "DATA." << word;
+      //	data.push_back(glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),ss9.str()));
+      //}
+    }
+
+//sergey//  glibDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
+//sergey//  while (glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),"DATA_RDY")) {
+//sergey//    
+//sergey//    glibDevice_->setDeviceBaseNode("GLIB");
+//sergey//    fifoDepth[0] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
+//sergey//    fifoDepth[1] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
+//sergey//    fifoDepth[2] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
+//sergey//    
+//sergey//    glibDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
+//sergey//    std::vector<uint32_t> data;
+//sergey//      for (int word = 0; word < 7; ++word) {
+//sergey//	std::stringstream ss9;
+//sergey//	ss9 << "DATA." << word;
+//sergey//	uint32_t tmpword = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),ss9.str());
+//sergey//	data.push_back(tmpword);
+//sergey//      }
     
     // read trigger data
-    vfatDevice_->setDeviceBaseNode("GLIB");
-    TrigReg = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"TRG_DATA.DATA");
+    TrigReg = glibDevice_->readTriggerFIFO(0x1);
     bxNumTr = TrigReg >> 6;
     SBit = TrigReg & 0x0000003F;
 
@@ -121,45 +139,51 @@ int gem::readout::GEMDataParker::getGLIBData(gem::readout::GEMData& gem, gem::re
     b1010 = ((data.at(5) & 0xF0000000)>>28);
     b1100 = ((data.at(5) & 0x0000F000)>>12);
     b1110 = ((data.at(4) & 0xF0000000)>>28);
+	
+    if (!(((b1010 == 0xa) && (b1100==0xc) && (b1110==0xe)))){
+      WARN("VFAT headers do not match expectation");
+      bufferDepth = glibDevice_->getFIFOOccupancy(0x1);
+      continue;
+    }
 
-    if ( !((b1010 == 0xa) && (b1100==0xc) && (b1110==0xe)) ){
-        WARN("VFAT headers do not match expectation");
-        vfatDevice_->setDeviceBaseNode("GLIB");
-
-        if(b1010 != 0x0A ){ cout << "in 1010 = "; show4bits(b1010); cout << endl;}
-        if(b1100 != 0x0C ){ cout << "in 1100 = "; show4bits(b1100); cout << endl;}
-        if(b1110 != 0x0E ){ cout << "in 1110 = "; show4bits(b1110); cout << endl;}
-
-        bufferDepth = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"LINK1.TRK_FIFO.DEPTH");
-        fifoDepth[0] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
-        fifoDepth[1] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
-        fifoDepth[2] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
-
-        if(fifoDepth[0]) INFO("LINK1 bufferDepth[0] (bad header) = " << std::hex << fifoDepth[0] << std::dec);
-        if(fifoDepth[1]) INFO("LINK1 bufferDepth[1] (bad header) = " << std::hex << fifoDepth[1] << std::dec);
-        if(fifoDepth[2]) INFO("LINK1 bufferDepth[2] (bad header) = " << std::hex << fifoDepth[2] << std::dec);
-
-        bufferDepth = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"LINK0.TRK_FIFO.DEPTH");
-        fifoDepth[0] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
-        fifoDepth[1] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
-        fifoDepth[2] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
-
-        if(fifoDepth[0]) INFO("LINK0 bufferDepth[0] (bad header) = " << std::hex << fifoDepth[0] << std::dec);
-        if(fifoDepth[1]) INFO("LINK0 bufferDepth[1] (bad header) = " << std::hex << fifoDepth[1] << std::dec);
-        if(fifoDepth[2]) INFO("LINK0 bufferDepth[2] (bad header) = " << std::hex << fifoDepth[2] << std::dec);
-
-        bufferDepth = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"LINK2.TRK_FIFO.DEPTH");
-        fifoDepth[0] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
-        fifoDepth[1] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
-        fifoDepth[2] = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
-
-        if(fifoDepth[0]) INFO("LINK2 bufferDepth[0] (bad header) = " << std::hex << fifoDepth[0] << std::dec);
-        if(fifoDepth[1]) INFO("LINK2 bufferDepth[1] (bad header) = " << std::hex << fifoDepth[1] << std::dec);
-        if(fifoDepth[2]) INFO("LINK2 bufferDepth[2] (bad header) = " << std::hex << fifoDepth[2] << std::dec);
-
-        vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
-        continue;
-      }
+//sergey//    if ( !((b1010 == 0xa) && (b1100==0xc) && (b1110==0xe)) ){
+//sergey//        WARN("VFAT headers do not match expectation");
+//sergey//        glibDevice_->setDeviceBaseNode("GLIB");
+//sergey//
+//sergey//        if(b1010 != 0x0A ){ cout << "in 1010 = "; show4bits(b1010); cout << endl;}
+//sergey//        if(b1100 != 0x0C ){ cout << "in 1100 = "; show4bits(b1100); cout << endl;}
+//sergey//        if(b1110 != 0x0E ){ cout << "in 1110 = "; show4bits(b1110); cout << endl;}
+//sergey//
+//sergey//        bufferDepth = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),"LINK1.TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[0] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[1] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[2] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
+//sergey//
+//sergey//        if(fifoDepth[0]) INFO("LINK1 bufferDepth[0] (bad header) = " << std::hex << fifoDepth[0] << std::dec);
+//sergey//        if(fifoDepth[1]) INFO("LINK1 bufferDepth[1] (bad header) = " << std::hex << fifoDepth[1] << std::dec);
+//sergey//        if(fifoDepth[2]) INFO("LINK1 bufferDepth[2] (bad header) = " << std::hex << fifoDepth[2] << std::dec);
+//sergey//
+//sergey//        bufferDepth = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),"LINK0.TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[0] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[1] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[2] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
+//sergey//
+//sergey//        if(fifoDepth[0]) INFO("LINK0 bufferDepth[0] (bad header) = " << std::hex << fifoDepth[0] << std::dec);
+//sergey//        if(fifoDepth[1]) INFO("LINK0 bufferDepth[1] (bad header) = " << std::hex << fifoDepth[1] << std::dec);
+//sergey//        if(fifoDepth[2]) INFO("LINK0 bufferDepth[2] (bad header) = " << std::hex << fifoDepth[2] << std::dec);
+//sergey//
+//sergey//        bufferDepth = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),"LINK2.TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[0] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(0))+".TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[1] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(1))+".TRK_FIFO.DEPTH");
+//sergey//        fifoDepth[2] = glibDevice_->readReg(glibDevice_->getDeviceBaseNode(),boost::str(linkForm%(2))+".TRK_FIFO.DEPTH");
+//sergey//
+//sergey//        if(fifoDepth[0]) INFO("LINK2 bufferDepth[0] (bad header) = " << std::hex << fifoDepth[0] << std::dec);
+//sergey//        if(fifoDepth[1]) INFO("LINK2 bufferDepth[1] (bad header) = " << std::hex << fifoDepth[1] << std::dec);
+//sergey//        if(fifoDepth[2]) INFO("LINK2 bufferDepth[2] (bad header) = " << std::hex << fifoDepth[2] << std::dec);
+//sergey//
+//sergey//        glibDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
+//sergey//        continue;
+//sergey//      }
 
     bxNum = data.at(6);
 
@@ -212,14 +236,20 @@ int gem::readout::GEMDataParker::getGLIBData(gem::readout::GEMData& gem, gem::re
     gem::readout::printVFATdataBits(counter_, vfat);
     */
 
+    bufferDepth = glibDevice_->getFIFOOccupancy(0x1);
+
+    /*
+     * dump VFAT data */
+    gem::readout::printVFATdataBits(counter_, vfat);
+      
     // GEM data filling
     gem::readout::GEMDataParker::fillGEMevent(gem, geb, vfat);
 
-    vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
+    //sergey//glibDevice_->setDeviceBaseNode("OptoHybrid.GEB.TRK_DATA.COL1");
 
-    }//closes check on DATA_RDY
+  }//closes check on DATA_RDY
   //}//closes while loop
-
+  
   return counter_;
 }
 
