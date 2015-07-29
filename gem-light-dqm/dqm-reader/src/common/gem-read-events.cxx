@@ -13,6 +13,7 @@
 #include <TH2.h>
 #include <TProfile.h>
 #include <TCanvas.h>
+#include <TGaxis.h>
 #include <TFrame.h>
 #include <TROOT.h>
 #include <TSystem.h>
@@ -153,6 +154,9 @@ TFile* thldread(Int_t get=0)
   gROOT->SetStyle("Plain");
   gStyle->GetAttDate()->SetTextColor(1);
   gStyle->SetOptStat(111111);
+
+  TGaxis *axis1 = new TGaxis(-4.5,-0.2,5.5,-0.2,-6,8,510,"");
+  axis1->SetMaxDigits(3);
 
   c1->SetFillColor(42);
   c1->GetFrame()->SetFillColor(21);
