@@ -242,7 +242,7 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 2;
+  const Int_t ieventPrint = 1;
   const Int_t ieventMax   = 90000;
   const Int_t kUPDATE     = 25;
   bool  OKpri = false;
@@ -279,7 +279,7 @@ TFile* thldread(Int_t get=0)
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
   
-      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
+      //      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
 
         // CRC check
         dataVFAT[11] = vfat.BC;
@@ -332,11 +332,13 @@ TFile* thldread(Int_t get=0)
           gem::readout::printVFATdataBits(ievent, vfat);
           //gem::readout::printVFATdata(ievent, vfat);
         }
-    
+
+     /*
       }// if 1010,1100,1110
       else {
         ifake++;
       }// if 1010,1100,1110
+      */
 
     }//end ivfat
 
