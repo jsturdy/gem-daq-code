@@ -168,15 +168,15 @@ int main(int argc, char** argv)
     }
 
     setTitles(hiVFAT, "Number VFAT blocks per Event", "Number of Events");   
-    setTitles(hiChip, "ChipID value, max 0xfff", "Number of Events");
-    setTitles(hi1010, "1010 marker, max 0xf", "Number of Events");   
-    setTitles(hi1100, "1100 marker, max 0xf", "Number of Events");   
-    setTitles(hi1110, "1110 marker, max 0xf", "Number of Events");   
-    setTitles(hiFlag, "Flag marker value, max 0xf", "Number of Events");   
-    setTitles(hiCRC, "CRC value, max 0xffff", "Number of Events");
-    setTitles(hiDiffCRC, "CRC difference", "Number of Events");
+    setTitles(hiChip, "ChipID value, max 0xfff", "Number of VFAT blocks");
+    setTitles(hi1010, "1010 marker, max 0xf", "Number of VFAT blocks");   
+    setTitles(hi1100, "1100 marker, max 0xf", "Number of VFAT blocks");   
+    setTitles(hi1110, "1110 marker, max 0xf", "Number of VFAT blocks");   
+    setTitles(hiFlag, "Flag marker value, max 0xf", "Number of VFAT blocks");   
+    setTitles(hiCRC, "CRC value, max 0xffff", "Number of VFAT blocks");
+    setTitles(hiDiffCRC, "CRC difference", "Number of VFAT blocks");
     setTitles(hiFake, "Fake events", "Number of Events");
-    setTitles(hiCh128, "Strips, max 128", "Number of Events"); 
+    setTitles(hiCh128, "Strips, max 128", "Number of VFAT blocks"); 
     setTitles(hi2DCRC, "CRC VFAT", "CRC calc");  
 
     ofile->Write();

@@ -199,9 +199,6 @@ int main(int argc, char** argv)
             uint64_t lsData = vfat.lsData;
             uint64_t msData = vfat.msData;
 
-            std::cout << "ls data read " << std::hex << vfat.lsData << std::endl;
-            std::cout << "ls data write " << std::hex << lsData << std::endl;
-
             // CRC check
             dataVFAT[11] = vfat.BC;
             dataVFAT[10] = vfat.EC;
@@ -222,7 +219,6 @@ int main(int argc, char** argv)
             }
     
             VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
-            std::cout << "ls data read back " << std::hex << VFATdata_->lsData() << std::endl;
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 

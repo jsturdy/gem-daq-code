@@ -19,6 +19,7 @@
 #include "TH2.h"
 #include "TF1.h"
 #include "TAxis.h"
+#include "TGaxis.h"
 #include "TMath.h"
 #include "TROOT.h"
 #include "TStyle.h"
@@ -47,7 +48,7 @@ TStyle * getStyle(TString name)
         theStyle->SetPadColor(0);
         theStyle->SetFrameFillColor(0);
         theStyle->SetStatColor(0);
-        theStyle->SetOptStat(0);
+        theStyle->SetOptStat(1111);
         theStyle->SetTitleFillColor(0);
         theStyle->SetCanvasBorderMode(0);
         theStyle->SetPadBorderMode(0);
@@ -85,8 +86,8 @@ TStyle * getStyle(TString name)
         // Margins:
         theStyle->SetPadTopMargin(0.05);
         theStyle->SetPadBottomMargin(0.15);//0.13);
-        theStyle->SetPadLeftMargin(0.15);//0.16);
-        theStyle->SetPadRightMargin(0.05);//0.02);
+        theStyle->SetPadLeftMargin(0.2);//0.16);
+        theStyle->SetPadRightMargin(0.15);//0.02);
         
         // For the Global title:
         theStyle->SetOptTitle(0);
@@ -101,7 +102,7 @@ TStyle * getStyle(TString name)
         theStyle->SetTitleFont(42, "XYZ");
         theStyle->SetTitleSize(0.05, "XYZ");
         theStyle->SetTitleXOffset(1.25);//0.9);
-        theStyle->SetTitleYOffset(1.5); // => 1.15 if exponents
+        theStyle->SetTitleYOffset(1.65); // => 1.15 if exponents
         
         // For the axis labels:
         theStyle->SetLabelColor(1, "XYZ");
@@ -113,10 +114,10 @@ TStyle * getStyle(TString name)
         theStyle->SetAxisColor(1, "XYZ");
         theStyle->SetStripDecimals(kTRUE);
         theStyle->SetTickLength(0.03, "XYZ");
-        theStyle->SetNdivisions(510, "XYZ");
+        theStyle->SetNdivisions(10, "XYZ");
         theStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
         theStyle->SetPadTickY(1);
-        
+        TGaxis::SetMaxDigits(3);
     }else if ( name == "myStyle" ) {
         theStyle = new TStyle("myStyle", "myStyle");
         //    theStyle->SetOptStat(0);
