@@ -89,16 +89,10 @@ using namespace std;
     }
 
     // unsigned short int 
-    uint16_t checkCRC(bool OKprint){
+    uint16_t checkCRC(){
       uint16_t crc_fin = 0xffff;
       for (int i = 11; i >= 1; i--){
         crc_fin = crc_calc(crc_fin, dataVFAT[i]);
-	/*
-	if(OKprint){
-          cout << " dataVFAT[" << std::setfill('0') << std::setw(2) << i << "] " << hex << std::setfill('0') << std::setw(4) << dataVFAT[i]
-               << " crc_temp " << std::setfill('0') << std::setw(4) << crc_fin << dec << endl;
-        }
-	*/
       }
       return(crc_fin);
     }
@@ -181,6 +175,13 @@ TFile* thldread(Int_t get=0)
   hiChip->GetXaxis()->CenterTitle();
   hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
+ 
+  TH1C* hiBX = new TH1C("BX",     "BX from OH",      100, 0x0, 0xffff );
+  hiBX->SetFillColor(48);
+  hiBX->GetXaxis()->SetTitle("BX value, max 0xffff");
+  hiBX->GetXaxis()->CenterTitle();
+  hiBX->GetYaxis()->SetTitle("Number of VFAT Blocks");
+  hiBX->GetYaxis()->CenterTitle();
  
   TH1C* hi1010 = new TH1C("1010", "Control Bits 1010", 16, 0x0, 0xf );
   hi1010->SetFillColor(48);
@@ -282,7 +283,8 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
-  
+      uint16_t  BX     = vfat.BXfrOH;  
+
       //      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
 
         // CRC check
@@ -298,7 +300,7 @@ TFile* thldread(Int_t get=0)
         dataVFAT[2]  = (0x00000000ffff0000 & vfat.lsData) >> 16;
         dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
 
-        uint16_t checkedCRC = checkCRC(OKpri);
+        uint16_t checkedCRC = checkCRC();
 	/*
         if(OKpri){
            cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
@@ -315,6 +317,7 @@ TFile* thldread(Int_t get=0)
         hiFlag->Fill(Flag);
         hi1110->Fill(b1110);
         hiChip->Fill(ChipID);
+        hiBX->Fill(BX);
         //hiCRC->Fill(CRC);
         hiVsCRC->Fill(CRC,checkedCRC);
     
@@ -359,6 +362,7 @@ TFile* thldread(Int_t get=0)
     if (ievent%kUPDATE == 0 && ievent != 0) {
       c1->cd(1)->SetLogy(); hiVFAT->Draw();
       c1->cd(2)->SetLogy(); hiChip->Draw();
+      c1->cd(3)->SetLogy(); hiBX->Draw();
 
       c1->cd(4)->SetLogy(); hi1010->Draw();
       c1->cd(5)->SetLogy(); hi1100->Draw();
