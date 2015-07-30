@@ -25,6 +25,9 @@
 #else
     #include "Event.h"
 #endif
+
+#include "gem/readout/GEMDataAMCformat.h"
+
 /**
 * GEM Tree Composer (gtc) application provides translation of the GEM output HEX file to ROOT-based TTree with GEM Events
 */
@@ -50,11 +53,10 @@
   Now you will have executables:
   - GEM Tree Writer bin/gtc
   - Example of GEMtree reader bin/reader
-  In order to run the writer application you have to add the new library path to your system:
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib
   Then run the executable providing input and output filenames:
-  ./bin/gtc inputHEXdata.dat outputROOTtree.root
-  You can download sample HEX data file:
+  ./bin/gtc GEMDQMRawData.dat outputROOTtree.root
+
+  You can download sample HEX-ASCII data file:
   wget https://baranov.web.cern.ch/baranov/xdaq/DataParker/GEM_DAQ_Tue_Jul_14_10-13-10_2015.dat
 
   After producing the outputROOTtree.root you can run the tree reader example, which should serve as basis for future analyzers:
@@ -70,6 +72,43 @@
 
 using namespace std;
 
+ /*
+  *  CRC ******************************************************************
+  */
+      uint16_t dataVFAT[11];
+
+      uint16_t crc_calc(uint16_t crc_in, uint16_t dato){
+      uint16_t v = 0x0001;
+      uint16_t mask = 0x0001;    
+      bool d=0;
+      uint16_t crc_temp = crc_in;
+      unsigned char datalen = 16;
+       
+      for (int i=0; i<datalen; i++){
+        if (dato & v) d = 1;
+        else d = 0;
+        if ((crc_temp & mask)^d) crc_temp = crc_temp>>1 ^ 0x8408;
+        else crc_temp = crc_temp>>1;
+        v<<=1;
+      }
+      return(crc_temp);
+    }
+
+    // unsigned short int 
+    uint16_t checkCRC(bool OKprint){
+      uint16_t crc_fin = 0xffff;
+      for (int i = 11; i >= 1; i--){
+        crc_fin = crc_calc(crc_fin, dataVFAT[i]);
+	/*
+	if(OKprint){
+          cout << " dataVFAT[" << std::setfill('0') << std::setw(2) << i << "] " << hex << std::setfill('0') << std::setw(4) << dataVFAT[i]
+               << " crc_temp " << std::setfill('0') << std::setw(4) << crc_fin << dec << endl;
+        }
+	*/
+      }
+      return(crc_fin);
+    }
+
 //! GEM VFAT2 Data class.
 /*!
   \brief GEMOnline
@@ -77,173 +116,19 @@ using namespace std;
   \author Sergey.Baranov@cern.ch
 */
 
-class GEMOnline {
-    public:
-
-        //! VFAT2 Channel data.
-        /*!
-          contents VFAT2 128 channels data in two 64 bits words.
-         */
-    
-        //! GEM Event Data Format (one chip data)
-        /*! 
-          Uncoding of VFAT2 data for one chip, data format.
-          \image html vfat2.data.format.png
-          \author Sergey.Baranov@cern.ch
-         */
-    
-        struct VFATData {
-            uint16_t BC;      /*!<Bunch Crossing number "BC" 16 bits, : 1010:4 (control bits), BC:12 */
-            uint16_t EC;      /*!<Event Counter "EC" 16 bits: 1100:4(control bits) , EC:8, Flag:4 */
-            uint32_t bxExp;   
-            uint16_t bxNum;   /*!<Event Number & SBit, 16 bits : bxNum:6, SBit:6 */
-            uint16_t ChipID;  /*!<ChipID 16 bits, 1110:4 (control bits), ChipID:12 */
-            uint64_t lsData;  /*!<lsData value, bits from 1to64. */ 
-            uint64_t msData;  /*!<msData value, bits from 65to128. */
-            uint16_t crc;     /*!<Checksum number, CRC:16 */
-        };    
-    
-        struct GEBData {
-            uint64_t header;      // ZSFlag:24 ChamID:12 
-            std::vector<VFATData> vfats;
-            uint64_t trailer;     // OHcrc: 16 OHwCount:16  ChamStatus:16
-        };
-
-        struct GEMData {
-            uint64_t header1;      // AmcNo:4      0000:4     LV1ID:24   BXID:12     DataLgth:20 
-            uint64_t header2;      // User:32      OrN:16     BoardID:16
-            uint64_t header3;      // DAVList:24   BufStat:24 DAVCount:5 FormatVer:3 MP7BordStat:8 
-            std::vector<GEBData> gebs;
-            uint64_t trailer2;     // EventStat:32 GEBerrFlag:24  
-            uint64_t trailer1;     // crc:32       LV1IDT:8   0000:4     DataLgth:20 
-        };
-
-        //! Print Event, "hex" format.
-        /*! 
-          Print VFAT2 event.
-         */
-    
-        //
-        // Useful printouts 
-        //
-        void show4bits(uint8_t x) 
-        {
-            int i;
-            const unsigned long unit = 1;
-            for(i=(sizeof(uint8_t)*4)-1; i>=0; i--)
-              (x & ((unit)<<i))?putchar('1'):putchar('0');
-     	    //printf("\n");
-        }
-
-        bool printVFATdata(int event, const VFATData& vfat)
-        {
-            if( event<0) return(false);
-            cout << "Received tracking data word:" << endl;
-            cout << "BC      :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.BC     << dec << endl;
-  	        cout << "EC      :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.EC     << dec << endl;
-            cout << "ChipID  :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.ChipID << dec << endl;
-            cout << "<127:64>:: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.msData << dec << endl;
-            cout << "<63:0>  :: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.lsData << dec << endl;
-            cout << "crc     :: 0x" << std::setfill('0') << std::setw(4) << hex << vfat.crc    << dec <<"\n"<< endl;
-            return true;
-        };
-
-        bool printVFATdataBits(int event, int ivfat, const VFATData& vfat)
-        {
-            if( event<0) return(false);
-	        cout << "\nReceived VFAT data word: event " << event << " ivfat  " << ivfat << endl;
-  
-            uint8_t   b1010 = (0xf000 & vfat.BC) >> 12;
-            show4bits(b1010); cout << " BC     0x" << hex << (0x0fff & vfat.BC) << dec << endl;
-            
-            uint8_t   b1100 = (0xf000 & vfat.EC) >> 12;
-            uint16_t   EC   = (0x0ff0 & vfat.EC) >> 4;
-            uint8_t   Flag  = (0x000f & vfat.EC);
-            show4bits(b1100); cout << " EC     0x" << hex << EC << dec << endl; 
-            show4bits(Flag);  cout << " Flag  " << endl;
-            
-            uint8_t   b1110 = (0xf000 & vfat.ChipID) >> 12;
-            uint16_t ChipID = (0x0fff & vfat.ChipID);
-            show4bits(b1110); cout << " ChipID 0x" << hex << ChipID << dec << " " << endl;
-            cout << " <127:64>:: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.msData << dec << endl;
-            cout << " <63:0>  :: 0x" << std::setfill('0') << std::setw(8) << hex << vfat.lsData << dec << endl;
-            cout << "     crc    0x" << hex << vfat.crc << dec << endl;
-            return true;
-        };
-  
-        //! Print ChipID.
-        /*! 
-            Print ChipID "hex" number and control bits "1110"
-         */
-    
-        bool PrintChipID(int event, const VFATData& vfat)
-        {
-            if( event<0 ) return(false);
-            cout << "\nevent " << event << endl;
-            uint8_t bitsE = ((vfat.ChipID&0xF000)>>12);
-            showbits(bitsE);
-            cout << hex << "1110 0x0" << ((vfat.ChipID&0xF000)>>12) << " ChipID 0x" << (vfat.ChipID&0x0FFF) << dec << endl;
-        };
-    
-        //! showbits function.
-        /*!
-         show bits function, needs for debugging
-         */
-    
-        void showbits(uint8_t x)
-        { 
-            int i; 
-            for(i=(sizeof(uint8_t)*8)-1; i>=0; i--)
-                (x&(1<<i))?putchar('1'):putchar('0');
-            printf("\n");
-        };
-
-        bool readGEBheader(ifstream& inpf, GEBData& geb)
-        {
-	        inpf >> hex >> geb.header;
-            return(true);
-        };	  
-
-        bool printGEBheader(const GEBData& geb)
-        {
-	        cout << hex << geb.header << " ChamID " << ((0x000000fff0000000 & geb.header) >> 28) 
-             << dec << " sumVFAT " << (0x000000000fffffff & geb.header) << endl;
-            return(true);
-        };	  
-
-        bool readGEBtrailer(ifstream& inpf, GEBData& geb)
-        {
- 	        inpf >> hex >> geb.trailer;
-            return(true);
-        };	  
-
-        //! Read 1-128 channels data
-        /*!
-          reading two 64 bits words (lsData & msData) with data from all channels for one VFAT2 chip 
-         */
-    
-        //! Read GEM event data
-        /*!
-          reading GEM VFAT2 data (BC,EC,bxNum,ChipID,(lsData & msData), crc.
-         */
-    
-        bool readEvent(ifstream& inpf, int event, VFATData& vfat)
-        {
-            if(event<0) return(false);
-            inpf >> hex >> vfat.BC;
-            inpf >> hex >> vfat.EC;
-	        inpf >> hex >> vfat.ChipID;
-            inpf >> hex >> vfat.lsData;
-            inpf >> hex >> vfat.msData;
-            inpf >> hex >> vfat.crc;
-            return(true);
-        };	  
-};
-
 //! root function.
 /*!
 https://root.cern.ch/drupal/content/documentation
 */
+
+// Ok printing
+bool OKprint(int ievent, int iMaxPrint ){
+  if( ievent <= iMaxPrint ){
+    return (true);
+  } else { 
+    return (false);
+  }
+}
 
 TROOT root("",""); // static TROOT object
 
@@ -274,24 +159,25 @@ int main(int argc, char** argv)
     Event *ev = new Event(); 
     GEMtree.Branch("GEMEvents", &ev);
 
-    GEMOnline         Online;   
-    GEMOnline::VFATData vfat;
-    GEMOnline::GEBData   geb;
+    gem::readout::GEBData   geb;
+    gem::readout::VFATData vfat;
 
     const Int_t ieventPrint = 3;
     const Int_t ieventMax   = 9000000;
     const Int_t kUPDATE     = 10;
+    bool OKpri = false;
 
     for(int ievent=0; ievent<ieventMax; ievent++)
     {
+        OKpri = OKprint(ievent,ieventPrint);
         if(inpf.eof()) break;
         if(!inpf.good()) break;
 
         cout << "Processing event " << ievent << endl;
 
         // read Event Chamber Header 
-        Online.readGEBheader(inpf, geb);
-        if(ievent <= ieventPrint) Online.printGEBheader(geb);
+        gem::readout::readGEBheader(inpf, geb);
+        if(OKpri) gem::readout::printGEBheader(ievent,geb);
 
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
@@ -299,9 +185,8 @@ int main(int argc, char** argv)
 
         GEBdata *GEBdata_ = new GEBdata(ZSFlag, ChamID, sumVFAT);
 
-        for(int ivfat=0; ivfat<sumVFAT; ivfat++)
-        {
-            Online.readEvent(inpf, ievent, vfat);
+        for(int ivfat=0; ivfat<sumVFAT; ivfat++){
+            gem::readout::readVFATdata(inpf, ievent, vfat);
 
             uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
             uint16_t  BC     = (0x0fff & vfat.BC);
@@ -314,18 +199,36 @@ int main(int argc, char** argv)
             uint64_t lsData = vfat.lsData;
             uint64_t msData = vfat.lsData;
 
+            // CRC check
+            dataVFAT[11] = vfat.BC;
+            dataVFAT[10] = vfat.EC;
+            dataVFAT[9]  = vfat.ChipID;
+            dataVFAT[8]  = (0xffff000000000000 & vfat.msData) >> 48;
+            dataVFAT[7]  = (0x0000ffff00000000 & vfat.msData) >> 32;
+            dataVFAT[6]  = (0x00000000ffff0000 & vfat.msData) >> 16;
+            dataVFAT[5]  = (0x000000000000ffff & vfat.msData);
+            dataVFAT[4]  = (0xffff000000000000 & vfat.lsData) >> 48;
+            dataVFAT[3]  = (0x0000ffff00000000 & vfat.lsData) >> 32;
+            dataVFAT[2]  = (0x00000000ffff0000 & vfat.lsData) >> 16;
+            dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
+    
+            uint16_t checkedCRC = checkCRC(OKpri);
+            if(OKpri){
+               cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
+                    << "     crc " << std::setfill('0') << std::setw(4) << checkedCRC << dec << "\n" << endl;
+            }
+    
             VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 
-            if(ievent <= ieventPrint)
-            {
-	            Online.printVFATdataBits(ievent, ivfat, vfat);
+            if(OKpri){
+              gem::readout::printVFATdataBits(ievent, vfat);
             }
         }
 
         // read Event Chamber Header 
-        Online.readGEBtrailer(inpf, geb);
+        gem::readout::readGEBtrailer(inpf, geb);
 
         uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
         uint16_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
@@ -339,7 +242,7 @@ int main(int argc, char** argv)
         GEMtree.Fill();
         ev->Clear();
 
-        if(ievent <= ieventPrint)
+        if(OKpri)
         {
             cout << "GEM Chamber Trailer: OHcrc " << hex << OHcrc 
             << " OHwCount " << OHwCount << " ChamStatus " << ChamStatus << dec 
