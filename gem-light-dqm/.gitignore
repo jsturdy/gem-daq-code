@@ -5,9 +5,9 @@ myexe*
 *.dat
 EventDict.*
 *.root
-bin/
-lib/
+bin
+lib
 src/obj/
 src/dic/
 work
-
+data
