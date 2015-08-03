@@ -13,6 +13,7 @@
 #include <TH2.h>
 #include <TProfile.h>
 #include <TCanvas.h>
+#include <TGaxis.h>
 #include <TFrame.h>
 #include <TROOT.h>
 #include <TSystem.h>
@@ -88,16 +89,10 @@ using namespace std;
     }
 
     // unsigned short int 
-    uint16_t checkCRC(bool OKprint){
+    uint16_t checkCRC(){
       uint16_t crc_fin = 0xffff;
       for (int i = 11; i >= 1; i--){
         crc_fin = crc_calc(crc_fin, dataVFAT[i]);
-	/*
-	if(OKprint){
-          cout << " dataVFAT[" << std::setfill('0') << std::setw(2) << i << "] " << hex << std::setfill('0') << std::setw(4) << dataVFAT[i]
-               << " crc_temp " << std::setfill('0') << std::setw(4) << crc_fin << dec << endl;
-        }
-	*/
       }
       return(crc_fin);
     }
@@ -149,10 +144,13 @@ TFile* thldread(Int_t get=0)
   const TString filename = "DQMlight.root";
 
   // Create a new canvas.
-  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,990,990);
+  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,950,950);
   gROOT->SetStyle("Plain");
   gStyle->GetAttDate()->SetTextColor(1);
   gStyle->SetOptStat(111111);
+
+  TGaxis *axis1 = new TGaxis(-4.5,-0.2,5.5,-0.2,-6,8,510,"");
+  axis1->SetMaxDigits(3);
 
   c1->SetFillColor(42);
   c1->GetFrame()->SetFillColor(21);
@@ -166,51 +164,66 @@ TFile* thldread(Int_t get=0)
   TH1F* hiVFAT = new TH1F("VFAT", "Number VFAT blocks per event", 100,  0., 100. );
   hiVFAT->SetFillColor(48);
   //hiVFAT->SetStats();
-  hiVFAT->GetXaxis()->SetTitle("Number VFAT blocks per Event");
+  hiVFAT->GetXaxis()->SetTitle("Number of VFAT Blocks");
   hiVFAT->GetXaxis()->CenterTitle();
-  hiVFAT->GetYaxis()->SetTitle("Number of Events");
+  hiVFAT->GetYaxis()->SetTitle("Number of Event");
   hiVFAT->GetYaxis()->CenterTitle();
  
   TH1C* hiChip = new TH1C("ChipID", "ChipID",         4096, 0x0, 0xfff );
   hiChip->SetFillColor(48);
   hiChip->GetXaxis()->SetTitle("ChipID value, max 0xfff");
   hiChip->GetXaxis()->CenterTitle();
-  hiChip->GetYaxis()->SetTitle("Number of Events");
+  hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
+ 
+  TH1C* hiBX = new TH1C("BX",     "BX from OH",      100, 0x0, 0xffff );
+  hiBX->SetFillColor(48);
+  hiBX->GetXaxis()->SetTitle("BX value, max 0xffff");
+  hiBX->GetXaxis()->CenterTitle();
+  hiBX->GetYaxis()->SetTitle("Number of VFAT Blocks");
+  hiBX->GetYaxis()->CenterTitle();
  
   TH1C* hi1010 = new TH1C("1010", "Control Bits 1010", 16, 0x0, 0xf );
   hi1010->SetFillColor(48);
   hi1010->GetXaxis()->SetTitle("1010 marker, max 0xf");
   hi1010->GetXaxis()->CenterTitle();
-  hi1010->GetYaxis()->SetTitle("Number of Events");
+  hi1010->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1010->GetYaxis()->CenterTitle();
 
   TH1C* hi1100 = new TH1C("1100", "Control Bits 1100", 16, 0x0, 0xf );
   hi1100->SetFillColor(48);
   hi1100->GetXaxis()->SetTitle("1100 marker value, max 0xf");
   hi1100->GetXaxis()->CenterTitle();
-  hi1100->GetYaxis()->SetTitle("Number of Events");
+  hi1100->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1100->GetYaxis()->CenterTitle();
 
   TH1C* hi1110 = new TH1C("1110", "Control Bits 1110", 16, 0x0, 0xf );
   hi1110->SetFillColor(48);
   hi1110->GetXaxis()->SetTitle("1110 marker value, max 0xf");
   hi1110->GetXaxis()->CenterTitle();
-  hi1110->GetYaxis()->SetTitle("Number of Events");
+  hi1110->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1110->GetYaxis()->CenterTitle();
 
   TH1C* hiFlag = new TH1C("Flag"  , "Flag",            16, 0x0, 0xf );
   hiFlag->SetFillColor(48);
   hiFlag->GetXaxis()->SetTitle("Flag marker value, max 0xf");
   hiFlag->GetXaxis()->CenterTitle();
-  hiFlag->GetYaxis()->SetTitle("Number of Events");
+  hiFlag->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiFlag->GetYaxis()->CenterTitle();
 
+  /*
   TH1C* hiCRC = new TH1C("CRC",     "CRC",             100, 0x0, 0xffff );
   hiCRC->SetFillColor(48);
+  hiCRC->GetXaxis()->SetTitle("CRC value, max 0xffff");
+  hiCRC->GetXaxis()->CenterTitle();
+  hiCRC->GetYaxis()->SetTitle("Number of Events");
+  hiCRC->GetYaxis()->CenterTitle();
+  */
 
-  TH1C* hiDiffCRC = new TH1C("DiffCRC", "CRC Diff",    100, 0xffff, 0xffff );
-  hiDiffCRC->SetFillColor(48);
+  TH2C* hiVsCRC = new TH2C("CRC", "CRC vs calCRC",     100, 0xffff, 0xffff, 100, 0xffff, 0xffff);
+  hiVsCRC->SetFillColor(48);
+  hiVsCRC->GetXaxis()->SetTitle("CRC vs CRC calc, max 0xffff");
+  hiVsCRC->GetXaxis()->CenterTitle();
 
   TH1C* hiFake = new TH1C("iFake", "Fake Events",      100, 0., 100. );
   hiFake->SetFillColor(48);
@@ -220,7 +233,7 @@ TFile* thldread(Int_t get=0)
   hiCh128->SetFillColor(48);
   hiCh128->GetXaxis()->SetTitle("Strips, max 128");
   hiCh128->GetXaxis()->CenterTitle();
-  hiCh128->GetYaxis()->SetTitle("Number of Events");
+  hiCh128->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiCh128->GetYaxis()->CenterTitle();
 
   stringstream histName, histTitle;
@@ -234,7 +247,7 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 2;
+  const Int_t ieventPrint = 1;
   const Int_t ieventMax   = 90000;
   const Int_t kUPDATE     = 25;
   bool  OKpri = false;
@@ -270,8 +283,9 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
-  
-      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
+      uint16_t  BX     = vfat.BXfrOH;  
+
+      //      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
 
         // CRC check
         dataVFAT[11] = vfat.BC;
@@ -286,7 +300,7 @@ TFile* thldread(Int_t get=0)
         dataVFAT[2]  = (0x00000000ffff0000 & vfat.lsData) >> 16;
         dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
 
-        uint16_t checkedCRC = checkCRC(OKpri);
+        uint16_t checkedCRC = checkCRC();
 	/*
         if(OKpri){
            cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
@@ -303,8 +317,9 @@ TFile* thldread(Int_t get=0)
         hiFlag->Fill(Flag);
         hi1110->Fill(b1110);
         hiChip->Fill(ChipID);
-        hiCRC->Fill(CRC);
-        hiDiffCRC->Fill(CRC-checkedCRC);
+        hiBX->Fill(BX);
+        //hiCRC->Fill(CRC);
+        hiVsCRC->Fill(CRC,checkedCRC);
     
         //I think it would be nice to time this...
         uint8_t chan0xf = 0;
@@ -324,11 +339,13 @@ TFile* thldread(Int_t get=0)
           gem::readout::printVFATdataBits(ievent, vfat);
           //gem::readout::printVFATdata(ievent, vfat);
         }
-    
+
+     /*
       }// if 1010,1100,1110
       else {
         ifake++;
       }// if 1010,1100,1110
+      */
 
     }//end ivfat
 
@@ -345,15 +362,15 @@ TFile* thldread(Int_t get=0)
     if (ievent%kUPDATE == 0 && ievent != 0) {
       c1->cd(1)->SetLogy(); hiVFAT->Draw();
       c1->cd(2)->SetLogy(); hiChip->Draw();
+      c1->cd(3)->SetLogy(); hiBX->Draw();
 
       c1->cd(4)->SetLogy(); hi1010->Draw();
       c1->cd(5)->SetLogy(); hi1100->Draw();
       c1->cd(6)->SetLogy(); hi1110->Draw();
 
       c1->cd(7)->SetLogy(); hiFlag->Draw();
-      //c1->cd(7)->SetLogy(); hiCRC->Draw();
-      c1->cd(8)->SetLogy(); hiCh128->Draw();
-      c1->cd(9)->SetLogy(); hiDiffCRC->Draw();
+      c1->cd(8); hiCh128->Draw();
+      c1->cd(9); hiVsCRC->Draw();
       c1->Update();
       cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
