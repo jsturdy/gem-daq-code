@@ -1,0 +1,13 @@
+*.swp
+*.o
+*.so
+myexe*
+*.dat
+EventDict.*
+*.root
+bin/
+lib/
+src/obj/
+src/dic/
+work
+

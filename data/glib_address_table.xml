@@ -6,7 +6,6 @@
 	  module="file://${BUILD_HOME}/data/glib_system_registers.xml">
     </node> <!--end system registers -->
     
-    
     <node id="SRAM1"  address="0x02000000"  mask="0xffffffff"  permission="rw"
 	  description="SRAM1 memory space "/>
     <node id="SRAM2"  address="0x04000000"  mask="0xffffffff"  permission="rw"
