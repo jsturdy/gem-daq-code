@@ -28,6 +28,8 @@
 #include "TObject.h"
 #include "TH1.h"
 #include "TH1F.h"
+#include <TFile.h>
+#include "TPaveStats.h"
 
 #include <iostream>
 
@@ -319,6 +321,7 @@ void setTitles(TH1 *h, TString xtitle, TString ytitle, TString ztitle)
 // Type = "png", "eps", etc.
 void printHistograms(TString type, TString prefix="")
 {
+    
     TIter next(gDirectory->GetListOfKeys());
     TKey *key;
     while ((key = (TKey*)next())) 
@@ -335,4 +338,109 @@ void printHistograms(TString type, TString prefix="")
     }
 }
 
+//Print single layered histogram into separate files located in prefix
+//ORIGINAL-OUTDATED, USE OTHER METHOD
+void layerHistogram(TH1 *h1, TH1 *h2, TString prefix="")
+{
+    TCanvas *c = newCanvas();
+ 
+    //Coloring and Styling
+    h1->SetMarkerColor(kBlue);
+    h1->SetMarkerStyle(7);
+    h1->SetFillStyle(3005);
+    h1->SetFillColor(kBlue);
+    h1->SetLineColor(kBlue);
+
+    h2->SetMarkerColor(kRed);
+    h2->SetMarkerStyle(7);
+    h2->SetFillStyle(3004);
+    h2->SetFillColor(kRed);
+    h2->SetLineColor(kRed);
+
+    //Sizing
+    double_t max1 = h1->GetBinContent(h1->GetMaximumBin());
+    double_t min1 = h1->GetBinContent(h1->GetMinimumBin());
+    double_t max2 = h2->GetBinContent(h2->GetMaximumBin());
+    double_t min2 = h2->GetBinContent(h2->GetMinimumBin());
+
+    cout << "max1: " << max1 << endl;
+    cout << "min1: " << min1 << endl;
+    cout << "max2: " << max1 << endl;
+    cout << "min2: " << min1 << endl;
+    
+    if (max2 > max1)
+	h1->SetMaximum(max2);
+    if (min2 < min1)
+	h1->SetMinimum(min2);
+
+    h1->Draw();
+    h2->Draw("same");
+
+    TString name =  h1->GetTitle();
+    if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
+    c->Print(prefix+name+".pdf","pdf");
+    c->Print(prefix+name+".root","root");
+}
+
+
+
+//Draw layered histogram of h1 and h2 onto specified canvas and pad number
+void layerHistogram(TH1 *h1, TH1 *h2, TCanvas *c, int pad=1)
+{
+    c->cd(pad);
+
+    //Coloring and Styling
+    h1->SetMarkerColor(kBlue);
+    h1->SetMarkerStyle(7);
+    h1->SetFillStyle(3005);
+    h1->SetFillColor(kBlue);
+    h1->SetLineColor(kBlue);
+
+    h2->SetMarkerColor(kRed);
+    h2->SetMarkerStyle(7);
+    h2->SetFillStyle(3004);
+    h2->SetFillColor(kRed);
+    h2->SetLineColor(kRed);
+
+    //Sizing
+    double_t max1 = h1->GetBinContent(h1->GetMaximumBin());
+    double_t min1 = h1->GetBinContent(h1->GetMinimumBin());
+    double_t max2 = h2->GetBinContent(h2->GetMaximumBin());
+    double_t min2 = h2->GetBinContent(h2->GetMinimumBin());
+
+    //cout << "max1: " << max1 << endl;
+    //cout << "min1: " << min1 << endl;
+    //cout << "max2: " << max2 << endl;
+    //cout << "min2: " << min2 << endl;
+    
+    if (max2 > max1)
+    {
+	//cout << "MAXIMUM SET TO "<<max2<<endl;
+	h1->SetMaximum(max2);
+    }
+    if (min2 < min1)
+    {
+	//cout << "MINIMUM SET TO "<<min2<<endl;
+	h1->SetMinimum(min2);
+    }
+
+    h1->Draw();
+    h2->Draw("SAMES");
+
+    //Show statistics box
+    c->Update();
+
+    //BROKEN - need to include more headers?
+    TPaveStats *st = (TPaveStats*)h1->FindObject("stats");
+    //st->SetX1NDC(50); //new x start position
+    //st->SetX2NDC(100); //new x end position
+
+    cout<<st->GetX1NDC()<<endl;
+    cout<<st->GetX2NDC()<<endl;
+
+    //st->SetX1NDC(50);
+    //st->SetX2NDC(50);
+
+
+}
 
