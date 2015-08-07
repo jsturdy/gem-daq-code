@@ -416,31 +416,57 @@ void layerHistogram(TH1 *h1, TH1 *h2, TCanvas *c, int pad=1)
     if (max2 > max1)
     {
 	//cout << "MAXIMUM SET TO "<<max2<<endl;
-	h1->SetMaximum(max2);
+	h1->SetMaximum(max2*1.1);
     }
     if (min2 < min1)
     {
 	//cout << "MINIMUM SET TO "<<min2<<endl;
-	h1->SetMinimum(min2);
+	h1->SetMinimum(min2*1.1);
     }
 
     h1->Draw();
-    h2->Draw("SAMES");
-
-    //Show statistics box
+    //h2->Draw("SAMES");
     c->Update();
 
-    //BROKEN - need to include more headers?
+    //Retrieve stat box
     TPaveStats *st = (TPaveStats*)h1->FindObject("stats");
-    //st->SetX1NDC(50); //new x start position
-    //st->SetX2NDC(100); //new x end position
-
-    cout<<st->GetX1NDC()<<endl;
-    cout<<st->GetX2NDC()<<endl;
-
-    //st->SetX1NDC(50);
-    //st->SetX2NDC(50);
+    TList *list1 = st->GetListOfLines();
+    //list1->Print();
+    
 
 
+    //Color code title
+    TText *title = st->GetLine(0);
+    title->Print();
+    TText *newtitle = title;
+    list1->Remove(title);
+    newtitle->SetTextColor(kBlue);
+    newtitle->Print();
+    list1->AddFirst(newtitle);
+
+
+
+    //Reposition
+    double x1 = st->GetX1NDC();
+    double x2 = st->GetX2NDC();
+    cout<< st->GetX1NDC()<<endl;
+    cout<< st->GetX2NDC()<<endl;
+    double diff = x2-x1;
+    st->SetX1NDC(x1-(diff+.04));  //new x start position
+    st->SetX2NDC(x2-(diff+.04));  //new x end position
+    
+
+
+    h2->Draw("SAMES");
+    c->Update();
+  
+    //Retrieve stat box
+    TPaveStats *st2 = (TPaveStats*)h2->FindObject("stats");
+    TList *list2 = st2->GetListOfLines();
+    
+
+    //Color code title
+    st2->GetLine(0)->SetTextColor(kRed);
+    
 }
 

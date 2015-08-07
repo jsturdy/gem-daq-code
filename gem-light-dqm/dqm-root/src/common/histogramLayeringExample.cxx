@@ -40,53 +40,100 @@
 using namespace std;
 int main(int argc, char** argv)
 {
-    if (argc<4) 
+    cout<<endl;
+
+
+    if (argc!=2) 
     {
-        cout << "Please provide 2 .root input files and 1 .root output file" << endl;
-        cout << "Usage: <path>/reader inputFile1.root inputFile2.root outputFile.root" << endl;
+        cout << "Please provide ONE text file containing ";
+	cout <<"2 root input files and one root output file ";
+        cout << "separated by lines." << endl;
+        cout << "Usage: <path>/reader input.txt" << endl;
+	cout << endl;
         return 0;
     }
-    TString ifilename1 = argv[1];
-    TString ifilename2 = argv[2];
-    TString ofilename = argv[3];
-    TString outname = argv[3];
-    outname = outname.Remove(outname.Length()-5, 5);
 
-    if (!ofilename.Contains(".root") or !ifilename1.Contains(".root") or !ifilename2.Contains(".root"))
-    {
-	cout << "Input and Output files must be in .root format." << endl;
-	return 0;
-    }
-    // vector<TString> ifiles;
-    // ifstream inputfile (argv[1]);
-    // if (inputfile.is_open())
-    // {
-    // 	while(getline(inputfile,line))
-    // 	{
-    // 	    ifiles.push_back(line);
-    // 	}
-    // 	inputfile.close();
-    // }
-    // else 
-    // {
-    // 	cout << "Unable to open input file: " << argv[1];
-    // 	return 0;
-    // }
+    //Currently only able to support 2 layers
+    int MAX_HIST = 2;
+
+
+
+
+    vector<TString> ifilenames;
+    TString ofilename;
+    TString outname;
+    TString outday;
+    vector<TFile*> ifiles;
     
+    ifstream textfile (argv[1]);
+    if (textfile.is_open())
+    {
+	int counter=0;
+	string line;
+    	while( getline (textfile,line) )
+    	{
+	    if(line.length()<6)
+		continue;
+	    if(line.substr(line.length()-5,5)!=".root")
+	    {		
+		cout << "########################"<< endl;
+		cout << "Detected incorrect file: " << line << endl;
+		cout << "########################"<< endl;
+		cout << endl;
+		cout << "Input and Output files must be in .root format." << endl;
+		cout << endl;
+		return 0;
+	    }
+	    counter++;
+	    if (counter<=MAX_HIST)
+	    {
+		ifilenames.push_back(line);
+		ifiles.push_back(new TFile(ifilenames[counter-1], "READ"));
+		cout<<"Input File "<<counter<<": "<<line<<endl;
+	    }
+	    else if (counter<=MAX_HIST+1)
+	    {
+		ofilename = line;
+	        outname = ofilename;
+		outname = outname.Remove(outname.Length()-5, 5);
+		outday = outname;
+		outday.Remove(4,outday.Length()-1);
+		gROOT->ProcessLine(".!mkdir -p ./output/"+outday+"/"+outname+"/root/");
+		TFile *ofile = new TFile("./output/"+outday+"/"+outname+"/root/"+ofilename, "RECREATE");
+		cout<<"Output File: "<<"./output/"+outday+"/"+outname+"/root/"+ofilename<<endl<<endl;
+	    }
+	    else
+	    {
+		cout << "####################"<< endl;
+		cout << "Detected Extra File: "<<line<<endl;
+		cout << "####################"<< endl;
+		cout << endl;
+		cout << "Only list 2 input files and one output file."<<endl;
+		cout << "Make sure you have no more than 3 files listed in text file."<<endl; 
+		cout << endl;
+		return 0;
+	    }
+	}
+    	textfile.close();
+    }
+    else 
+    {
+    	cout << "Unable to open input file: " << argv[1];
+    	return 0;
+    }
 
-    TFile *file1 = new TFile(ifilename1, "READ");
-    TFile *file2 = new TFile(ifilename2, "READ");
-    TFile *ofile = new TFile(ofilename, "RECREATE");
+
+   
     vector<TH1*> hist1; 
     vector<TH1*> hist2;
-    int cnt1=0; //counts iterations through file1
-    int cnt2=0; //counts iterations through file2
+    int cnt1=0; //counts iterations through ifile1
+    int cnt2=0; //counts iterations through ifile2
 
     //List all keys
-    TList *keylist1 = file1->GetListOfKeys();
+    TList *keylist1 = ifiles[0]->GetListOfKeys();
     cout << endl << "List of keys in Input File 1:" << endl;
     keylist1->Print();
-    TList *keylist2 = file2->GetListOfKeys();
+    TList *keylist2 = ifiles[1]->GetListOfKeys();
     cout << endl << "List of keys in Input File 2:" << endl;
     keylist2->Print();
     cout << endl;
@@ -156,9 +203,9 @@ int main(int argc, char** argv)
 	    layerHistogram(hist1[i], hist2[i], c);
 	    c->Write();
 
-	    gROOT->ProcessLine(".!mkdir -p ./output/"+outname+"/");
-	    c->Print( "output/"+outname+"/"+class1+".pdf","pdf");
-	    c->Print( "output/"+outname+"/"+class1+".root","root");
+	    gROOT->ProcessLine(".!mkdir -p ./output/"+outday+"/"+outname+"/");
+	    c->Print( "output/"+outday+"/"+outname+"/"+class1+".pdf","pdf");
+	    c->Print( "output/"+outday+"/"+outname+"/"+class1+".root","root");
 	}
     }
     
@@ -174,9 +221,10 @@ int main(int argc, char** argv)
 	layerHistogram(hist1[i], hist2[i], c, i+1);
     }
     cout<<endl<<"Printing all Histograms."<<endl;
-    gROOT->ProcessLine(".!mkdir -p ./output/"+outname+"/");
-    c->Print( "output/"+outname+"/"+"histograms.pdf","pdf");
-    c->Print( "output/"+outname+"/"+"histograms.root","root");
+    c->Write();
+    gROOT->ProcessLine(".!mkdir -p ./output/"+outday+"/"+outname+"/");
+    c->Print( "output/"+outday+"/"+outname+"/"+"histograms.pdf","pdf");
+    c->Print( "output/"+outday+"/"+outname+"/"+"histograms.root","root");
 
      
 
@@ -206,9 +254,10 @@ int main(int argc, char** argv)
     }
     if (complete==2)
     {
-	gROOT->ProcessLine(".!mkdir -p ./output/"+outname+"/");
-	crc->Print( "output/"+outname+"/"+"crc_check.pdf","pdf");
-	crc->Print( "output/"+outname+"/"+"crc_check.root","root");
+	crc->Write();
+	gROOT->ProcessLine(".!mkdir -p ./output/"+outday+"/"+outname+"/");
+	crc->Print( "output/"+outday+"/"+outname+"/"+"crc_check.pdf","pdf");
+	crc->Print( "output/"+outday+"/"+outname+"/"+"crc_check.root","root");
     }
     else
 	cout << "Unable to locate all CRC Histograms." << endl;
@@ -253,9 +302,10 @@ int main(int argc, char** argv)
     }
     if (complete==4)
     {
-	gROOT->ProcessLine(".!mkdir -p ./output/"+outname+"/");
-	cbf->Print( "output/"+outname+"/"+"cbf_check.pdf","pdf");
-	cbf->Print( "output/"+outname+"/"+"cbf_check.root","root");
+	cbf->Write();
+	gROOT->ProcessLine(".!mkdir -p ./output/"+outday+"/"+outname+"/");
+	cbf->Print( "output/"+outday+"/"+outname+"/"+"cbf_check.pdf","pdf");
+	cbf->Print( "output/"+outday+"/"+outname+"/"+"cbf_check.root","root");
     }
     else
 	cout << "Unable to locate all Control Bit/Flag Histograms." << endl;
@@ -263,8 +313,8 @@ int main(int argc, char** argv)
 
 
     cout << endl;
-    cout << ifilename1 << " histograms plotted in blue." << endl;
-    cout << ifilename2 << " histograms plotted in red." << endl;
+    cout << ifilenames[0] << " histograms plotted in blue." << endl;
+    cout << ifilenames[1] << " histograms plotted in red." << endl;
 
 
 
