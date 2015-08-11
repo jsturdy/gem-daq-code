@@ -470,3 +470,91 @@ void layerHistogram(TH1 *h1, TH1 *h2, TCanvas *c, int pad=1)
     
 }
 
+//Allows for layering of more than 2 histograms using a vector
+void layerHistogram(vector<TH1*> h, TCanvas *c, int pad=1)
+{
+    int num_hist = h.size();
+    //cout << "Number of histograms: " << num_hist << endl;
+    vector<int> maxs;
+    int max=0;
+    vector<int> mins;
+    int min=0;
+
+    c->cd(pad);
+
+    for (int i=0;i<num_hist;i++)
+    { 
+	//Set color/style
+	if (num_hist==2) //Use red/blue when comparing only 2
+	{
+	    h[i]->SetMarkerColor(2*(1+i));
+	    h[i]->SetMarkerStyle(7);
+	    h[i]->SetFillStyle(i+3004);
+	    h[i]->SetFillColor(2*(1+i));
+	    h[i]->SetLineColor(2*(1+i));	 
+	}
+	else if (num_hist>9 and i>9) //Very unlikely to have more than 9 histograms, but it works
+	{
+	    h[i]->SetMarkerColor(i+30);
+	    h[i]->SetMarkerStyle(7);
+	    h[i]->SetFillStyle(i+3004);
+	    h[i]->SetFillColor(i+30);
+	    h[i]->SetLineColor(i+30);
+	}
+	else
+	{
+	    h[i]->SetMarkerColor(i+2);
+	    h[i]->SetMarkerStyle(7);
+	    h[i]->SetFillStyle(i+3004);
+	    h[i]->SetFillColor(i+2);
+	    h[i]->SetLineColor(i+2);
+	}
+
+	//Resize as necessary
+	maxs.push_back(h[i]->GetBinContent(h[i]->GetMaximumBin()));
+	mins.push_back(h[i]->GetBinContent(h[i]->GetMinimumBin()));
+	if (maxs[i]>max)
+	    h[0]->SetMaximum(maxs[i]);
+	
+	if (mins[i]<min)
+	    h[0]->SetMinimum(mins[i]);
+    }
+    h[0]->Draw();
+    for (int i=1;i<num_hist;i++)
+	    h[i]->Draw("SAMES");
+}
+
+void layerSpecific(vector<vector<TH1*>> hs, vector<const char*> hnames, TCanvas *can)
+{
+    int numF = hs.size();
+    int numH = hs[0].size();
+    vector<TH1*> plot_hists;
+    int complete=0;
+    cout << "locating histograms... " << endl;
+    for (int i=0;i<numH;i++)
+    {
+    	const char* histname = hs[0][i]->GetName();
+	
+	for (int n=0;n<hnames.size();n++)
+	{
+	    plot_hists.clear();
+	    if ( strcmp(histname,hnames[n])==0 )
+	    { 
+		complete++;
+		cout << "Found "<< hnames[n] <<endl;
+		for (int j=0;j<numF;j++)
+		    plot_hists.push_back( hs[j][i] );
+		layerHistogram(plot_hists, can, n+1);
+	    }
+	}
+    }
+    if (complete==hnames.size())
+    {
+    	can->Write();
+    	// gROOT->ProcessLine(".!mkdir -p ./output/"+outday+"/"+outname+"/");
+    	// crc->Print( "output/"+outday+"/"+outname+"/"+"crc_check.pdf","pdf");
+    	// crc->Print( "output/"+outday+"/"+outname+"/"+"crc_check.root","root");
+    }
+    else
+    	cout << "Unable to locate all desired Histograms." << endl;
+}
