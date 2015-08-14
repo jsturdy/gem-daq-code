@@ -11,6 +11,6 @@
     <node id="BC0"          address="0x3"  mask="0xFFFFFFFF"  permission="w"
 	  description="send BC0 command to system" />
     <node id="L1ACalPulse"  address="0x4"  mask="0xFFFFFFFF"  permission="w"
-	  description="send L1A and CalPulse separated by <valu> VFAT2 clock cycles" />
+	  description="send L1A and CalPulse separated by <value> VFAT2 clock cycles" />
   </node> <!-- end send commands -->
 </node> <!-- end fast command definitions -->
