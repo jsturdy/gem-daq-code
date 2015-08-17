@@ -191,13 +191,13 @@ int main(int argc, char** argv)
             uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
             uint16_t  BC     = (0x0fff & vfat.BC);
             uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
-            uint8_t   EC     = (0x0fff & vfat.EC) >> 4;
+            uint8_t   EC     = (0x0ff0 & vfat.EC) >> 4;
             uint8_t   Flag   = (0x000f & vfat.EC);
             uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
             uint16_t  ChipID = (0x0fff & vfat.ChipID);
             uint16_t  CRC    = vfat.crc;
             uint64_t lsData = vfat.lsData;
-            uint64_t msData = vfat.lsData;
+            uint64_t msData = vfat.msData;
 
             // CRC check
             dataVFAT[11] = vfat.BC;

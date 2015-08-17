@@ -1,7 +1,7 @@
 /**
  * class: GEMApplication
  * description: Generic GEM application, all GEM applications should inherit
-                from this class and define and extend as necessary
+ from this class and define and extend as necessary
  *              structure borrowed from TCDS core, with nods to HCAL and EMU code
  * author: 
  * date: 
@@ -95,9 +95,9 @@ void gem::base::GEMApplication::actionPerformed(xdata::Event& event)
   // loaded (from the XDAQ configuration file).  This should be implemented in all derived classes
   // followed by a call to gem::base::GEMApplication::actionPerformed(event)
   /*
-  if (event.type() == "setDefaultValues" || event.type() == "urn:xdaq-event:setDefaultValues") {
+    if (event.type() == "setDefaultValues" || event.type() == "urn:xdaq-event:setDefaultValues") {
     DEBUG("GEMApplication::actionPerformed() setDefaultValues" << 
-		    "Default configuration values have been loaded from xml profile");
+    "Default configuration values have been loaded from xml profile");
     //DEBUG("GEMApplication::actionPerformed()   --> starting monitoring");
     //monitorP_->startMonitoring();
     }
@@ -105,25 +105,25 @@ void gem::base::GEMApplication::actionPerformed(xdata::Event& event)
   // update monitoring variables
   if (event.type() == "ItemRetrieveEvent" || event.type() == "urn:xdata-event:ItemRetrieveEvent") {
     DEBUG("GEMApplication::actionPerformed() ItemRetrieveEvent" << 
-		    "");
+          "");
   } else if (event.type() == "ItemGroupRetrieveEvent" || event.type() == "urn:xdata-event:ItemGroupRetrieveEvent") {
     DEBUG("GEMApplication::actionPerformed() ItemGroupRetrieveEvent" << 
-		    "");
+          "");
   }
   //item is changed, update it
   if (event.type()=="ItemChangedEvent" || event.type()=="urn:xdata-event:ItemChangedEvent") {
     DEBUG("GEMApplication::actionPerformed() ItemChangedEvent" << 
-		    "");
+          "");
 
     /* from HCAL runInfoServer
-    std::list<std::string> names;
-    names.push_back(str_RUNNUMBER);
+       std::list<std::string> names;
+       names.push_back(str_RUNNUMBER);
 
-    try {
-      getMonitorInfospace()->fireItemGroupChanged(names, this);
-    } catch (xcept::Exception& e) {
-      ERROR(xcept::stdformat_exception_history(e));
-    }
+       try {
+       getMonitorInfospace()->fireItemGroupChanged(names, this);
+       } catch (xcept::Exception& e) {
+       ERROR(xcept::stdformat_exception_history(e));
+       }
     */
   }
 }

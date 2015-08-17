@@ -32,10 +32,10 @@ void gem::utils::gemXMLparser::parseXMLFile()
   try {
     xercesc::XMLPlatformUtils::Initialize();
     INFO("Successfully initialized XML4C system");
-  } catch(const xercesc::XMLException& toCatch){
+  } catch(const xercesc::XMLException& toCatch) {
     ERROR("Error during Xerces-c Initialization.\n"
-	  << "  Exception message:"
-	  << xercesc::XMLString::transcode(toCatch.getMessage()));
+          << "  Exception message:"
+          << xercesc::XMLString::transcode(toCatch.getMessage()));
     return;
   }
 
@@ -59,17 +59,17 @@ void gem::utils::gemXMLparser::parseXMLFile()
   bool errorsOccured = false;
   try {
     parser->parse(xmlFile_.c_str());
-  } catch (const xercesc::XMLException& e){
+  } catch (const xercesc::XMLException& e) {
     ERROR("An error occured during parsing\n   Message: "
-	  << xercesc::XMLString::transcode(e.getMessage()));
+          << xercesc::XMLString::transcode(e.getMessage()));
     errorsOccured = true;
     //fileError = "An error occured during parsing of selected file. Please select another configuration file.";
-  } catch (const xercesc::DOMException& e){
+  } catch (const xercesc::DOMException& e) {
     ERROR("An error occured during parsing\n   Message: "
-	  << xercesc::XMLString::transcode(e.msg));
+          << xercesc::XMLString::transcode(e.msg));
     errorsOccured = true;
     //fileError = "An error occured during parsing of selected file. Please select another configuration file.";
-  } catch (...){
+  } catch (...) {
     ERROR("An error occured during parsing");
     errorsOccured = true;
     //fileError = "An error occured during parsing of selected file. Please select another configuration file.";
@@ -79,7 +79,7 @@ void gem::utils::gemXMLparser::parseXMLFile()
   //crateIds.clear();
   //crateNodes.clear();
 
-  if (!errorsOccured){
+  if (!errorsOccured) {
     DEBUG("DOM tree created succesfully");
     xercesc::DOMNode * pDoc = parser->getDocument();
     DEBUG("Base node (getDocument) obtained");
@@ -88,11 +88,11 @@ void gem::utils::gemXMLparser::parseXMLFile()
     while (n) {
       DEBUG("Loop on child nodes");
       if (n->getNodeType() == xercesc::DOMNode::ELEMENT_NODE) {
-	DEBUG("Element node found");
-	if (strcmp("GEMSystem",xercesc::XMLString::transcode(n->getNodeName()))==0) {
-	  DEBUG("GEM system found");
-	  parseGEMSystem(n);
-	}
+        DEBUG("Element node found");
+        if (strcmp("GEMSystem",xercesc::XMLString::transcode(n->getNodeName()))==0) {
+          DEBUG("GEM system found");
+          parseGEMSystem(n);
+        }
       }
       n = n->getNextSibling();
     } 
@@ -113,17 +113,17 @@ void gem::utils::gemXMLparser::parseGEMSystem(xercesc::DOMNode * pNode)
   while (n) {
     if (n->getNodeType() == xercesc::DOMNode::ELEMENT_NODE) {    
       if (strcmp("uTCACrate",xercesc::XMLString::transcode(n->getNodeName()))==0) {
-	DEBUG("GEM system parsing: uTCA crate found");
-	if (countChildElementNodes(n)) {
-	  DEBUG("GEM system parsing: uTCA crate is not empty");
-	  gemCrateProperties* crate = new gemCrateProperties();
-	  DEBUG("GEM system parsing: new crate properties object created");
-	  crate->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("CrateId"))->getNodeValue()));
-	  gemSystem_->addSubDeviceRef(crate);
-	  gemSystem_->addSubDeviceId(crate->getDeviceId());
-	  DEBUG("GEM system parsing: new crate properties object added to crateRefs");
-	  parseCrate(n);
-	}
+        DEBUG("GEM system parsing: uTCA crate found");
+        if (countChildElementNodes(n)) {
+          DEBUG("GEM system parsing: uTCA crate is not empty");
+          gemCrateProperties* crate = new gemCrateProperties();
+          DEBUG("GEM system parsing: new crate properties object created");
+          crate->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("CrateId"))->getNodeValue()));
+          gemSystem_->addSubDeviceRef(crate);
+          gemSystem_->addSubDeviceId(crate->getDeviceId());
+          DEBUG("GEM system parsing: new crate properties object added to crateRefs");
+          parseCrate(n);
+        }
       }
     }    
     n = n->getNextSibling();
@@ -139,24 +139,24 @@ void gem::utils::gemXMLparser::parseCrate(xercesc::DOMNode * pNode)
   while (n) {
     if (n->getNodeType() == xercesc::DOMNode::ELEMENT_NODE) {
       if (strcmp("MCH",xercesc::XMLString::transcode(n->getNodeName()))==0) {
-	INFO("parseMCH");
+        INFO("parseMCH");
       } 
       if (strcmp("AMC",xercesc::XMLString::transcode(n->getNodeName()))==0) {
-	INFO("parseAMC");
+        INFO("parseAMC");
       } 
       if (strcmp("GLIB",xercesc::XMLString::transcode(n->getNodeName()))==0) {
-	INFO("parseGLIB");
-	DEBUG("crate parsing: GLIB found");
-	if (countChildElementNodes(n)) {
-	  DEBUG("crate parsing: GLIB is not empty");
-	  gemGLIBProperties* glib = new gemGLIBProperties();
-	  DEBUG("crate parsing: create new GLIBproperties object");
-	  glib->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("GLIBId"))->getNodeValue()));
-	  gemSystem_->getSubDevicesRefs().back()->addSubDeviceRef(glib);
-	  gemSystem_->getSubDevicesRefs().back()->addSubDeviceId(glib->getDeviceId());
-	  DEBUG("crate parsing: Add new GLIBproperties to the subdevices of parent crate");
-	  parseGLIB(n);
-	}
+        INFO("parseGLIB");
+        DEBUG("crate parsing: GLIB found");
+        if (countChildElementNodes(n)) {
+          DEBUG("crate parsing: GLIB is not empty");
+          gemGLIBProperties* glib = new gemGLIBProperties();
+          DEBUG("crate parsing: create new GLIBproperties object");
+          glib->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("GLIBId"))->getNodeValue()));
+          gemSystem_->getSubDevicesRefs().back()->addSubDeviceRef(glib);
+          gemSystem_->getSubDevicesRefs().back()->addSubDeviceId(glib->getDeviceId());
+          DEBUG("crate parsing: Add new GLIBproperties to the subdevices of parent crate");
+          parseGLIB(n);
+        }
       } 
     }
     n = n->getNextSibling();
@@ -178,16 +178,16 @@ void gem::utils::gemXMLparser::parseGLIB(xercesc::DOMNode * pNode)
       addProperty("DEPTH",     n, glib_);
       addProperty("TDC_SBits", n, glib_);
       if (strcmp("OH",xercesc::XMLString::transcode(n->getNodeName()))==0) {
-	DEBUG("GLIB parsing: OH found");
-	if (countChildElementNodes(n)) {
-	  gemOHProperties* oh = new gemOHProperties();
-	  DEBUG("GLIB parsing: create new OHproperties obect");
-	  oh->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("OHId"))->getNodeValue()));
-	  gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceRef(oh);
-	  gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceId(oh->getDeviceId());
-	  DEBUG("GLIB parsing: Add new OHproperties to the subdevices of parent device");
-	  parseOH(n);
-	}
+        DEBUG("GLIB parsing: OH found");
+        if (countChildElementNodes(n)) {
+          gemOHProperties* oh = new gemOHProperties();
+          DEBUG("GLIB parsing: create new OHproperties obect");
+          oh->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("OHId"))->getNodeValue()));
+          gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceRef(oh);
+          gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceId(oh->getDeviceId());
+          DEBUG("GLIB parsing: Add new OHproperties to the subdevices of parent device");
+          parseOH(n);
+        }
       }
     }    
     n = n->getNextSibling();
@@ -213,18 +213,18 @@ void gem::utils::gemXMLparser::parseOH(xercesc::DOMNode * pNode)
       addProperty("GTPLock",      n, oh_);
       addProperty("FW",           n, oh_);
       if (strcmp("VFATSettings",xercesc::XMLString::transcode(n->getNodeName()))==0) {
-	DEBUG("OH parsing: VFATSettings tag found");
-	if (countChildElementNodes(n)) {
-	  gemVFATProperties* vfat = new gemVFATProperties();
-	  DEBUG("OH parsing: create new VFATproperties object");
-	  vfat->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("VFATId"))->getNodeValue()));
-	  DEBUG("OH parsing: retrieve VFAT device ID");
-	  gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceRef(vfat);
-	  DEBUG("OH parsing: add new VFATproperties to the subdevices of the parent device");
-	  gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceId(vfat->getDeviceId());
-	  DEBUG("OH parsing: add VFAT device ID to the subdevices of the parent device");
-	  parseVFAT2Settings(n);
-	}
+        DEBUG("OH parsing: VFATSettings tag found");
+        if (countChildElementNodes(n)) {
+          gemVFATProperties* vfat = new gemVFATProperties();
+          DEBUG("OH parsing: create new VFATproperties object");
+          vfat->setDeviceId(xercesc::XMLString::transcode(n->getAttributes()->getNamedItem(xercesc::XMLString::transcode("VFATId"))->getNodeValue()));
+          DEBUG("OH parsing: retrieve VFAT device ID");
+          gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceRef(vfat);
+          DEBUG("OH parsing: add new VFATproperties to the subdevices of the parent device");
+          gemSystem_->getSubDevicesRefs().back()->getSubDevicesRefs().back()->getSubDevicesRefs().back()->addSubDeviceId(vfat->getDeviceId());
+          DEBUG("OH parsing: add VFAT device ID to the subdevices of the parent device");
+          parseVFAT2Settings(n);
+        }
       }
     }    
     n = n->getNextSibling();

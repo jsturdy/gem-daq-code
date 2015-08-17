@@ -12,15 +12,15 @@ namespace gem {
   namespace utils {
     class gemDeviceProperties {
     public:
-      gemDeviceProperties(){}
-      virtual ~gemDeviceProperties(){}
+      gemDeviceProperties() {}
+      virtual ~gemDeviceProperties() {}
       const std::string& getDeviceId() const {return deviceId_;}
       void setDeviceId(const char* deviceId) {deviceId_ = deviceId;}
       const std::vector<std::string>& getSubDevicesIds() {return subDevicesIds_;}
       void addSubDeviceId(const std::string& deviceId) {subDevicesIds_.push_back(deviceId);}
       const std::map<std::string, std::string>& getDeviceProperties() {return deviceProperties_;}
       void addDeviceProperty(const std::string& first, const std::string& second) {
-	deviceProperties_.insert(std::pair<std::string, std::string>(first,second));
+        deviceProperties_.insert(std::pair<std::string, std::string>(first,second));
       }
       
     private:

@@ -24,7 +24,7 @@ gem::hw::amc13::AMC13ManagerWeb::~AMC13ManagerWeb()
  * right now it just prints out the status page that the AMC13 generates
  * in the future it will be nice to add other monitoring to a separate tab perhaps
  * need a way to have the content be dynamic with, e.g., AJAX
-*/
+ */
 void gem::hw::amc13::AMC13ManagerWeb::monitorPage(xgi::Input * in, xgi::Output * out)
   throw (xgi::exception::Exception)
 {
@@ -70,20 +70,20 @@ void gem::hw::amc13::AMC13ManagerWeb::monitorPage(xgi::Input * in, xgi::Output *
     .set("name","setLevel") << std::endl
 
        << (level == 0 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","0").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","0"))
+           cgicc::input().set("type","radio").set("name","level").set("value","0").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","0"))
        << "version" << std::endl
        << (level == 1 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","1").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","1"))
+           cgicc::input().set("type","radio").set("name","level").set("value","1").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","1"))
        << "minimum" << std::endl
        << (level == 2 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","2").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","2"))
+           cgicc::input().set("type","radio").set("name","level").set("value","2").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","2"))
        << "default" << std::endl
        << (level == 3 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","3").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","3"))
+           cgicc::input().set("type","radio").set("name","level").set("value","3").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","3"))
        << "maximum" << std::endl
 
        << cgicc::br()     << std::endl

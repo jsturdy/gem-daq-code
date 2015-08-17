@@ -25,17 +25,17 @@ namespace gem {
       {
 	
       public:
-	VFAT2XMLParser(const std::string& xmlFile,
-		       gem::hw::vfat::HwVFAT2* vfatDevice);
+        VFAT2XMLParser(const std::string& xmlFile,
+                       gem::hw::vfat::HwVFAT2* vfatDevice);
 
-	~VFAT2XMLParser();
+        ~VFAT2XMLParser();
 
-	void parseXMLFile();
-	void parseTURBO(xercesc::DOMNode * pNode);
-	void parseVFAT(xercesc::DOMNode * pNode);
+        void parseXMLFile();
+        void parseTURBO(xercesc::DOMNode * pNode);
+        void parseVFAT(xercesc::DOMNode * pNode);
       private:
-	std::string xmlFile_;
-	gem::hw::vfat::HwVFAT2* vfatDevice_;
+        std::string xmlFile_;
+        gem::hw::vfat::HwVFAT2* vfatDevice_;
       };
       
     }//end namespace gem::supervisor::tbutils

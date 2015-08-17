@@ -16,7 +16,7 @@
 #include "xoap/SOAPSerializer.h"
 
 xoap::MessageReference gem::utils::soap::GEMSOAPToolBox::makeSoapReply(std::string const& command,
-								       std::string const& response)
+                                                                       std::string const& response)
 {
   xoap::MessageReference reply        = xoap::createMessage();
   xoap::SOAPEnvelope     envelope     = reply->getSOAPPart().getEnvelope();
@@ -27,9 +27,9 @@ xoap::MessageReference gem::utils::soap::GEMSOAPToolBox::makeSoapReply(std::stri
 }
 
 xoap::MessageReference gem::utils::soap::GEMSOAPToolBox::makeSoapFaultReply(std::string const& faultString,
-									    std::string const& faultCode,
-									    std::string const& detail,
-									    std::string const& faultActor)
+                                                                            std::string const& faultCode,
+                                                                            std::string const& detail,
+                                                                            std::string const& faultActor)
 {
   xoap::MessageReference reply       = xoap::createMessage();
   xoap::SOAPEnvelope     envelope    = reply->getSOAPPart().getEnvelope();
@@ -60,7 +60,7 @@ xoap::MessageReference gem::utils::soap::GEMSOAPToolBox::makeSoapFaultReply(std:
 }
 
 xoap::MessageReference gem::utils::soap::GEMSOAPToolBox::makeFSMSoapReply(std::string const& event,
-									  std::string const& state)
+                                                                          std::string const& state)
 {
   xoap::MessageReference reply         = xoap::createMessage();
   xoap::SOAPEnvelope     envelope      = reply->getSOAPPart().getEnvelope();
@@ -86,31 +86,31 @@ std::string gem::utils::soap::GEMSOAPToolBox::extractFSMCommandName(xoap::Messag
   DOMNodeList* bodyList = node->getChildNodes();
 
   /* what is this method doing differntly? when would this not work vs the other method?
-  for (unsigned int i = 0; i < bodyList->getLength(); i++) 
-    {
-      DOMNode* command = bodyList->item(i);
-      if (command->getNodeType() == DOMNode::ELEMENT_NODE)
-	return xoap::XMLCh2String(command->getLocalName());
-    }
+     for (unsigned int i = 0; i < bodyList->getLength(); i++) 
+     {
+     DOMNode* command = bodyList->item(i);
+     if (command->getNodeType() == DOMNode::ELEMENT_NODE)
+     return xoap::XMLCh2String(command->getLocalName());
+     }
   */
   // The body should contain a single node with the name of the FSM
   // command to execute.
   if (bodyList->getLength() != 1) {
     XCEPT_RAISE(xoap::exception::Exception,
-		toolbox::toString("Expected exactly one element "
-				  "in FSM command SOAP message, "
-				  "but found %d.", bodyList->getLength()));
+                toolbox::toString("Expected exactly one element "
+                                  "in FSM command SOAP message, "
+                                  "but found %d.", bodyList->getLength()));
   }
   return xoap::XMLCh2String((bodyList->item(0))->getLocalName());  
 }
 
 bool gem::utils::soap::GEMSOAPToolBox::sendCommand(std::string const& cmd,
-						   xdaq::ApplicationContext* appCxt,
-						   xdaq::ApplicationDescriptor* srcDsc,
-						   xdaq::ApplicationDescriptor* destDsc
-						   //log4cplus::Logger* logger,
-						   //std::string const& param
-						   )
+                                                   xdaq::ApplicationContext* appCxt,
+                                                   xdaq::ApplicationDescriptor* srcDsc,
+                                                   xdaq::ApplicationDescriptor* destDsc
+                                                   //log4cplus::Logger* logger,
+                                                   //std::string const& param
+                                                   )
   throw (gem::utils::exception::Exception)
 {
   try {
@@ -128,13 +128,13 @@ bool gem::utils::soap::GEMSOAPToolBox::sendCommand(std::string const& cmd,
     
   } catch (xcept::Exception& e) {
     XCEPT_RETHROW(gem::utils::exception::SOAPException,
-		  ::toolbox::toString("Command %s failed [%s]",cmd.c_str(),e.what()),e);
+                  ::toolbox::toString("Command %s failed [%s]",cmd.c_str(),e.what()),e);
   } catch (std::exception& e) {
     XCEPT_RAISE(gem::utils::exception::SOAPException,
-		::toolbox::toString("Command %s failed [%s]",cmd.c_str(),e.what()));
-  } catch(...) {
+                ::toolbox::toString("Command %s failed [%s]",cmd.c_str(),e.what()));
+  } catch (...) {
     XCEPT_RAISE(gem::utils::exception::SOAPException,
-		::toolbox::toString("Command %s failed",cmd.c_str()));
+                ::toolbox::toString("Command %s failed",cmd.c_str()));
   }
   return true;
 }

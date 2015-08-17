@@ -49,7 +49,7 @@ gem::hw::GEMHwDevice::GEMHwDevice(std::string const& deviceName):
 }
 
 gem::hw::GEMHwDevice::GEMHwDevice(std::string const& connectionFile,
-				  std::string const& cardName):
+                                  std::string const& cardName):
   //p_gemConnectionManager(0),
   //p_gemHW(0),
   hwLock_(toolbox::BSem::FULL, true),
@@ -87,10 +87,10 @@ gem::hw::GEMHwDevice::~GEMHwDevice()
 std::string gem::hw::GEMHwDevice::printErrorCounts() const {
   std::stringstream errstream;
   errstream << "errors while accessing registers:"              << std::endl 
-	    << "Bad header:  "       <<ipBusErrs_.BadHeader     << std::endl
-	    << "Read errors: "       <<ipBusErrs_.ReadError     << std::endl
-	    << "Timeouts:    "       <<ipBusErrs_.Timeout       << std::endl
-	    << "Controlhub errors: " <<ipBusErrs_.ControlHubErr << std::endl;
+            << "Bad header:  "       <<ipBusErrs_.BadHeader     << std::endl
+            << "Read errors: "       <<ipBusErrs_.ReadError     << std::endl
+            << "Timeouts:    "       <<ipBusErrs_.Timeout       << std::endl
+            << "Controlhub errors: " <<ipBusErrs_.ControlHubErr << std::endl;
   INFO(errstream);
   return errstream.str();
 }
@@ -110,14 +110,14 @@ void gem::hw::GEMHwDevice::connectDevice()
   std::stringstream tmpUri;
   if (controlhubAddress.size() > 0) {
     DEBUG("Using control hub at address '" << controlhubAddress
-	  << ", port number " << controlhubPort << "'.");
+          << ", port number " << controlhubPort << "'.");
     tmpUri << "chtcp-"<< getIPbusProtocolVersion() << "://" << controlhubAddress << ":" << controlhubPort
-	   << "?target=" << deviceAddress << ":" << ipbusPort;
+           << "?target=" << deviceAddress << ":" << ipbusPort;
   } else {
     DEBUG("No control hub address specified -> "
-	  "continuing with a direct connection.");
-      tmpUri << "ipbusudp-" << getIPbusProtocolVersion() << "://"
-             << deviceAddress << ":" << ipbusPort;
+          "continuing with a direct connection.");
+    tmpUri << "ipbusudp-" << getIPbusProtocolVersion() << "://"
+           << deviceAddress << ":" << ipbusPort;
   }
   std::string const uri = tmpUri.str();
   std::string const id  = getDeviceID();
@@ -133,8 +133,8 @@ void gem::hw::GEMHwDevice::connectDevice()
     tmpHWP.reset(new uhal::HwInterface(uhal::ConnectionManager::getDevice(id, uri, addressTable)));
   } catch (uhal::exception::FileNotFound const& err) {
     std::string msg = toolbox::toString("Could not find uhal address table file '%s' "
-					"(or one of its included address table modules).",
-					addressTable.c_str());
+                                        "(or one of its included address table modules).",
+                                        addressTable.c_str());
     ERROR(msg);
   } catch (uhal::exception::exception const& err) {
     std::string msgBase = "Could not obtain the uhal device from the connection manager";
@@ -237,6 +237,9 @@ uint32_t gem::hw::GEMHwDevice::readReg(std::string const& name)
       uhal::ValWord<uint32_t> val = hw.getNode(name).read();
       hw.dispatch();
       res = val.value();
+      DEBUG("Successfully read register " << name.c_str() << " with value 0x" 
+            << std::setfill('0') << std::setw(8) << std::hex << res << std::dec 
+            << " retry count is " << retryCount << ". Should move on to next operation");
       return res;
       //break;
     } catch (uhal::exception::exception const& err) {
@@ -244,16 +247,16 @@ uint32_t gem::hw::GEMHwDevice::readReg(std::string const& name)
       std::string msg     = toolbox::toString("%s: %s.", msgBase.c_str(), err.what());
       std::string errCode = toolbox::toString("%s",err.what());
       if (knownErrorCode(errCode)) {
-	++retryCount;
-	if (retryCount > 4)
-	  DEBUG("Failed to read register " << name <<
-	       ", retrying. retryCount("<<retryCount<<")"
-	       << std::endl);
-	updateErrorCounters(errCode);
-	continue;
+        ++retryCount;
+        if (retryCount > 4)
+          DEBUG("Failed to read register " << name <<
+                ", retrying. retryCount("<<retryCount<<")"
+                << std::endl);
+        updateErrorCounters(errCode);
+        continue;
       } else {
-	ERROR(msg);
-	//XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
+        ERROR(msg);
+        //XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
       }
     } catch (std::exception const& err) {
       std::string msgBase = toolbox::toString("Could not read register '%s' (std)", name.c_str());
@@ -279,41 +282,41 @@ void gem::hw::GEMHwDevice::readRegs(register_pair_list &regList)
       std::vector<std::pair<std::string,uhal::ValWord<uint32_t> > > vals;
       //vals.reserve(regList.size());
       for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	vals.push_back(std::make_pair(curReg->first,hw.getNode(curReg->first).read()));
+        vals.push_back(std::make_pair(curReg->first,hw.getNode(curReg->first).read()));
       hw.dispatch();
 
       //would like to have these local to the loop, how to do...?
       auto curVal = vals.begin();
       auto curReg = regList.begin();
       for ( ; curReg != regList.end(); ++curVal,++curReg) 
-	curReg->second = (curVal->second).value();
+        curReg->second = (curVal->second).value();
       return;
       //break;
     } catch (uhal::exception::exception const& err) {
       std::string msgBase = "Could not read from register in list:";
       for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
+        msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
       std::string msg     = toolbox::toString("%s (uHAL): %s.", msgBase.c_str(), err.what());
       std::string errCode = toolbox::toString("%s",err.what());
       if (knownErrorCode(errCode)) {
-	++retryCount;
-	/* would need to loop the debug message as curReg is out of scope here
-	if (retryCount > 4)
-	  for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	    DEBUG("Failed to read register " << curReg->first <<
-	          ", retrying. retryCount("<<retryCount<<")"
-	          << std::endl);
-	*/
-	updateErrorCounters(errCode);
-	continue;
+        ++retryCount;
+        /* would need to loop the debug message as curReg is out of scope here
+           if (retryCount > 4)
+           for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
+           DEBUG("Failed to read register " << curReg->first <<
+           ", retrying. retryCount("<<retryCount<<")"
+           << std::endl);
+        */
+        updateErrorCounters(errCode);
+        continue;
       } else {
-	ERROR(msg);
-	//XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
+        ERROR(msg);
+        //XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
       }
     } catch (std::exception const& err) {
       std::string msgBase = "Could not read from register in list:";
       for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
+        msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
       std::string msg = toolbox::toString("%s (std): %s.", msgBase.c_str(), err.what());
       ERROR(msg);
       //XCEPT_RAISE(gem::hw::exception::HardwareProblem, msg);
@@ -337,16 +340,16 @@ void gem::hw::GEMHwDevice::writeReg(std::string const& name, uint32_t const val)
       std::string msg     = toolbox::toString("%s: %s.", msgBase.c_str(), err.what());
       std::string errCode = toolbox::toString("%s",err.what());
       if (knownErrorCode(errCode)) {
-	++retryCount;
-	if (retryCount > 4)
-	  DEBUG("Failed to write value 0x" << std::hex<< val << std::dec << " to register " << name <<
-	       ", retrying. retryCount("<<retryCount<<")"
-	       << std::endl);
-	updateErrorCounters(errCode);
-	continue;
+        ++retryCount;
+        if (retryCount > 4)
+          DEBUG("Failed to write value 0x" << std::hex<< val << std::dec << " to register " << name <<
+                ", retrying. retryCount("<<retryCount<<")"
+                << std::endl);
+        updateErrorCounters(errCode);
+        continue;
       } else {
-	ERROR(msg);
-	//XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
+        ERROR(msg);
+        //XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
       }
     } catch (std::exception const& err) {
       std::string msgBase = toolbox::toString("Could not write to register '%s' (std)", name.c_str());
@@ -365,37 +368,37 @@ void gem::hw::GEMHwDevice::writeRegs(register_pair_list const& regList)
   while (retryCount < MAX_IPBUS_RETRIES) {
     try {
       for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	hw.getNode(curReg->first).write(curReg->second);
+        hw.getNode(curReg->first).write(curReg->second);
       hw.dispatch();
       return;
       //break;
     } catch (uhal::exception::exception const& err) {
       std::string msgBase = "Could not write to register in list:";
       for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
+        msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
       std::string msg     = toolbox::toString("%s (uHAL): %s.", msgBase.c_str(), err.what());
       std::string errCode = toolbox::toString("%s",err.what());
       if (knownErrorCode(errCode)) {
-	++retryCount;
-	/* would need to loop the debug message as curReg is out of scope here
-	if (retryCount > 4)
-	  for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	    DEBUG("Failed to write value 0x" << std::hex <<
-		  curReg->second << std::dec <<
-		  " to register " << curReg->first <<
-		  ", retrying. retryCount("<<retryCount<<")"
-		  << std::endl);
-	*/
-	updateErrorCounters(errCode);
-	continue;
+        ++retryCount;
+        /* would need to loop the debug message as curReg is out of scope here
+           if (retryCount > 4)
+           for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
+           DEBUG("Failed to write value 0x" << std::hex <<
+           curReg->second << std::dec <<
+           " to register " << curReg->first <<
+           ", retrying. retryCount("<<retryCount<<")"
+           << std::endl);
+        */
+        updateErrorCounters(errCode);
+        continue;
       } else {
-	ERROR(msg);
-	//XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
+        ERROR(msg);
+        //XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
       }
     } catch (std::exception const& err) {
       std::string msgBase = "Could not write to register in list:";
       for (auto curReg = regList.begin(); curReg != regList.end(); ++curReg) 
-	msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
+        msgBase += toolbox::toString(" '%s'", curReg->first.c_str());
       std::string msg = toolbox::toString("%s (std): %s.", msgBase.c_str(), err.what());
       ERROR(msg);
       //XCEPT_RAISE(gem::hw::exception::HardwareProblem, msg);
@@ -412,10 +415,10 @@ void gem::hw::GEMHwDevice::writeValueToRegs(std::vector<std::string> const& regN
 }
 
 /*
-void gem::hw::GEMHwDevice::zeroReg(std::string const& name)
-{
+  void gem::hw::GEMHwDevice::zeroReg(std::string const& name)
+  {
   writeReg(name,0);
-}
+  }
 */
 
 void gem::hw::GEMHwDevice::zeroRegs(std::vector<std::string> const& regNames)
@@ -458,17 +461,17 @@ std::vector<uint32_t> gem::hw::GEMHwDevice::readBlock(std::string const& name, s
       std::string msg     = toolbox::toString("%s: %s.", msgBase.c_str(), err.what());
       std::string errCode = toolbox::toString("%s",err.what());
       if (knownErrorCode(errCode)) {
-	++retryCount;
-	if (retryCount > 4)
-	  DEBUG("Failed to read block " << name << " with " << numWords << " words" <<
-	       ", retrying. retryCount("<<retryCount<<")" << std::endl
-	       << "error was " << errCode
-	       << std::endl);
-	updateErrorCounters(errCode);
-	continue;
+        ++retryCount;
+        if (retryCount > 4)
+          DEBUG("Failed to read block " << name << " with " << numWords << " words" <<
+                ", retrying. retryCount("<<retryCount<<")" << std::endl
+                << "error was " << errCode
+                << std::endl);
+        updateErrorCounters(errCode);
+        continue;
       } else {
-	ERROR(msg);
-	//XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
+        ERROR(msg);
+        //XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
       }
     } catch (std::exception const& err) {
       std::string msgBase = toolbox::toString("Could not read block '%s' (std)", name.c_str());
@@ -502,16 +505,16 @@ void gem::hw::GEMHwDevice::writeBlock(std::string const& name, std::vector<uint3
       std::string msg     = toolbox::toString("%s: %s.", msgBase.c_str(), err.what());
       std::string errCode = toolbox::toString("%s",err.what());
       if (knownErrorCode(errCode)) {
-	++retryCount;
-	if (retryCount > 4)
-	  DEBUG("Failed to write block " << name <<
-	       ", retrying. retryCount("<<retryCount<<")"
-	       << std::endl);
-	updateErrorCounters(errCode);
-	continue;
+        ++retryCount;
+        if (retryCount > 4)
+          DEBUG("Failed to write block " << name <<
+                ", retrying. retryCount("<<retryCount<<")"
+                << std::endl);
+        updateErrorCounters(errCode);
+        continue;
       } else {
-	ERROR(msg);
-	//XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
+        ERROR(msg);
+        //XCEPT_RAISE(gem::hw::exception::HardwareProblem, toolbox::toString("%s.", msgBase.c_str()));
       }
     } catch (std::exception const& err) {
       std::string msgBase = toolbox::toString("Could not write to block '%s' (std)", name.c_str());
@@ -525,12 +528,12 @@ void gem::hw::GEMHwDevice::writeBlock(std::string const& name, std::vector<uint3
 
 bool gem::hw::GEMHwDevice::knownErrorCode(std::string const& errCode) const {
   return ((errCode.find("amount of data")              != std::string::npos) ||
-	  (errCode.find("INFO CODE = 0x4L")            != std::string::npos) ||
-	  (errCode.find("INFO CODE = 0x6L")            != std::string::npos) ||
-	  (errCode.find("timed out")                   != std::string::npos) ||
-	  (errCode.find("had response field = 0x04")   != std::string::npos) ||
-	  (errCode.find("had response field = 0x06")   != std::string::npos) ||
-	  (errCode.find("ControlHub error code is: 4") != std::string::npos));
+          (errCode.find("INFO CODE = 0x4L")            != std::string::npos) ||
+          (errCode.find("INFO CODE = 0x6L")            != std::string::npos) ||
+          (errCode.find("timed out")                   != std::string::npos) ||
+          (errCode.find("had response field = 0x04")   != std::string::npos) ||
+          (errCode.find("had response field = 0x06")   != std::string::npos) ||
+          (errCode.find("ControlHub error code is: 4") != std::string::npos));
 }
 
 

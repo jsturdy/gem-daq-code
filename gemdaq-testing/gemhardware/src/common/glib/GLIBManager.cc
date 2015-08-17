@@ -53,7 +53,7 @@ void gem::hw::glib::GLIBManager::actionPerformed(xdata::Event& event)
 {
   if (event.type() == "setDefaultValues" || event.type() == "urn:xdaq-event:setDefaultValues") {
     LOG4CPLUS_DEBUG(getApplicationLogger(), "GLIBManager::actionPerformed() setDefaultValues" << 
-		    "Default configuration values have been loaded from xml profile");
+                    "Default configuration values have been loaded from xml profile");
     //gemMonitorP_->startMonitoring();
   }
   // update monitoring variables

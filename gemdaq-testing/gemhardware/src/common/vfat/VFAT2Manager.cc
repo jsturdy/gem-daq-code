@@ -11,7 +11,7 @@
 XDAQ_INSTANTIATOR_IMPL(gem::hw::vfat::VFAT2Manager)
 
 gem::hw::vfat::VFAT2Manager::VFAT2Manager(xdaq::ApplicationStub * s)
-  throw (xdaq::exception::Exception):
+throw (xdaq::exception::Exception):
 xdaq::WebApplication(s)
 {
   xgi::framework::deferredbind(this, this, &VFAT2Manager::Default,       "Default"     );
@@ -48,15 +48,15 @@ void gem::hw::vfat::VFAT2Manager::actionPerformed(xdata::Event& event)
   // This is called after all default configuration values have been
   // loaded (from the XDAQ configuration file).
   if (event.type() == "urn:xdaq-event:setDefaultValues") {
-      std::stringstream ss;
-      ss << "device_=[" << device_.toString() << "]" << std::endl;
-      ss << "ipAddr_=[" << ipAddr_.toString() << "]" << std::endl;
-      ss << "settingsFile_=[" << settingsFile_.toString() << "]" << std::endl;
-      LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::actionPerformed() Default configuration values have been loaded");
-      LOG4CPLUS_DEBUG(this->getApplicationLogger(), ss.str());
-      //LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::actionPerformed()   --> starting monitoring");
-      //monitorP_->startMonitoring();
-    }
+    std::stringstream ss;
+    ss << "device_=[" << device_.toString() << "]" << std::endl;
+    ss << "ipAddr_=[" << ipAddr_.toString() << "]" << std::endl;
+    ss << "settingsFile_=[" << settingsFile_.toString() << "]" << std::endl;
+    LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::actionPerformed() Default configuration values have been loaded");
+    LOG4CPLUS_DEBUG(this->getApplicationLogger(), ss.str());
+    //LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::actionPerformed()   --> starting monitoring");
+    //monitorP_->startMonitoring();
+  }
   //Initialize the HW device, should have picked up the device string from the xml file by now
   LOG4CPLUS_DEBUG(this->getApplicationLogger(),"VFAT2Manager::VFAT2Manager::4 device_ = " << device_.toString() << std::endl);
   vfatDevice = new HwVFAT2(device_.toString());
@@ -69,7 +69,7 @@ void gem::hw::vfat::VFAT2Manager::actionPerformed(xdata::Event& event)
   //readVFAT2Registers(vfatParams);
   vfatDevice->getAllSettings();
   LOG4CPLUS_DEBUG(this->getApplicationLogger(),"vfatParams:" << std::endl
-		 << vfatDevice->getVFAT2Params() << std::endl);
+                  << vfatDevice->getVFAT2Params() << std::endl);
   //readVFAT2Registers();
   vfatParams_ = vfatDevice->getVFAT2Params();
   LOG4CPLUS_DEBUG(this->getApplicationLogger(),"VFAT2Manager::VFAT2Manager::6 device_ = " << device_.toString() << std::endl);
@@ -130,33 +130,33 @@ void gem::hw::vfat::VFAT2Manager::readVFAT2Registers(gem::hw::vfat::VFAT2Control
     //std::vector<std::string> nodes_ = hw.getNodes(deviceBaseNode+".*");
     nodes_ = hw.getNodes(deviceBaseNode+".*");
     nodes_.erase( std::remove(nodes_.begin(),
-			     nodes_.end(),
-			     deviceBaseNode),
-		 nodes_.end() );
+                              nodes_.end(),
+                              deviceBaseNode),
+                  nodes_.end() );
     
     std::vector<std::string>::iterator cleannode  = nodes_.begin();
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"before removal::getNodes(): " << std::endl
-		   << "nodes_.size() = " << nodes_.size() << std::endl);
+                    << "nodes_.size() = " << nodes_.size() << std::endl);
     std::copy(nodes_.begin(),nodes_.end(),std::ostream_iterator<std::string>(std::cout,", "));
     
     for (; cleannode != nodes_.end(); ++cleannode) {
       cleannode->erase(cleannode->find(deviceBaseNode+"."),
-		       std::string(deviceBaseNode+".").length());
+                       std::string(deviceBaseNode+".").length());
     }
     
     std::vector<std::string>::const_iterator node = nodes_.begin();
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"after removal::getNodes(): " << std::endl
-		   << "nodes_.size() = " << nodes_.size() << std::endl);
+                    << "nodes_.size() = " << nodes_.size() << std::endl);
     std::copy(nodes_.begin(),nodes_.end(),std::ostream_iterator<std::string>(std::cout,", "));
     
     node = nodes_.begin();
     LOG4CPLUS_DEBUG(this->getApplicationLogger(), "attempting to read the vfat registers");
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"start reading::getNodes(): " << std::endl
-		   << "nodes_.size() = " << nodes_.size() << std::endl);
+                    << "nodes_.size() = " << nodes_.size() << std::endl);
     
     for (; node != nodes_.end(); ++node) {
       LOG4CPLUS_DEBUG(this->getApplicationLogger(),"reading::getNodes(): " << std::endl
-		     << "nodes_.size() = " << nodes_.size() << std::endl);
+                      << "nodes_.size() = " << nodes_.size() << std::endl);
       LOG4CPLUS_DEBUG(this->getApplicationLogger(), "attempting to read register " << (*node));
       vfatFullRegs_[*node] = vfatDevice->readReg(vfatDevice->getDeviceBaseNode(),*node);
       vfatRegs_[*node]     = vfatDevice->readVFATReg(*node);
@@ -164,7 +164,7 @@ void gem::hw::vfat::VFAT2Manager::readVFAT2Registers(gem::hw::vfat::VFAT2Control
       std::cout << *node << "  0x" << std::hex << static_cast<unsigned>(vfatRegs_[*node])     << std::dec << std::endl;
     }
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"done reading::getNodes(): " << std::endl
-		   << "nodes_.size() = " << nodes_.size() << std::endl);
+                    << "nodes_.size() = " << nodes_.size() << std::endl);
     
     
     LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::readVFAT2Registers() --> read in current parameters");
@@ -231,34 +231,34 @@ void gem::hw::vfat::VFAT2Manager::readVFAT2Registers(gem::hw::vfat::VFAT2Control
     LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::readVFAT2Registers() --> read in current parameters");
     LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::readVFAT2Registers()::Control Register 0");
     LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("0x%02x <%s:%s:%s:%s:%s>")
-						      % static_cast<unsigned>(params.control0)
-						      % gem::hw::vfat::RunModeToString.at(        params.runMode  )
-						      % gem::hw::vfat::TriggerModeToString.at(    params.trigMode )
-						      % gem::hw::vfat::MSPolarityToString.at(     params.msPol    )
-						      % gem::hw::vfat::CalPolarityToString.at(    params.calPol   )
-						      % gem::hw::vfat::CalibrationModeToString.at(params.calibMode)));
+                                                       % static_cast<unsigned>(params.control0)
+                                                       % gem::hw::vfat::RunModeToString.at(        params.runMode  )
+                                                       % gem::hw::vfat::TriggerModeToString.at(    params.trigMode )
+                                                       % gem::hw::vfat::MSPolarityToString.at(     params.msPol    )
+                                                       % gem::hw::vfat::CalPolarityToString.at(    params.calPol   )
+                                                       % gem::hw::vfat::CalibrationModeToString.at(params.calibMode)));
     
     LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::readVFAT2Registers()::Control Register 1");
     LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("0x%02x <%s:%s:%s:%s>")
-						      % static_cast<unsigned>(params.control1)
-						      % gem::hw::vfat::DACModeToString.at(      params.dacMode   )
-						      % gem::hw::vfat::ProbeModeToString.at(    params.probeMode )
-						      % gem::hw::vfat::LVDSPowerSaveToString.at(params.lvdsMode  )
-						      % gem::hw::vfat::ReHitCTToString.at(      params.reHitCT   )));
+                                                       % static_cast<unsigned>(params.control1)
+                                                       % gem::hw::vfat::DACModeToString.at(      params.dacMode   )
+                                                       % gem::hw::vfat::ProbeModeToString.at(    params.probeMode )
+                                                       % gem::hw::vfat::LVDSPowerSaveToString.at(params.lvdsMode  )
+                                                       % gem::hw::vfat::ReHitCTToString.at(      params.reHitCT   )));
     
     LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::readVFAT2Registers()::Control Register 2");
     LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("0x%02x <%s:%s:%s>")
-						      %static_cast<unsigned>(params.control2)
-						      % gem::hw::vfat::HitCountModeToString.at( params.hitCountMode)
-						      % gem::hw::vfat::MSPulseLengthToString.at(params.msPulseLen  )
-						      % gem::hw::vfat::DigInSelToString.at(     params.digInSel    )));
+                                                       %static_cast<unsigned>(params.control2)
+                                                       % gem::hw::vfat::HitCountModeToString.at( params.hitCountMode)
+                                                       % gem::hw::vfat::MSPulseLengthToString.at(params.msPulseLen  )
+                                                       % gem::hw::vfat::DigInSelToString.at(     params.digInSel    )));
     
     LOG4CPLUS_DEBUG(getApplicationLogger(), "VFAT2Manager::readVFAT2Registers()::Control Register 3");
     LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("0x%02x <%s:%s:%s>")
-						      % static_cast<unsigned>(params.control3)
-						      % gem::hw::vfat::TrimDACRangeToString.at( params.trimDACRange    )
-						      % gem::hw::vfat::PbBGToString.at(         params.padBandGap      )
-						      % gem::hw::vfat::DFTestPatternToString.at(params.sendTestPattern )));
+                                                       % static_cast<unsigned>(params.control3)
+                                                       % gem::hw::vfat::TrimDACRangeToString.at( params.trimDACRange    )
+                                                       % gem::hw::vfat::PbBGToString.at(         params.padBandGap      )
+                                                       % gem::hw::vfat::DFTestPatternToString.at(params.sendTestPattern )));
   }
   catch (uhal::exception::exception const& err) {
     std::string msg =
@@ -273,7 +273,7 @@ void gem::hw::vfat::VFAT2Manager::readVFAT2Registers(gem::hw::vfat::VFAT2Control
     XCEPT_RAISE(gem::hw::vfat::exception::VFATHwProblem, msg);
   }
   LOG4CPLUS_DEBUG(this->getApplicationLogger(),"ending constructor::getNodes(): " << std::endl
-		 << "nodes_.size() = " << nodes_.size() << std::endl);
+                  << "nodes_.size() = " << nodes_.size() << std::endl);
 }
 
 void gem::hw::vfat::VFAT2Manager::Default(xgi::Input * in, xgi::Output * out )
@@ -296,20 +296,20 @@ void gem::hw::vfat::VFAT2Manager::ControlPanel(xgi::Input * in, xgi::Output * ou
 
     //head = out["head"]
     *out << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatmanager.css\"/>"          << std::endl
-	 << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatcontrolregisters.css\"/>" << std::endl
-	 << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatglobalsettings.css\"/>"   << std::endl
-	 << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatchannelregister.css\"/>"  << std::endl
-	 << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatcommands.css\"/>"         << std::endl;
+         << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatcontrolregisters.css\"/>" << std::endl
+         << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatglobalsettings.css\"/>"   << std::endl
+         << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatchannelregister.css\"/>"  << std::endl
+         << "    <link rel=\"stylesheet\" href=\"/gemdaq/gemhardware/html/css/vfat/vfatcommands.css\"/>"         << std::endl;
 
     
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"building the control panel vfatParams_:" << vfatParams_);
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"vfatDevice->getVFAT2Params():" << vfatDevice->getVFAT2Params());
     std::string method = toolbox::toString("/%s/controlVFAT2",getApplicationDescriptor()->getURN().c_str());
     *out << cgicc::form().set("method","POST")
-                         .set("action",method)
-                         //.set("action","")
-                         //.set("onsubmit","return false;")
-	 << std::endl;
+      .set("action",method)
+      //.set("action","")
+      //.set("onsubmit","return false;")
+         << std::endl;
     //.set("onsubmit","return false;")
     //     << cgicc::br() << std::endl;
     //.set("action", method) << "</br>" << std::endl;
@@ -325,9 +325,9 @@ void gem::hw::vfat::VFAT2Manager::ControlPanel(xgi::Input * in, xgi::Output * ou
       *out << *leftSide << std::endl;
       */
     *out << cgicc::section().set("style","display:inline-block;float:left")       << std::endl
-	 << cgicc::fieldset().set("class","vfatParameters")       << std::endl
-    	 << cgicc::legend("VFAT2 Parameters")                     << std::endl
-    	 << cgicc::span().set("style","display:block;float:left") << std::endl;
+         << cgicc::fieldset().set("class","vfatParameters")       << std::endl
+         << cgicc::legend("VFAT2 Parameters")                     << std::endl
+         << cgicc::span().set("style","display:block;float:left") << std::endl;
 
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"building the VFATInfoLayout");
     gem::hw::vfat::VFAT2Manager::VFAT2ControlPanelWeb::createVFATInfoLayout(out, vfatParams_);
@@ -339,29 +339,29 @@ void gem::hw::vfat::VFAT2Manager::ControlPanel(xgi::Input * in, xgi::Output * ou
     gem::hw::vfat::VFAT2Manager::VFAT2ControlPanelWeb::createCounterLayout(out, vfatParams_);
     *out << cgicc::span()     << std::endl;
     *out << cgicc::comment() << "ending the VFAT2 Parameters fieldset" << cgicc::comment() << std::endl
-	 << cgicc::fieldset() << std::endl;
+         << cgicc::fieldset() << std::endl;
     *out << std::endl;
     *out << "      <section class=\"vfatSettings\">" << std::endl;
     *out << "        <fieldset class=\"vfatGlobalSettings\">" << std::endl
-	 << cgicc::legend("Global settings")      << std::endl;
+         << cgicc::legend("Global settings")      << std::endl;
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"building the ControlRegisterLayout");
     gem::hw::vfat::VFAT2Manager::VFAT2ControlPanelWeb::createControlRegisterLayout(out, vfatParams_);
     *out << cgicc::br() << std::endl
-	 << std::endl;
+         << std::endl;
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"building the SettingsLayout");
     gem::hw::vfat::VFAT2Manager::VFAT2ControlPanelWeb::createSettingsLayout(out, vfatParams_);
 
     *out << cgicc::comment() << "ending the Global settings fieldset" << cgicc::comment() << std::endl
-	 << "	     </fieldset>" << std::endl;
+         << "	     </fieldset>" << std::endl;
     
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"building the ChannelRegisterLayout");
     gem::hw::vfat::VFAT2Manager::VFAT2ControlPanelWeb::createChannelRegisterLayout(out, vfatParams_);
     *out << cgicc::comment() << "ending the vfatSettings section" << cgicc::comment() << std::endl
-	 << "      </section>" << std::endl
+         << "      </section>" << std::endl
     
-	 << cgicc::comment() << "ending the left side section" << cgicc::comment() << std::endl
+         << cgicc::comment() << "ending the left side section" << cgicc::comment() << std::endl
       //<< "    </section>" << std::endl;
-	 << cgicc::section()  << std::endl;
+         << cgicc::section()  << std::endl;
     
 
     /*
@@ -372,67 +372,67 @@ void gem::hw::vfat::VFAT2Manager::ControlPanel(xgi::Input * in, xgi::Output * ou
     gem::hw::vfat::VFAT2Manager::VFAT2ControlPanelWeb::createCommandLayout(out, vfatParams_);
     
     *out << cgicc::section() << std::endl
-	 << "Bad headers:: " << (vfatDevice->ipBusErrs_).BadHeader     << cgicc::br() << std::endl
-	 << "Read errors:: " << (vfatDevice->ipBusErrs_).ReadError     << cgicc::br() << std::endl
-	 << "Timeouts   :: " << (vfatDevice->ipBusErrs_).Timeout       << cgicc::br() << std::endl
-	 << "CH errors  :: " << (vfatDevice->ipBusErrs_).ControlHubErr << cgicc::br() << std::endl
-	 << cgicc::section() << std::endl;
+         << "Bad headers:: " << (vfatDevice->ipBusErrs_).BadHeader     << cgicc::br() << std::endl
+         << "Read errors:: " << (vfatDevice->ipBusErrs_).ReadError     << cgicc::br() << std::endl
+         << "Timeouts   :: " << (vfatDevice->ipBusErrs_).Timeout       << cgicc::br() << std::endl
+         << "CH errors  :: " << (vfatDevice->ipBusErrs_).ControlHubErr << cgicc::br() << std::endl
+         << cgicc::section() << std::endl;
     
     *out << cgicc::form() << cgicc::br() << std::endl;
     *out << cgicc::script().set("type","text/javascript")
-                           .set("src","http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js")
-	 << cgicc::script() << std::endl;
+      .set("src","http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js")
+         << cgicc::script() << std::endl;
     *out << cgicc::script().set("type","text/javascript")
-                           .set("src","http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js")
-	 << cgicc::script() << std::endl;
+      .set("src","http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js")
+         << cgicc::script() << std::endl;
 
     /*
-    *out << cgicc::script().set("type","text/javascript")
-                           .set("src","gemdaq/gemhardware/html/scripts/loadVFATSettings.js")
-	 << cgicc::script() << cgicc::br()
-	 << std::endl;
+     *out << cgicc::script().set("type","text/javascript")
+     .set("src","gemdaq/gemhardware/html/scripts/loadVFATSettings.js")
+     << cgicc::script() << cgicc::br()
+     << std::endl;
     */
     *out << cgicc::script().set("type","text/javascript")
-                           .set("src","/gemdaq/gemhardware/html/scripts/toggleVFATCheckboxes.js")
-	 << cgicc::script() << cgicc::br()
-	 << std::endl;
+      .set("src","/gemdaq/gemhardware/html/scripts/toggleVFATCheckboxes.js")
+         << cgicc::script() << cgicc::br()
+         << std::endl;
 
     /*
     **load here all the scripts to jquery/ajax the forms/values/files**
     *out << "    <script type=\"text/javascript\">" << std::endl
-	 << "      $(document).ready(function()"    << std::endl
-	 << "        {" << std::endl
-	 << "          alert(\"JQuery is working! :D\");" << std::endl
-	 << "        });"   << std::endl
-	 << "    </script>" << std::endl;
+    << "      $(document).ready(function()"    << std::endl
+    << "        {" << std::endl
+    << "          alert(\"JQuery is working! :D\");" << std::endl
+    << "        });"   << std::endl
+    << "    </script>" << std::endl;
     *out << std::endl; 
     *out << std::endl; 
     *out << "    <script type=\"text/javascript\">" << std::endl
-	 << "    $(document).ready( function () {"  << std::endl
-	 << "    	var registerSetBoxes = [$(\"#CR0Set\"),$(\"#CR1Set\"),$(\"#CR2Set\"),$(\"#CR3Set\"),"       << std::endl
-	 << "    				$(\"#SetIPreampIn\"),$(\"#SetIPreampFeed\"),$(\"#SetIPreampOut\")," << std::endl
-	 << "    				$(\"#SetIShaper\"),$(\"#SetIShaperFeed\"),"                         << std::endl
-	 << "    				$(\"#SetIComp\"),"   << std::endl
-	 << "    				$(\"#SetLatency\")," << std::endl
-	 << "    				$(\"#SetVCal\"),"    << std::endl
-	 << "    				$(\"#SetVThreshold1\"),$(\"#SetVThreshold2\")," << std::endl
-	 << "    				$(\"#SetCalPhase\")" << std::endl
-	 << "    				];"                  << std::endl
-	 << "    	var nBoxes = registerSetBoxes.length;"       << std::endl
-	 << "    	$(\"#SelectAll\").click(function(event) {"   << std::endl
-	 << "                   alert(\"Select all checkboxes\");"   << std::endl
-	 << "    		for (var i=0; i<nBoxes; ++i ) {"     << std::endl
-	 << "    		    registerSetBoxes[i].get(0).checked = true;" << std::endl
-	 << "    		};" << std::endl
-	 << "    	    });"    << std::endl
-	 << "    	$(\"#SelectNone\").click(function(event) {"  << std::endl
-	 << "                   alert(\"Deselect all checkboxes\");" << std::endl
-	 << "    		for (var i=0; i<nBoxes; ++i ) {"     << std::endl
-	 << "    		    registerSetBoxes[i].get(0).checked = false;" << std::endl
-	 << "    		};" << std::endl
-	 << "    	    });"    << std::endl
-	 << "        });"           << std::endl
-	 << "    </script>"         << std::endl;
+    << "    $(document).ready( function () {"  << std::endl
+    << "    	var registerSetBoxes = [$(\"#CR0Set\"),$(\"#CR1Set\"),$(\"#CR2Set\"),$(\"#CR3Set\"),"       << std::endl
+    << "    				$(\"#SetIPreampIn\"),$(\"#SetIPreampFeed\"),$(\"#SetIPreampOut\")," << std::endl
+    << "    				$(\"#SetIShaper\"),$(\"#SetIShaperFeed\"),"                         << std::endl
+    << "    				$(\"#SetIComp\"),"   << std::endl
+    << "    				$(\"#SetLatency\")," << std::endl
+    << "    				$(\"#SetVCal\"),"    << std::endl
+    << "    				$(\"#SetVThreshold1\"),$(\"#SetVThreshold2\")," << std::endl
+    << "    				$(\"#SetCalPhase\")" << std::endl
+    << "    				];"                  << std::endl
+    << "    	var nBoxes = registerSetBoxes.length;"       << std::endl
+    << "    	$(\"#SelectAll\").click(function(event) {"   << std::endl
+    << "                   alert(\"Select all checkboxes\");"   << std::endl
+    << "    		for (var i=0; i<nBoxes; ++i ) {"     << std::endl
+    << "    		    registerSetBoxes[i].get(0).checked = true;" << std::endl
+    << "    		};" << std::endl
+    << "    	    });"    << std::endl
+    << "    	$(\"#SelectNone\").click(function(event) {"  << std::endl
+    << "                   alert(\"Deselect all checkboxes\");" << std::endl
+    << "    		for (var i=0; i<nBoxes; ++i ) {"     << std::endl
+    << "    		    registerSetBoxes[i].get(0).checked = false;" << std::endl
+    << "    		};" << std::endl
+    << "    	    });"    << std::endl
+    << "        });"           << std::endl
+    << "    </script>"         << std::endl;
     *out << std::endl; 
     */
     // *out << "  </body>" << std::endl;
@@ -491,11 +491,11 @@ void gem::hw::vfat::VFAT2Manager::RegisterView(xgi::Input * in, xgi::Output * ou
       *out << "      <tr>"     << std::endl;
       *out << "        <td>"   << *node << "</td>"  << std::endl;
       *out << "        <td>0x" << std::setfill('0') << std::setw(8)
-	   << std::hex << vfatFullRegs_[*node]
-	   << std::dec << "</td>"                   << std::endl;
+           << std::hex << vfatFullRegs_[*node]
+           << std::dec << "</td>"                   << std::endl;
       *out << "        <td>0x" << std::setfill('0') << std::setw(2)
-	   << std::hex << vfatRegs_[*node]
-	   << std::dec << "</td>"                   << std::endl;
+           << std::hex << vfatRegs_[*node]
+           << std::dec << "</td>"                   << std::endl;
       //*out << "        <td>" << cgicc::input().set("type","text"
       //						   ).set("name",boost::str(uregform%ureg)
       //							 ).set("value", boost::str(boost::format("0x%08x")%xreg_users_.at(ureg))
@@ -580,7 +580,7 @@ void gem::hw::vfat::VFAT2Manager::getCheckedRegisters(cgicc::Cgicc cgi, std::vec
 
    Latency     - SetLatency      - Latency     
    VCal        - SetVCal         - VCal        
-    VThreshold1 - SetVThreshold1  - VThreshold1 
+   VThreshold1 - SetVThreshold1  - VThreshold1 
    VThreshold2 - SetVThreshold2  - VThreshold2 
    
    CalPhase - SetCalPhase - CalPhase
@@ -596,7 +596,7 @@ void gem::hw::vfat::VFAT2Manager::getCheckedRegisters(cgicc::Cgicc cgi, std::vec
    HitCount0
    HitCount1
    HitCount2
-   **/
+  **/
 
   //std::vector<std::pair<std::string,uint8_t> > regValsToSet;
   std::pair<std::string,uint8_t> regPair;
@@ -607,106 +607,106 @@ void gem::hw::vfat::VFAT2Manager::getCheckedRegisters(cgicc::Cgicc cgi, std::vec
       std::vector<cgicc::FormEntry> vfat2FormEntries = cgi.getElements();
 
       if (cgi.queryCheckbox("CR0Set") ) {
-	uint8_t regToSet = vfatDevice->getVFAT2Params().control0;
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the run mode to :"+
-		       boost::to_upper_copy(cgi["RunMode"      ]->getValue()));
-	vfatDevice->setRunMode(        (gem::hw::vfat::StringToRunMode        .at(boost::to_upper_copy(cgi["RunMode"    ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the trigger mode to :"+
-		       boost::to_upper_copy(cgi["TriggerMode"      ]->getValue()));
-	vfatDevice->setTriggerMode(    (gem::hw::vfat::StringToTriggerMode    .at(boost::to_upper_copy(cgi["TriggerMode"]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the monostable pulse polarity to :"+
-		       boost::to_upper_copy(cgi["MSPolarity"      ]->getValue()));
-	vfatDevice->setMSPolarity(     (gem::hw::vfat::StringToMSPolarity     .at(boost::to_upper_copy(cgi["MSPolarity" ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the calibration pulse polarity to :"+
-		       boost::to_upper_copy(cgi["CalPolarity"      ]->getValue()));
-	vfatDevice->setCalPolarity(    (gem::hw::vfat::StringToCalPolarity    .at(boost::to_upper_copy(cgi["CalPolarity"]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting calibration mode to :"+
-		       boost::to_upper_copy(cgi["CalMode"      ]->getValue()));
-	vfatDevice->setCalibrationMode((gem::hw::vfat::StringToCalibrationMode.at(boost::to_upper_copy(cgi["CalMode"    ]->getValue()))),regToSet);
+        uint8_t regToSet = vfatDevice->getVFAT2Params().control0;
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the run mode to :"+
+                        boost::to_upper_copy(cgi["RunMode"      ]->getValue()));
+        vfatDevice->setRunMode(        (gem::hw::vfat::StringToRunMode        .at(boost::to_upper_copy(cgi["RunMode"    ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the trigger mode to :"+
+                        boost::to_upper_copy(cgi["TriggerMode"      ]->getValue()));
+        vfatDevice->setTriggerMode(    (gem::hw::vfat::StringToTriggerMode    .at(boost::to_upper_copy(cgi["TriggerMode"]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the monostable pulse polarity to :"+
+                        boost::to_upper_copy(cgi["MSPolarity"      ]->getValue()));
+        vfatDevice->setMSPolarity(     (gem::hw::vfat::StringToMSPolarity     .at(boost::to_upper_copy(cgi["MSPolarity" ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the calibration pulse polarity to :"+
+                        boost::to_upper_copy(cgi["CalPolarity"      ]->getValue()));
+        vfatDevice->setCalPolarity(    (gem::hw::vfat::StringToCalPolarity    .at(boost::to_upper_copy(cgi["CalPolarity"]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting calibration mode to :"+
+                        boost::to_upper_copy(cgi["CalMode"      ]->getValue()));
+        vfatDevice->setCalibrationMode((gem::hw::vfat::StringToCalibrationMode.at(boost::to_upper_copy(cgi["CalMode"    ]->getValue()))),regToSet);
 
-	LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
-	regValsToSet.push_back(std::make_pair("ContReg0",regToSet));
+        LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
+        regValsToSet.push_back(std::make_pair("ContReg0",regToSet));
       }
 
       if (cgi.queryCheckbox("CR1Set") ) {
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting control register 1");
-	uint8_t regToSet = vfatDevice->getVFAT2Params().control1;
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the probe mode to :"+
-		       boost::to_upper_copy(cgi["ProbeMode"      ]->getValue()));
-	vfatDevice->setProbeMode(        (gem::hw::vfat::StringToProbeMode    .at(boost::to_upper_copy(cgi["ProbeMode"    ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the lvds power save state to :"+
-		       boost::to_upper_copy(cgi["LVDSPowerSave"      ]->getValue()));
-	vfatDevice->setLVDSMode(         (gem::hw::vfat::StringToLVDSPowerSave.at(boost::to_upper_copy(cgi["LVDSPowerSave"]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the hit count cycle time to :"+
-		       boost::to_upper_copy(cgi["ReHitCT"      ]->getValue()));
-	vfatDevice->setHitCountCycleTime((gem::hw::vfat::StringToReHitCT      .at(boost::to_upper_copy(cgi["ReHitCT"      ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the DAC mode to :"+
-		       boost::to_upper_copy(cgi["DACMode"      ]->getValue()));
-	LOG4CPLUS_DEBUG(getApplicationLogger(), boost::to_upper_copy(cgi["DACMode"      ]->getValue()));
-	vfatDevice->setDACMode(          (gem::hw::vfat::StringToDACMode      .at(boost::to_upper_copy(cgi["DACMode"      ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
-	regValsToSet.push_back(std::make_pair("ContReg1",regToSet));
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting control register 1");
+        uint8_t regToSet = vfatDevice->getVFAT2Params().control1;
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the probe mode to :"+
+                        boost::to_upper_copy(cgi["ProbeMode"      ]->getValue()));
+        vfatDevice->setProbeMode(        (gem::hw::vfat::StringToProbeMode    .at(boost::to_upper_copy(cgi["ProbeMode"    ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the lvds power save state to :"+
+                        boost::to_upper_copy(cgi["LVDSPowerSave"      ]->getValue()));
+        vfatDevice->setLVDSMode(         (gem::hw::vfat::StringToLVDSPowerSave.at(boost::to_upper_copy(cgi["LVDSPowerSave"]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the hit count cycle time to :"+
+                        boost::to_upper_copy(cgi["ReHitCT"      ]->getValue()));
+        vfatDevice->setHitCountCycleTime((gem::hw::vfat::StringToReHitCT      .at(boost::to_upper_copy(cgi["ReHitCT"      ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the DAC mode to :"+
+                        boost::to_upper_copy(cgi["DACMode"      ]->getValue()));
+        LOG4CPLUS_DEBUG(getApplicationLogger(), boost::to_upper_copy(cgi["DACMode"      ]->getValue()));
+        vfatDevice->setDACMode(          (gem::hw::vfat::StringToDACMode      .at(boost::to_upper_copy(cgi["DACMode"      ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
+        regValsToSet.push_back(std::make_pair("ContReg1",regToSet));
       }
 
       if (cgi.queryCheckbox("CR2Set") ) {
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting control register 2");
-	uint8_t regToSet = vfatDevice->getVFAT2Params().control2;
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the monostable pulse length to :"+
-		       boost::to_upper_copy(cgi["MSPulseLength"      ]->getValue()));
-	vfatDevice->setMSPulseLength((gem::hw::vfat::StringToMSPulseLength.at(boost::to_upper_copy(cgi["MSPulseLength"]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the digital input pad to :"+
-		       boost::to_upper_copy(cgi["DigInSel"      ]->getValue()));
-	vfatDevice->setInputPadMode( (gem::hw::vfat::StringToDigInSel     .at(boost::to_upper_copy(cgi["DigInSel"     ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the hit count mode to :"+
-		       boost::to_upper_copy(cgi["HitCountMode"      ]->getValue()));
-	vfatDevice->setHitCountMode( (gem::hw::vfat::StringToHitCountMode .at(boost::to_upper_copy(cgi["HitCountMode" ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
-	regValsToSet.push_back(std::make_pair("ContReg2",regToSet));
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting control register 2");
+        uint8_t regToSet = vfatDevice->getVFAT2Params().control2;
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the monostable pulse length to :"+
+                        boost::to_upper_copy(cgi["MSPulseLength"      ]->getValue()));
+        vfatDevice->setMSPulseLength((gem::hw::vfat::StringToMSPulseLength.at(boost::to_upper_copy(cgi["MSPulseLength"]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the digital input pad to :"+
+                        boost::to_upper_copy(cgi["DigInSel"      ]->getValue()));
+        vfatDevice->setInputPadMode( (gem::hw::vfat::StringToDigInSel     .at(boost::to_upper_copy(cgi["DigInSel"     ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the hit count mode to :"+
+                        boost::to_upper_copy(cgi["HitCountMode"      ]->getValue()));
+        vfatDevice->setHitCountMode( (gem::hw::vfat::StringToHitCountMode .at(boost::to_upper_copy(cgi["HitCountMode" ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
+        regValsToSet.push_back(std::make_pair("ContReg2",regToSet));
       }
 
       if (cgi.queryCheckbox("CR3Set") ) {
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting control register 3");
-	uint8_t regToSet = vfatDevice->getVFAT2Params().control3;
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the trim dac range to :"+
-		       boost::to_upper_copy(cgi["TrimDACRange"      ]->getValue()));
-	vfatDevice->setTrimDACRange((gem::hw::vfat::StringToTrimDACRange .at(boost::to_upper_copy(cgi["TrimDACRange"]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the pad band gap to :"+
-		       boost::to_upper_copy(cgi["PbBG"      ]->getValue()));
-	vfatDevice->setBandgapPad(  (gem::hw::vfat::StringToPbBG         .at(boost::to_upper_copy(cgi["PbBG"        ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the test pattern mode to :"+
-		       boost::to_upper_copy(cgi["DFTest"      ]->getValue()));
-	vfatDevice->sendTestPattern((gem::hw::vfat::StringToDFTestPattern.at(boost::to_upper_copy(cgi["DFTest"      ]->getValue()))),regToSet);
-	LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
-	regValsToSet.push_back(std::make_pair("ContReg3",regToSet));
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting control register 3");
+        uint8_t regToSet = vfatDevice->getVFAT2Params().control3;
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the trim dac range to :"+
+                        boost::to_upper_copy(cgi["TrimDACRange"      ]->getValue()));
+        vfatDevice->setTrimDACRange((gem::hw::vfat::StringToTrimDACRange .at(boost::to_upper_copy(cgi["TrimDACRange"]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the pad band gap to :"+
+                        boost::to_upper_copy(cgi["PbBG"      ]->getValue()));
+        vfatDevice->setBandgapPad(  (gem::hw::vfat::StringToPbBG         .at(boost::to_upper_copy(cgi["PbBG"        ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), "Setting the test pattern mode to :"+
+                        boost::to_upper_copy(cgi["DFTest"      ]->getValue()));
+        vfatDevice->sendTestPattern((gem::hw::vfat::StringToDFTestPattern.at(boost::to_upper_copy(cgi["DFTest"      ]->getValue()))),regToSet);
+        LOG4CPLUS_DEBUG(getApplicationLogger(), boost::str(boost::format("with value 0x%02x")%(unsigned)regToSet));
+        regValsToSet.push_back(std::make_pair("ContReg3",regToSet));
       }
 
       if (cgi.queryCheckbox("SetIPreampIn") )
-	regValsToSet.push_back(std::make_pair("IPreampIn"   , cgi["IPreampIn"   ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("IPreampIn"   , cgi["IPreampIn"   ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetIPreampFeed") )
-	regValsToSet.push_back(std::make_pair("IPreampFeed" , cgi["IPreampFeed" ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("IPreampFeed" , cgi["IPreampFeed" ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetIPreampOut") )
-	regValsToSet.push_back(std::make_pair("IPreampOut"  , cgi["IPreampOut"  ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("IPreampOut"  , cgi["IPreampOut"  ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetIShaper") )
-	regValsToSet.push_back(std::make_pair("IShaper"     , cgi["IShaper"     ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("IShaper"     , cgi["IShaper"     ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetIShaperFeed") )
-	regValsToSet.push_back(std::make_pair("IShaperFeed" , cgi["IShaperFeed" ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("IShaperFeed" , cgi["IShaperFeed" ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetIComp") )
-	regValsToSet.push_back(std::make_pair("IComp"       , cgi["IComp"       ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("IComp"       , cgi["IComp"       ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetLatency") )
-	regValsToSet.push_back(std::make_pair("Latency"     , cgi["Latency"     ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("Latency"     , cgi["Latency"     ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetVCal") )
-	regValsToSet.push_back(std::make_pair("VCal"        , cgi["VCal"        ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("VCal"        , cgi["VCal"        ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetVThreshold1") )
-	regValsToSet.push_back(std::make_pair("VThreshold1" , cgi["VThreshold1" ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("VThreshold1" , cgi["VThreshold1" ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetVThreshold2") )
-	regValsToSet.push_back(std::make_pair("VThreshold2" , cgi["VThreshold2" ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("VThreshold2" , cgi["VThreshold2" ]->getIntegerValue()));
       if (cgi.queryCheckbox("SetCalPhase") )
-	regValsToSet.push_back(std::make_pair("CalPhase"    , cgi["CalPhase"    ]->getIntegerValue()));
+        regValsToSet.push_back(std::make_pair("CalPhase"    , cgi["CalPhase"    ]->getIntegerValue()));
     }
   /*
-  catch (const boost::exception & e)
+    catch (const boost::exception & e)
     {
-      XCEPT_RAISE(boost::exception, e);
+    XCEPT_RAISE(boost::exception, e);
     }
   */
   catch (const xgi::exception::Exception & e)
@@ -806,12 +806,12 @@ void gem::hw::vfat::VFAT2Manager::performAction(cgicc::Cgicc cgi, std::vector<st
     vfatDevice->readVFAT2Channel(1);
     vfatParams_ = vfatDevice->getVFAT2Params();
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"set channel 0/1 - 0x"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].fullChannelReg)<<std::dec<<"::<"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].calPulse0     )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].calPulse      )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].mask          )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].trimDAC       )<<std::dec<<">"
-		   << std::endl);
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].fullChannelReg)<<std::dec<<"::<"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].calPulse0     )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].calPulse      )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].mask          )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[0].trimDAC       )<<std::dec<<">"
+                    << std::endl);
   }
   
   else if (strcmp(controlOption.c_str(),"Get This Channel") == 0) {
@@ -830,7 +830,7 @@ void gem::hw::vfat::VFAT2Manager::performAction(cgicc::Cgicc cgi, std::vector<st
     //shouldn't need protection here
     uint8_t chan = cgi["ChanSel"]->getIntegerValue();
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"Set this channel button pressed for channel "
-		   << (unsigned)chan);
+                    << (unsigned)chan);
     //vfatDevice->getVFAT2Params().channels[chan-1].calPulse  = (cgi.queryCheckbox("ChCal") );
     //vfatDevice->getVFAT2Params().channels[chan-1].mask      = (cgi.queryCheckbox("ChMask") );
 
@@ -852,14 +852,14 @@ void gem::hw::vfat::VFAT2Manager::performAction(cgicc::Cgicc cgi, std::vector<st
     vfatParams_ = vfatDevice->getVFAT2Params();
     vfatParams_.activeChannel = chan;
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),
-		   "chan = "<< (unsigned)chan << "; activeChannel = " <<(unsigned)vfatParams_.activeChannel << std::endl);
+                    "chan = "<< (unsigned)chan << "; activeChannel = " <<(unsigned)vfatParams_.activeChannel << std::endl);
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"set this channel " << (unsigned)chan << " - 0x"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].fullChannelReg)<<std::dec<<"::<"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse0     )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse      )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].mask          )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].trimDAC       )<<std::dec<<">"
-		   << std::endl);
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].fullChannelReg)<<std::dec<<"::<"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse0     )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse      )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].mask          )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].trimDAC       )<<std::dec<<">"
+                    << std::endl);
   }
   
   else if (strcmp(controlOption.c_str(),"Set All Channels") == 0) {
@@ -872,7 +872,7 @@ void gem::hw::vfat::VFAT2Manager::performAction(cgicc::Cgicc cgi, std::vector<st
       setCalPulse = true;
     for (int chan = min_chan; chan < 129; ++chan) {
       if (chan == 1)
-	vfatDevice->enableCalPulseToChannel(chan-1,setCalPulse);
+        vfatDevice->enableCalPulseToChannel(chan-1,setCalPulse);
       vfatDevice->enableCalPulseToChannel(chan,setCalPulse); }
     if (cgi.queryCheckbox("ChMask") )
       setMasked = true;
@@ -880,19 +880,19 @@ void gem::hw::vfat::VFAT2Manager::performAction(cgicc::Cgicc cgi, std::vector<st
       vfatDevice->maskChannel(chan,setMasked);
     if (cgi.queryCheckbox("SetTrimDAC")) 
       for (int chan = min_chan; chan < 129; ++chan)
-	vfatDevice->setChannelTrimDAC(chan,cgi["TrimDAC"]->getIntegerValue());
+        vfatDevice->setChannelTrimDAC(chan,cgi["TrimDAC"]->getIntegerValue());
     
     //vfatDevice->readVFAT2Channels(vfatDevice->getVFAT2Params());
     vfatDevice->readVFAT2Channels();
     vfatParams_ = vfatDevice->getVFAT2Params();
     vfatParams_.activeChannel = chan;
     LOG4CPLUS_DEBUG(this->getApplicationLogger(),"set all channels " << (unsigned)chan << " - 0x"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].fullChannelReg)<<std::dec<<"::<"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse0     )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse      )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].mask          )<<std::dec<<":"
-		   <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].trimDAC       )<<std::dec<<">"
-		   << std::endl);
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].fullChannelReg)<<std::dec<<"::<"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse0     )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].calPulse      )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].mask          )<<std::dec<<":"
+                    <<std::hex<<static_cast<unsigned>(vfatParams_.channels[chan-1].trimDAC       )<<std::dec<<">"
+                    << std::endl);
   }
 
   else if (strcmp(controlOption.c_str(),"Read VFAT") == 0) {
@@ -914,7 +914,7 @@ void gem::hw::vfat::VFAT2Manager::performAction(cgicc::Cgicc cgi, std::vector<st
     std::vector<std::pair<std::string,uint8_t> >::const_iterator curReg = regValsToSet.begin();
     for (; curReg != regValsToSet.end(); ++curReg) {
       std::string msg =
-	toolbox::toString("%s - 0x%02x",(curReg->first).c_str(),static_cast<unsigned>(curReg->second));
+        toolbox::toString("%s - 0x%02x",(curReg->first).c_str(),static_cast<unsigned>(curReg->second));
       LOG4CPLUS_DEBUG(this->getApplicationLogger(),msg);
     }
     
