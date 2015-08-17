@@ -323,15 +323,16 @@ TFile* thldread(Int_t get=0)
     
         //I think it would be nice to time this...
         uint8_t chan0xf = 0;
+
         for (int chan = 0; chan < 128; ++chan) {
           if (chan < 64){
             chan0xf = ((vfat.lsData >> chan) & 0x1);
             histos[chan]->Fill(chan0xf);
-          if(!chan0xf) hiCh128->Fill(chan);
+	    if(chan0xf != 0x0) hiCh128->Fill(chan);
     	  } else {
             chan0xf = ((vfat.msData >> (chan-64)) & 0x1);
       	    histos[chan]->Fill(chan0xf);
-    	  if(!chan0xf) hiCh128->Fill(chan);
+    	    if(chan0xf != 0x0) hiCh128->Fill(chan);
           }
         }
     
