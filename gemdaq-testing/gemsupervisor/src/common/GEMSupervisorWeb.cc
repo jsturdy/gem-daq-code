@@ -61,95 +61,95 @@ void gem::supervisor::GEMSupervisorWeb::controlPanel(xgi::Input * in, xgi::Outpu
       if (!is_working_ && !is_running_) {
       }
       else if (is_working_) {
-	cgicc::HTTPResponseHeader &head = out->getHTTPResponseHeader();
-	head.addHeader("Refresh","2");
+        cgicc::HTTPResponseHeader &head = out->getHTTPResponseHeader();
+        head.addHeader("Refresh","2");
       }
       else if (is_running_) {
-	cgicc::HTTPResponseHeader &head = out->getHTTPResponseHeader();
-	head.addHeader("Refresh","30");
+        cgicc::HTTPResponseHeader &head = out->getHTTPResponseHeader();
+        head.addHeader("Refresh","30");
       }
 
       *out << "<table class=\"xdaq-table\">" << std::endl
-	   << cgicc::thead() << std::endl
-	   << cgicc::tr()    << std::endl //open
-	   << cgicc::th()    << "Control" << cgicc::th() << std::endl
-	   << cgicc::tr()    << std::endl //close
-	   << cgicc::thead() << std::endl 
+           << cgicc::thead() << std::endl
+           << cgicc::tr()    << std::endl //open
+           << cgicc::th()    << "Control" << cgicc::th() << std::endl
+           << cgicc::tr()    << std::endl //close
+           << cgicc::thead() << std::endl 
       
-	   << "<tbody>" << std::endl
-	   << "<tr>"    << std::endl
-	   << "<td>"    << std::endl;
+           << "<tbody>" << std::endl
+           << "<tr>"    << std::endl
+           << "<td>"    << std::endl;
     
       if (state == "Initial") {
-	//send the initialize command
-	*out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Initialize") << std::endl;
-	*out << cgicc::input().set("type", "submit")
-	  .set("name", "command").set("title", "Initialize GEM system.")
-	  .set("value", "Initialize") << std::endl;
-	*out << cgicc::form() << std::endl;
+        //send the initialize command
+        *out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Initialize") << std::endl;
+        *out << cgicc::input().set("type", "submit")
+          .set("name", "command").set("title", "Initialize GEM system.")
+          .set("value", "Initialize") << std::endl;
+        *out << cgicc::form() << std::endl;
       }
     
       else if (state == "Halted" || state == "Configured") {
-	//this will allow the parameters to be set to the chip and scan routine
-	*out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Configure") << std::endl;
-	*out << cgicc::input().set("type", "submit")
-	  .set("name", "command").set("title", "Configure threshold scan.")
-	  .set("value", "Configure") << std::endl;
-	*out << cgicc::form()        << std::endl;
+        //this will allow the parameters to be set to the chip and scan routine
+        *out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Configure") << std::endl;
+        *out << cgicc::input().set("type", "submit")
+          .set("name", "command").set("title", "Configure threshold scan.")
+          .set("value", "Configure") << std::endl;
+        *out << cgicc::form()        << std::endl;
       }
     
       else if (!(state == "Running")) {
-	//hardware is initialized and configured, we can start the run
-	*out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Start") << std::endl;
-	*out << cgicc::input().set("type", "submit")
-	  .set("name", "command").set("title", "Start GEM system.")
-	  .set("value", "Start") << std::endl;
-	*out << cgicc::form()    << std::endl;
+        //hardware is initialized and configured, we can start the run
+        *out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Start") << std::endl;
+        *out << cgicc::input().set("type", "submit")
+          .set("name", "command").set("title", "Start GEM system.")
+          .set("value", "Start") << std::endl;
+        *out << cgicc::form()    << std::endl;
       }
     
       else if (state == "Running") {
-	*out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Stop") << std::endl;
-	*out << cgicc::input().set("type", "submit")
-	  .set("name", "command").set("title", "Stop threshold scan.")
-	  .set("value", "Stop") << std::endl;
-	*out << cgicc::form()   << std::endl;
+        *out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Stop") << std::endl;
+        *out << cgicc::input().set("type", "submit")
+          .set("name", "command").set("title", "Stop threshold scan.")
+          .set("value", "Stop") << std::endl;
+        *out << cgicc::form()   << std::endl;
       }
     
       if (state == "Halted" ||
-	  state == "Configured" ||
-	  state == "Running" ||
-	  state == "Paused") {
-	*out << cgicc::comment() << "end the main commands, now putting the halt/reset commands which should be possible all the time" << cgicc::comment() << cgicc::br() << std::endl;
-	*out << cgicc::span()  << std::endl
-	     << "<table>" << std::endl
-	     << "<tr>"    << std::endl
-	     << "<td>"    << std::endl;
+          state == "Configured" ||
+          state == "Running" ||
+          state == "Paused") {
+        *out << cgicc::comment() << "end the main commands, now putting the halt/reset commands which should be possible all the time" << cgicc::comment() << cgicc::br() << std::endl;
+        *out << cgicc::span()  << std::endl
+             << "<table>" << std::endl
+             << "<tr>"    << std::endl
+             << "<td>"    << std::endl;
 	
-	//always should have a halt command
-	*out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Halt") << std::endl;
-	*out << cgicc::input().set("type", "submit")
-	  .set("name", "command").set("title", "Halt GEM system FSM.")
-	  .set("value", "Halt") << std::endl;
-	*out << cgicc::form() << std::endl
-	     << "</td>" << std::endl;
+        //always should have a halt command
+        *out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Halt") << std::endl;
+        *out << cgicc::input().set("type", "submit")
+          .set("name", "command").set("title", "Halt GEM system FSM.")
+          .set("value", "Halt") << std::endl;
+        *out << cgicc::form() << std::endl
+             << "</td>" << std::endl;
 	
-	*out << "<td>"  << std::endl;
-	*out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Reset") << std::endl;
-	*out << cgicc::input().set("type", "submit")
-	  .set("name", "command").set("title", "Reset GEM FSM.")
-	  .set("value", "Reset") << std::endl;
-	*out << cgicc::form() << std::endl;
+        *out << "<td>"  << std::endl;
+        *out << cgicc::form().set("method","POST").set("action", "/" + gemAppP_->getApplicationDescriptor()->getURN() + "/Reset") << std::endl;
+        *out << cgicc::input().set("type", "submit")
+          .set("name", "command").set("title", "Reset GEM FSM.")
+          .set("value", "Reset") << std::endl;
+        *out << cgicc::form() << std::endl;
       }
       *out << "</td>"    << std::endl
-	   << "</tr>"    << std::endl
-	   << "</table>" << std::endl
-	   << cgicc::br() << std::endl
-	   << cgicc::span()  << std::endl;
+           << "</tr>"    << std::endl
+           << "</table>" << std::endl
+           << cgicc::br() << std::endl
+           << cgicc::span()  << std::endl;
       
       *out << "</td>" << std::endl
-	   << "</tr>"    << std::endl
-	   << "</tbody>" << std::endl
-	   << "</table>" << cgicc::br() << std::endl;
+           << "</tr>"    << std::endl
+           << "</tbody>" << std::endl
+           << "</table>" << cgicc::br() << std::endl;
     }
   
     catch (const xgi::exception::Exception& e) {
@@ -209,20 +209,20 @@ void gem::supervisor::GEMSupervisorWeb::monitorPage(xgi::Input * in, xgi::Output
     .set("name","setLevel") << std::endl
 
        << (level == 0 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","0").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","0"))
+           cgicc::input().set("type","radio").set("name","level").set("value","0").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","0"))
        << "version" << std::endl
        << (level == 1 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","1").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","1"))
+           cgicc::input().set("type","radio").set("name","level").set("value","1").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","1"))
        << "minimum" << std::endl
        << (level == 2 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","2").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","2"))
+           cgicc::input().set("type","radio").set("name","level").set("value","2").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","2"))
        << "default" << std::endl
        << (level == 3 ?
-	   cgicc::input().set("type","radio").set("name","level").set("value","3").set("checked") :
-	   cgicc::input().set("type","radio").set("name","level").set("value","3"))
+           cgicc::input().set("type","radio").set("name","level").set("value","3").set("checked") :
+           cgicc::input().set("type","radio").set("name","level").set("value","3"))
        << "maximum" << std::endl
 
        << cgicc::br()     << std::endl

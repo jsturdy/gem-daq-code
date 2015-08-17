@@ -3,43 +3,43 @@
 #include "gem/hw/vfat/HwVFAT2.h"
 
 /* removing HW initialization with an application in favour of just a log4cplus::Logger
-gem::hw::vfat::HwVFAT2::HwVFAT2(xdaq::Application* vfatApp,
-				std::string const& vfatDevice):
-  gem::hw::GEMHwDevice::GEMHwDevice(vfatApp)
-//logVFAT2_(vfatApp->getApplicationLogger()),
-//hwVFAT2_(0)
-//monVFAT2_(0)
-{
-  //this->gem::hw::GEMHwDevice::GEMHwDevice();
-  //gem::hw::vfat::HwVFAT2::initDevice();
-  //can use a different address table for the VFAT access
-  setAddressTableFileName("geb_vfat_address_table.xml");
-  setIPbusProtocolVersion("2.0");
-  setDeviceID("VFAT2Hw");
-  setDeviceBaseNode("VFATS."+vfatDevice);
+   gem::hw::vfat::HwVFAT2::HwVFAT2(xdaq::Application* vfatApp,
+   std::string const& vfatDevice):
+   gem::hw::GEMHwDevice::GEMHwDevice(vfatApp)
+   //logVFAT2_(vfatApp->getApplicationLogger()),
+   //hwVFAT2_(0)
+   //monVFAT2_(0)
+   {
+   //this->gem::hw::GEMHwDevice::GEMHwDevice();
+   //gem::hw::vfat::HwVFAT2::initDevice();
+   //can use a different address table for the VFAT access
+   setAddressTableFileName("geb_vfat_address_table.xml");
+   setIPbusProtocolVersion("2.0");
+   setDeviceID("VFAT2Hw");
+   setDeviceBaseNode("VFATS."+vfatDevice);
 
-  //what's the difference between connect, init, enable for VFAT?
-  //check that register values are hardware default values, if not, something may be amiss
+   //what's the difference between connect, init, enable for VFAT?
+   //check that register values are hardware default values, if not, something may be amiss
   
-  //set register values to sw default values
+   //set register values to sw default values
 
-  //hardware is enabled!
+   //hardware is enabled!
 
-  //set register values to desired values
+   //set register values to desired values
 
-  //hardware is configured!
+   //hardware is configured!
 
-  //set run bit
+   //set run bit
 
-  //hardware is running
-}
+   //hardware is running
+   }
 */
 
 gem::hw::vfat::HwVFAT2::HwVFAT2(std::string const& vfatDevice):
   gem::hw::GEMHwDevice::GEMHwDevice(vfatDevice)
-//logVFAT2_(vfatApp->getApplicationLogger()),
-//hwVFAT2_(0)
-//monVFAT2_(0)
+  //logVFAT2_(vfatApp->getApplicationLogger()),
+  //hwVFAT2_(0)
+  //monVFAT2_(0)
 {
   //this->gem::hw::GEMHwDevice::GEMHwDevice();
   //gem::hw::vfat::HwVFAT2::initDevice();
@@ -127,7 +127,7 @@ bool gem::hw::vfat::HwVFAT2::isHwConnected()
   else if (gem::hw::GEMHwDevice::isHwConnected()) {
     DEBUG("Checking hardware connection" << std::endl);
     try {
-      uint32_t chipTest = readVFATReg("ChipID0");
+      uint32_t chipTest = readVFATReg("ChipID0",true);
       INFO("read chipID0 0x" << std::hex << chipTest << std::dec << std::endl);
       is_connected_ = true;
       
@@ -150,7 +150,7 @@ bool gem::hw::vfat::HwVFAT2::isHwConnected()
 }
 
 //
-uint8_t gem::hw::vfat::HwVFAT2::readVFATReg( std::string const& regName) {
+uint8_t gem::hw::vfat::HwVFAT2::readVFATReg( std::string const& regName, bool debug) {
   uint32_t readVal = readReg(getDeviceBaseNode(),regName);
   
   /*
@@ -173,18 +173,33 @@ uint8_t gem::hw::vfat::HwVFAT2::readVFATReg( std::string const& regName) {
     ++vfatErrors_.Error;
     ERROR(msg);
     XCEPT_RAISE(gem::hw::vfat::exception::TransactionError,msg);
-  } else if ((readVal >> 25) & 0x0){
+  } else if ((readVal >> 25) & 0x0) {
     std::string msg = toolbox::toString("VFAT transaction invalid bit set reading register %s",regName.c_str());
     ++vfatErrors_.Invalid;
     ERROR(msg);
     XCEPT_RAISE(gem::hw::vfat::exception::InvalidTransaction,msg);
-  } else if ((readVal >> 24) & 0x0){
+  } else if ((readVal >> 24) & 0x0) {
     std::string msg = toolbox::toString("VFAT read transaction returned write on register %s",regName.c_str());
     ++vfatErrors_.RWMismatch;
     ERROR(msg);
     XCEPT_RAISE(gem::hw::vfat::exception::WrongTransaction,msg);
   } else {
     return (readVal & 0xff);
+  }
+}
+
+//
+uint8_t gem::hw::vfat::HwVFAT2::readVFATReg( std::string const& regName) {
+  //temporary wrapper just to fix a simple bug
+  //this will have to change in the future, or the return values have to be made sensible
+  try {
+    return readVFATReg(regName,false);
+  } catch (gem::hw::vfat::exception::TransactionError const& e) {
+    return 0xff;      
+  } catch (gem::hw::vfat::exception::InvalidTransaction const& e) {
+    return 0xff;      
+  } catch (gem::hw::vfat::exception::WrongTransaction const& e) {
+    return 0xff;      
   }
 }
 
@@ -227,12 +242,12 @@ void gem::hw::vfat::HwVFAT2::readVFAT2Channel(uint8_t channel)
   vfatParams_.channels[channel-1].mask        = ((chanSettings&VFAT2ChannelBitMasks::ISMASKED)>>VFAT2ChannelBitShifts::ISMASKED);
   vfatParams_.channels[channel-1].trimDAC     = ((chanSettings&VFAT2ChannelBitMasks::TRIMDAC )>>VFAT2ChannelBitShifts::TRIMDAC );
   DEBUG("readVFAT2Channel " << (unsigned)channel << " - 0x"
-	<< std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].fullChannelReg) << std::dec << "::<"
-	<< std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].calPulse0     ) << std::dec << ":"
-	<< std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].calPulse      ) << std::dec << ":"
-	<< std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].mask          ) << std::dec << ":"
-	<< std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].trimDAC       ) << std::dec << ">"
-	<< std::endl);
+        << std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].fullChannelReg) << std::dec << "::<"
+        << std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].calPulse0     ) << std::dec << ":"
+        << std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].calPulse      ) << std::dec << ":"
+        << std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].mask          ) << std::dec << ":"
+        << std::hex << static_cast<unsigned>(vfatParams_.channels[channel-1].trimDAC       ) << std::dec << ">"
+        << std::endl);
 }
 
 //void gem::hw::vfat::HwVFAT2::readVFAT2Channels(gem::hw::vfat::VFAT2ControlParams &params)
@@ -517,16 +532,16 @@ void gem::hw::vfat::HwVFAT2::setChannelTrimDAC(uint8_t channel, uint8_t trimDAC)
 }
 
 /***
-void gem::hw::vfat::HwVFAT2::setChannelTrimDAC(uint8_t channel, double trimDAC) {
-  //channel should be 1 to 128
-  if ((channel > 128) || (channel < 1)) {
+    void gem::hw::vfat::HwVFAT2::setChannelTrimDAC(uint8_t channel, double trimDAC) {
+    //channel should be 1 to 128
+    if ((channel > 128) || (channel < 1)) {
     std::string msg =
-      toolbox::toString("Channel specified (%d) outside expectation (1-128)",channel);
+    toolbox::toString("Channel specified (%d) outside expectation (1-128)",channel);
     XCEPT_RAISE(gem::hw::vfat::exception::NonexistentChannel,msg);
     return;
-  }
-  std::string registerName = "VFATChannels.ChanReg"+channel;
-  uint8_t channelSettings = readVFATReg(registerName);
-  writeVFATReg(registerName,channelSettings|0x20);
-}
+    }
+    std::string registerName = "VFATChannels.ChanReg"+channel;
+    uint8_t channelSettings = readVFATReg(registerName);
+    writeVFATReg(registerName,channelSettings|0x20);
+    }
 ***/
