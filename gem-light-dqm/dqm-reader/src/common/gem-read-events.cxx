@@ -129,6 +129,7 @@ TFile* thldread(Int_t get=0)
   TApplication App("App", &argc, argv);
 #endif
  
+  gem::readout::GEMData   gem;
   gem::readout::GEBData   geb;
   gem::readout::VFATData vfat;
 
@@ -247,9 +248,9 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 1;
+  const Int_t ieventPrint = 3;
   const Int_t ieventMax   = 90000;
-  const Int_t kUPDATE     = 25;
+  const Int_t kUPDATE     = 1;
   bool  OKpri = false;
 
   for(int ievent=0; ievent<ieventMax; ievent++){
@@ -259,7 +260,18 @@ TFile* thldread(Int_t get=0)
 
     if(OKpri) cout << "\nievent " << ievent << endl;
 
-    // read Event Chamber Header
+   /*
+    *  GEM Chamber's Data level
+    */
+
+    gem::readout::readGEMhd1(inpf, gem);
+    gem::readout::readGEMhd2(inpf, gem);
+    gem::readout::readGEMhd3(inpf, gem);
+
+   /*
+    *  GEB Headers Data level
+    */
+
     gem::readout::readGEBheader(inpf, geb);
     //if(OKpri) gem::readout::printGEBheader(ievent,geb);
 
@@ -267,14 +279,14 @@ TFile* thldread(Int_t get=0)
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
 
+   /*
+    *  GEB PayLoad Data
+    */
+
     int iSumVFAT = 0;
     int ifake = 0;
     for(int ivfat=0; ivfat<sumVFAT; ivfat++){
       iSumVFAT++;
-
-     /*
-      *  GEM Event Reading
-      */
       gem::readout::readVFATdata(inpf, ievent, vfat);
   
       uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
@@ -285,7 +297,7 @@ TFile* thldread(Int_t get=0)
       uint16_t  CRC    = vfat.crc;
       uint16_t  BX     = vfat.BXfrOH;  
 
-      //      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
+      //if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
 
         // CRC check
         dataVFAT[11] = vfat.BC;
@@ -301,12 +313,6 @@ TFile* thldread(Int_t get=0)
         dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
 
         uint16_t checkedCRC = checkCRC();
-	/*
-        if(OKpri){
-           cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
-                << "     crc " << std::setfill('0') << std::setw(4) << checkedCRC << dec << "\n" << endl;
-	} 
-        */
   
        /*
         * GEM Event Analyse
@@ -347,12 +353,14 @@ TFile* thldread(Int_t get=0)
         ifake++;
       }// if 1010,1100,1110
       */
-
-    }//end ivfat
+    }//end of GEB PayLoad Data
 
     hiFake->Fill(ifake);
 
-    // read Event Chamber Header 
+   /*
+    *  GEB Trailers Data level
+    */
+
     gem::readout::readGEBtrailer(inpf, geb);
     if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
 
@@ -360,6 +368,12 @@ TFile* thldread(Int_t get=0)
     uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
     uint64_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
 
+   /*
+    *  GEM Trailers Data level
+    */
+    gem::readout::readGEBtr2(inpf, gem);
+    gem::readout::readGEBtr1(inpf, gem);
+   
     if (ievent%kUPDATE == 0 && ievent != 0) {
       c1->cd(1)->SetLogy(); hiVFAT->Draw();
       c1->cd(2)->SetLogy(); hiChip->Draw();
