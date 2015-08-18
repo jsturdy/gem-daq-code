@@ -54,6 +54,7 @@ TFile* thldread(Int_t get=0)
   TApplication App("App", &argc, argv);
 #endif
  
+  gem::readout::GEMData   gem;
   gem::readout::GEBData   geb;
   gem::readout::VFATData vfat;
 
@@ -79,7 +80,7 @@ TFile* thldread(Int_t get=0)
   TFile* hfile = NULL;
   hfile = new TFile(filename,"RECREATE","ROOT file with histograms");
 
-  const Int_t ieventPrint = 2;
+  const Int_t ieventPrint = 3;
   const Int_t ieventMax   = 90000;
   const Int_t kUPDATE     = 50;
   bool OKpri = false;
@@ -92,7 +93,18 @@ TFile* thldread(Int_t get=0)
 
     if(OKpri) cout << "\nievent " << ievent << endl;
 
-    // read Event Chamber Header 
+   /*
+    *  GEM Chamber's Data level
+    */
+
+    gem::readout::readGEMhd1(inpf, gem);
+    gem::readout::readGEMhd2(inpf, gem);
+    gem::readout::readGEMhd3(inpf, gem);
+
+   /*
+    *  GEB Headers Data level
+    */
+
     gem::readout::readGEBheader(inpf, geb);
     if(OKpri) gem::readout::printGEBheader(ievent,geb);
 
@@ -100,10 +112,11 @@ TFile* thldread(Int_t get=0)
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
 
+   /*
+    *  GEB PayLoad Data
+    */
+
     for(int ivfat=0; ivfat<sumVFAT; ivfat++){
-     /*
-      *  GEM Event Reading
-      */
       gem::readout::readVFATdata(inpf, ievent, vfat);
   
       uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
@@ -112,6 +125,7 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
+      uint16_t  BX     = vfat.BXfrOH;  
 
       uint16_t  BC     = (0x0fff & vfat.BC);
       uint8_t   EC     = (0x0fff & vfat.EC) >> 4;
@@ -120,13 +134,16 @@ TFile* thldread(Int_t get=0)
 
       if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) ){
         if(OKpri){
+          cout << "VFAT headers do not match expectation" << endl;
           gem::readout::printVFATdataBits(ievent, vfat);
         }
       }// if 1010,1100,1110, ChipID
+    }//end of GEB PayLoad Data
 
-    }//end ivfat
+   /*
+    *  GEB Trailers Data level
+    */
 
-    // read Event Chamber Header 
     gem::readout::readGEBtrailer(inpf, geb);
     if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
 
@@ -140,6 +157,12 @@ TFile* thldread(Int_t get=0)
       cout << "GEM Camber Treiler: OHcrc " << hex << OHcrc << " OHwCount " << OHwCount << " ChamStatus " << ChamStatus << dec 
            << " ievent " << ievent << endl;
     }
+
+   /*
+    *  GEM Trailers Data level
+    */
+    gem::readout::readGEBtr2(inpf, gem);
+    gem::readout::readGEBtr1(inpf, gem);
 
     if (ievent%kUPDATE == 0 && ievent != 0) {
       //c1->Update();
