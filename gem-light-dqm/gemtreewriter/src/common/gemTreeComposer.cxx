@@ -159,6 +159,7 @@ int main(int argc, char** argv)
     Event *ev = new Event(); 
     GEMtree.Branch("GEMEvents", &ev);
 
+    gem::readout::GEMData   gem;
     gem::readout::GEBData   geb;
     gem::readout::VFATData vfat;
 
@@ -175,7 +176,18 @@ int main(int argc, char** argv)
 
         cout << "Processing event " << ievent << endl;
 
-        // read Event Chamber Header 
+       /*
+        *  GEM Headers Data level
+        */
+      
+        gem::readout::readGEMhd1(inpf, gem);
+        gem::readout::readGEMhd2(inpf, gem);
+        gem::readout::readGEMhd3(inpf, gem);
+
+       /*
+        *  GEB Headers Data level
+        */
+
         gem::readout::readGEBheader(inpf, geb);
         if(OKpri) gem::readout::printGEBheader(ievent,geb);
 
@@ -183,6 +195,9 @@ int main(int argc, char** argv)
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
         uint32_t sumVFAT = (0x000000000fffffff & geb.header);
 
+       /*
+        *  GEB PayLoad Data
+        */
         GEBdata *GEBdata_ = new GEBdata(ZSFlag, ChamID, sumVFAT);
 
         for(int ivfat=0; ivfat<sumVFAT; ivfat++){
@@ -196,8 +211,9 @@ int main(int argc, char** argv)
             uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
             uint16_t  ChipID = (0x0fff & vfat.ChipID);
             uint16_t  CRC    = vfat.crc;
-            uint64_t lsData = vfat.lsData;
-            uint64_t msData = vfat.msData;
+            uint16_t  BX     = vfat.BXfrOH;  
+            uint64_t  lsData = vfat.lsData;
+            uint64_t  msData = vfat.msData;
 
             // CRC check
             dataVFAT[11] = vfat.BC;
@@ -213,21 +229,18 @@ int main(int argc, char** argv)
             dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
     
             uint16_t checkedCRC = checkCRC(OKpri);
-            if(OKpri){
-               cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
-                    << "     crc " << std::setfill('0') << std::setw(4) << checkedCRC << dec << "\n" << endl;
-            }
     
             VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 
-            if(OKpri){
-              gem::readout::printVFATdataBits(ievent, vfat);
-            }
-        }
+            if(OKpri) gem::readout::printVFATdataBits(ievent, vfat);
 
-        // read Event Chamber Header 
+        }//end of GEB PayLoad Data
+
+       /*
+        *  GEB Trailers Data level
+        */
         gem::readout::readGEBtrailer(inpf, geb);
 
         uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
@@ -237,6 +250,12 @@ int main(int argc, char** argv)
 
         GEBdata_->setTrailer(OHcrc, OHwCount, ChamStatus, GEBres);
 
+       /*
+        *  GEM Trailers Data level
+        */
+        gem::readout::readGEBtr2(inpf, gem);
+        gem::readout::readGEBtr1(inpf, gem);
+    
         ev->Build(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
@@ -252,5 +271,5 @@ int main(int argc, char** argv)
     inpf.close();
     hfile->Write();// Save file with tree
     cout<<"=== hfile->Write()"<<endl;
-	return 0;
+    return 0;
 }

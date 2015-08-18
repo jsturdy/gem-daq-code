@@ -261,7 +261,7 @@ TFile* thldread(Int_t get=0)
     if(OKpri) cout << "\nievent " << ievent << endl;
 
    /*
-    *  GEM Chamber's Data level
+    *  GEM Headers Data level
     */
 
     gem::readout::readGEMhd1(inpf, gem);
