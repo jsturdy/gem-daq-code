@@ -7,26 +7,26 @@ namespace gem {
   namespace utils {
 
     template <class L>
-    class LockGuard
-    {
-    public:
-      LockGuard(L& lock);
-      ~LockGuard();
+      class LockGuard
+      {
+      public:
+        LockGuard(L& lock);
+        ~LockGuard();
 
-    private:
-      L& lock_;
+      private:
+        L& lock_;
 
-      // Prevent copying.
-      LockGuard(LockGuard const&);
-      LockGuard& operator=(LockGuard const&);
-    };
+        // Prevent copying.
+        LockGuard(LockGuard const&);
+        LockGuard& operator=(LockGuard const&);
+      };
 
   } // namespace utils
 } // namespace gem
 
 template <class L>
 gem::utils::LockGuard<L>::LockGuard(L& lock) :
-  lock_(lock)
+lock_(lock)
 {
   lock_.lock();
 }

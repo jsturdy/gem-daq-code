@@ -85,7 +85,7 @@ gem::base::GEMFSMApplication::GEMFSMApplication(xdaq::ApplicationStub* stub)
 
   //also want to get the name of the GEM FSM aplication to put it into this commandLoopName
   tmpLoopName << "urn:toolbox-task-workloop:"
-	      << className << ":" << instanceNumber;
+              << className << ":" << instanceNumber;
   workLoopName = tmpLoopName.str();
     
   //appStateInfoSpace_.setFSMState(gemfsm_.getCurrentStateName());
@@ -105,11 +105,11 @@ void gem::base::GEMFSMApplication::xgiInitialize(xgi::Input* in, xgi::Output* ou
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Initialize",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Initialize failed", e );
   }
   
@@ -120,11 +120,11 @@ void gem::base::GEMFSMApplication::xgiEnable(xgi::Input* in, xgi::Output* out) {
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Enable",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Enable failed", e );
   }
   
@@ -135,11 +135,11 @@ void gem::base::GEMFSMApplication::xgiConfigure(xgi::Input* in, xgi::Output* out
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Configure",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Configure failed", e );
   }
   
@@ -150,11 +150,11 @@ void gem::base::GEMFSMApplication::xgiStart(xgi::Input* in, xgi::Output* out) {
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Start",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Start failed", e );
   }
   
@@ -165,11 +165,11 @@ void gem::base::GEMFSMApplication::xgiStop(xgi::Input* in, xgi::Output* out) {
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Stop",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Stop failed", e );
   }
   
@@ -180,11 +180,11 @@ void gem::base::GEMFSMApplication::xgiPause(xgi::Input* in, xgi::Output* out) {
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Pause",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Pause failed", e );
   }
   
@@ -195,11 +195,11 @@ void gem::base::GEMFSMApplication::xgiResume(xgi::Input* in, xgi::Output* out) {
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Resume",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Resume failed", e );
   }
   
@@ -210,11 +210,11 @@ void gem::base::GEMFSMApplication::xgiHalt(xgi::Input* in, xgi::Output* out) {
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Halt",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Halt failed", e );
   }
   
@@ -225,11 +225,11 @@ void gem::base::GEMFSMApplication::xgiReset(xgi::Input* in, xgi::Output* out) {
   try {
     INFO("Sending SOAP command to application");
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Reset",
-						  appContextP_,
-						  appDescriptorP_,
-						  appDescriptorP_
-						  );
-  } catch( toolbox::fsm::exception::Exception& e ){
+                                                  appContextP_,
+                                                  appDescriptorP_,
+                                                  appDescriptorP_
+                                                  );
+  } catch( toolbox::fsm::exception::Exception& e ) {
     XCEPT_RETHROW( xgi::exception::Exception, "Reset failed", e );
   }
   
@@ -242,8 +242,8 @@ void gem::base::GEMFSMApplication::transitionDriver(::toolbox::Event::Reference 
   throw (::toolbox::fsm::exception::Exception) {
   try {
     if (e->type() == "Initialize" || e->type() == "Configure" || e->type() == "Start"  ||
-	e->type() == "Stop"       || e->type() == "Pause"     || e->type() == "Resume" || 
-	e->type() == "Halt"       || e->type() == "Reset" ) {
+        e->type() == "Stop"       || e->type() == "Pause"     || e->type() == "Resume" || 
+        e->type() == "Halt"       || e->type() == "Reset" ) {
       workloopDriver(e->type());
     } else XCEPT_RAISE(::toolbox::fsm::exception::Exception,"Unknown transition command");
   } catch (gem::utils::exception::Exception& ex) {

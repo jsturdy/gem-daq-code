@@ -40,17 +40,17 @@ namespace gem {
       
       //class OptoHybridManager: public gem::base::GEMWebApplication, public gem::base::GEMFSMApplication
       class OptoHybridManager: public xdaq::WebApplication, public xdata::ActionListener
-	{
+        {
 	  
-	public:
-	  XDAQ_INSTANTIATOR();
+        public:
+          XDAQ_INSTANTIATOR();
 	  
-	  OptoHybridManager(xdaq::ApplicationStub * s)
-	    throw (xdaq::exception::Exception);
+          OptoHybridManager(xdaq::ApplicationStub * s)
+            throw (xdaq::exception::Exception);
 
-	  ~OptoHybridManager();
+          ~OptoHybridManager();
 	  
-	}; //end class OptoHybridManager
+        }; //end class OptoHybridManager
 
     }//end namespace gem::hw::optohybrid
     

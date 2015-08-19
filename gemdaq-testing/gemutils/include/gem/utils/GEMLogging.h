@@ -20,9 +20,9 @@ namespace gem {
 
   //generic function to trace hierarchy in the Logger objects from non-xdaq applications
   //copied from HCAL hcalHTR.cc
-//  void setLogger(const log4cplus::Logger& parentLogger) {
-//    m_logger = log4cplus::Logger::getInstance(buildLogName(parentLogger,m_slot));
-//  }
+  //  void setLogger(const log4cplus::Logger& parentLogger) {
+  //    m_logger = log4cplus::Logger::getInstance(buildLogName(parentLogger,m_slot));
+  //  }
 
 }
 
