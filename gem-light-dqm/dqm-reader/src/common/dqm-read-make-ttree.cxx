@@ -60,7 +60,7 @@ TFile* thldread(Int_t get=0)
 
   string file="GEMDQMRawData.dat";
 
-  ifstream inpf(file.c_str());
+  std::ifstream inpf(file.c_str(), std::ios::in|std::ios::binary);
   if(!inpf.is_open()) {
     cout << "\nThe file: " << file.c_str() << " is missing.\n" << endl;
     return 0;
@@ -69,55 +69,47 @@ TFile* thldread(Int_t get=0)
   /* ROOT Analysis Histograms */
   const TString filename = "DQMTreeLight.root";
 
-  // Create a new canvas.
-  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,700,300);
-  c1->SetFillColor(42);
-  c1->GetFrame()->SetFillColor(21);
-  c1->GetFrame()->SetBorderSize(6);
-  c1->GetFrame()->SetBorderMode(-1);
-  c1->Divide(2,1);
-
-  TFile* hfile = NULL;
-  hfile = new TFile(filename,"RECREATE","ROOT file with histograms");
-
-  const Int_t ieventPrint = 3;
+  const Int_t ieventPrint = 5;
   const Int_t ieventMax   = 90000;
-  const Int_t kUPDATE     = 50;
+  const Int_t kUPDATE     = 1;
   bool OKpri = false;
 
+  /*
+   *  Events Loop
+   */
 
-  for(int ievent=0; ievent<ieventMax; ievent++){
+  for(int ievent=1; ievent <= ieventMax; ievent++){
     OKpri = OKprint(ievent,ieventPrint);
     if(inpf.eof()) break;
     if(!inpf.good()) break;
 
-    if(OKpri) cout << "\nievent " << ievent << endl;
+    if(OKpri) cout << "\nievent Start loop" << ievent << endl;
 
    /*
     *  GEM Chamber's Data level
     */
 
-    gem::readout::readGEMhd1(inpf, gem);
-    gem::readout::readGEMhd2(inpf, gem);
-    gem::readout::readGEMhd3(inpf, gem);
+    if(!gem::readout::readGEMhd1(inpf, gem)) break;
+    if(!gem::readout::readGEMhd2(inpf, gem)) break;
+    if(!gem::readout::readGEMhd3(inpf, gem)) break;
 
    /*
     *  GEB Headers Data level
     */
 
-    gem::readout::readGEBheader(inpf, geb);
-    if(OKpri) gem::readout::printGEBheader(ievent,geb);
-
-    uint64_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
-    uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
+    if(!gem::readout::readGEBheader(inpf, geb));
+    //if(OKpri) gem::readout::printGEBheader(ievent,geb);
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
+
+    if(!gem::readout::readGEBrunhed(inpf, geb)) break;
 
    /*
     *  GEB PayLoad Data
     */
 
-    for(int ivfat=0; ivfat<sumVFAT; ivfat++){
-      gem::readout::readVFATdata(inpf, ievent, vfat);
+    for(int ivfat=1; ivfat <= sumVFAT; ivfat++){
+
+      if(!gem::readout::readVFATdata(inpf, ievent, vfat)) break;
   
       uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
       uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
@@ -132,48 +124,35 @@ TFile* thldread(Int_t get=0)
       uint64_t  lsData = vfat.lsData;
       uint64_t  msData = vfat.lsData;
 
-      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) ){
-        if(OKpri){
+      if ( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
           cout << "VFAT headers do not match expectation" << endl;
           gem::readout::printVFATdataBits(ievent, vfat);
-        }
-      }// if 1010,1100,1110, ChipID
+      }// if 1010,1100,1110
+
     }//end of GEB PayLoad Data
 
    /*
     *  GEB Trailers Data level
     */
 
-    gem::readout::readGEBtrailer(inpf, geb);
-    if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
-
-    uint64_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
-    uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
-    uint64_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
-
-    uint16_t GEBres     = (0x000000000000ffff & geb.trailer);
-
-    if(OKpri){
-      cout << "GEM Camber Treiler: OHcrc " << hex << OHcrc << " OHwCount " << OHwCount << " ChamStatus " << ChamStatus << dec 
-           << " ievent " << ievent << endl;
-    }
+    if(!gem::readout::readGEBtrailer(inpf, geb)) break;
+    //if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
 
    /*
     *  GEM Trailers Data level
     */
-    gem::readout::readGEBtr2(inpf, gem);
-    gem::readout::readGEBtr1(inpf, gem);
+    if(!gem::readout::readGEMtr2(inpf, gem)) break;
+    if(!gem::readout::readGEMtr1(inpf, gem)) break;
+
+    gem::readout::printVFATdataBits(ievent, vfat);
 
     if (ievent%kUPDATE == 0 && ievent != 0) {
-      //c1->Update();
       cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
-    if(OKpri) cout<<"ievent "<< ievent <<endl;
   }// end GEB event
   inpf.close();
 
   // Save all objects in this file
-  hfile->Write();
   cout<<"=== hfile->Write()"<<endl;
 
 #ifndef __CINT__

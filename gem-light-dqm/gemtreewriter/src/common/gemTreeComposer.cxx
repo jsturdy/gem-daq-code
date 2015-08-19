@@ -180,9 +180,9 @@ int main(int argc, char** argv)
         *  GEM Headers Data level
         */
       
-        gem::readout::readGEMhd1(inpf, gem);
-        gem::readout::readGEMhd2(inpf, gem);
-        gem::readout::readGEMhd3(inpf, gem);
+        if(!gem::readout::readGEMhd1(inpf, gem)) break;
+        if(!gem::readout::readGEMhd2(inpf, gem)) break;
+        if(!gem::readout::readGEMhd3(inpf, gem)) break;
 
        /*
         *  GEB Headers Data level
@@ -195,13 +195,16 @@ int main(int argc, char** argv)
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
         uint32_t sumVFAT = (0x000000000fffffff & geb.header);
 
+        gem::readout::readGEBrunhed(inpf, geb);
+
        /*
         *  GEB PayLoad Data
         */
         GEBdata *GEBdata_ = new GEBdata(ZSFlag, ChamID, sumVFAT);
 
         for(int ivfat=0; ivfat<sumVFAT; ivfat++){
-            gem::readout::readVFATdata(inpf, ievent, vfat);
+
+            if(!gem::readout::readVFATdata(inpf, ievent, vfat)) break;
 
             uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
             uint16_t  BC     = (0x0fff & vfat.BC);
@@ -241,7 +244,7 @@ int main(int argc, char** argv)
        /*
         *  GEB Trailers Data level
         */
-        gem::readout::readGEBtrailer(inpf, geb);
+        if(!gem::readout::readGEBtrailer(inpf, geb)) break;
 
         uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
         uint16_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
@@ -253,8 +256,8 @@ int main(int argc, char** argv)
        /*
         *  GEM Trailers Data level
         */
-        gem::readout::readGEBtr2(inpf, gem);
-        gem::readout::readGEBtr1(inpf, gem);
+        if(!gem::readout::readGEMtr2(inpf, gem)) break;
+        if(!gem::readout::readGEMtr1(inpf, gem)) break;
     
         ev->Build(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
         ev->addGEBdata(*GEBdata_);
