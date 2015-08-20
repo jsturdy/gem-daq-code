@@ -1,4 +1,0 @@
-//Input files
-./examples/analyzed_gemtree1.root
-./examples/analyzed_gemtree2.root
-./examples/analyzed_gemtree3.root

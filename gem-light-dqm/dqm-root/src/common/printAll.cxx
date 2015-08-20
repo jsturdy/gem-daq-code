@@ -48,28 +48,14 @@ int main(int argc, char** argv)
     if (argc!=2) 
     {
         cout << "Please provide ONE root file." << endl;
-        cout << "Usage: <path>/printer input.txt" << endl;
+        cout << "Usage: <path>/printer input.root" << endl;
 	cout << endl;
         return 0;
     }
 
 
-    
-    //Create output file in proper location
-    time_t t = time(NULL);
-    tm* timePtr = localtime(&t);
-    char oPath [64];
-    char oName [64];
-    char oCommand [64];
-    strftime (oPath, 64, "./output/%m_%d-%H/%b%d_%G-%H_%M_%S/", timePtr);
-    strftime (oName, 64, "./output/%m_%d-%H/%b%d_%G-%H_%M_%S/%b%d_%G-%H_%M_%S.root", timePtr);
-    strftime (oCommand, 64, ".!mkdir -p ./output/%m_%d-%H/%b%d_%G-%H_%M_%S/", timePtr);
-   
-   
     vector<TH1*> hs;
   
-   
-   
     TString ifilename = argv[1];
     string ifilestring = argv[1];
     TFile *ifile;
@@ -90,11 +76,24 @@ int main(int argc, char** argv)
     int len = name.Length()-loc-5;
     TSubString subname = name(loc,len);
     iname = subname;
+
+    
+    //Create date path to hold runs based on time
+    time_t t = time(NULL);
+    tm* timePtr = localtime(&t);
+    char oPath [64];
+    strftime (oPath, 64, "./output/%m_%d-%H/%b%d_%G-%H_%M_%S/", timePtr);
+    
+    TString dPath = oPath;
+ 
     
 
-    gROOT->ProcessLine(oCommand);
-    TFile *ofile = new TFile(oName, "RECREATE");
-    cout<<"Output File: "<< oName <<endl<<endl;
+    gROOT->ProcessLine(".!mkdir -p "+dPath);
+    TFile *ofile = new TFile(dPath+iname+".root", "RECREATE");
+    cout<<"Output File: "<<dPath<<".root"<<endl<<endl;
+
+
+
     
     //Retrieve histograms from file
     TList* keylist = new TList;
@@ -113,12 +112,18 @@ int main(int argc, char** argv)
   
     int numH = hs.size();
 
-    //Print Canvases of each histogram individually
+    //Which types will be stored
+    vector<TString> types;
+    types.push_back("pdf");
+    types.push_back("png");
+    types.push_back("jpg");
 
+
+    //Print Canvases of each histogram individually
     for (int j=0;j<numH;j++)
     {
 	TCanvas *cv = newCanvas(hs[j]->GetName());
-	printPictures(hs[j],iname,oPath,cv);
+	printPictures(hs[j],iname,dPath,cv,types);
     }
    
 
@@ -127,13 +132,14 @@ int main(int argc, char** argv)
     temph.push_back(hs);
     vector<TString> tempn;
     tempn.push_back(iname);
-    plotAll(temph, tempn, oPath);
+
+    plotEvery(temph, tempn, dPath, types);
 
     
     //Print canvases as other types
-    TString pdf = oPath;
+    TString pdf = dPath;
     pdf+="pdf/";
-    TString png = oPath;
+    TString png = dPath;
     png+="png/";
 
     // printCanvases("pdf", pdf);

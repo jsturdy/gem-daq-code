@@ -357,9 +357,9 @@ void printHistograms(TString type, TString prefix="")
 }
 
 //Prints each individual histogram to picture formats
-void printPictures(TH1 *h, TString iname, TString opath, TCanvas *c, int pad=1)
+void printPictures(TH1 *h, TString iname, TString opath, TCanvas *c, vector<TString> types)
 {							
-    c->cd(pad);
+    c->cd(1);
     int max=h->GetBinContent(h->GetMaximumBin());
     h->SetMaximum(max*1.1);
     h->SetMinimum(0);
@@ -384,17 +384,11 @@ void printPictures(TH1 *h, TString iname, TString opath, TCanvas *c, int pad=1)
     leg->AddEntry(h,iname,"l");
     leg->Draw();
 
-    gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pdfs/");
-    c->Print(opath+"individual_pdfs/"+iname+"--"+h->GetName()+".pdf","pdf");
-
-    gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pngs/");
-    c->Print(opath+"individual_pngs/"+iname+"--"+h->GetName()+".png","png");
-
-    gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_jpgs/");
-    c->Print(opath+"individual_jpgs/"+iname+"--"+h->GetName()+".jpg","jpg");
-    
-    gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_roots/");
-    c->Print(opath+"individual_roots/"+iname+"--"+h->GetName()+".root","root");
+    for (int t=0;t<types.size(); t++)
+    {
+	gROOT->ProcessLine(".!mkdir -p "+opath+types[t]+"/");
+	c->Print(opath+types[t]+"/"+iname+"--"+h->GetName()+"."+types[t],types[t]);
+    }
 }
 
 //Layers all histograms in h on single canvas/pad in different colors/styles
@@ -537,10 +531,10 @@ void layerSpecific(vector<vector<TH1*>> hs, vector<const char*> hnames,vector<TS
     	cout << "Unable to locate all desired Histograms." << endl;
 }
 
-//Creates canvases containing all histograms for each file
-void plotAll(vector<vector<TH1*>> hs, vector<TString> inames, TString opath)
+//Plots NxN canvases for every dimension of hs, with each dimension named by inames
+void plotEvery(vector<vector<TH1*>> hs, vector<TString> inames, TString opath, vector<TString> types)
 {
-    cout << "Plotting all histograms." << endl;
+    cout << "plotEvery: Plotting Every Histograms." << endl;
     int numF = hs.size();
     int numH = hs[0].size();
     int c_side = ceil(sqrt(numH));
@@ -569,15 +563,22 @@ void plotAll(vector<vector<TH1*>> hs, vector<TString> inames, TString opath)
 	}
 	allc->Write();
 	
+	for (int t=0;t<types.size(); t++)
+	{
+	    	gROOT->ProcessLine(".!mkdir -p "+opath+types[t]+"/");
+		allc->Print(opath+types[t]+"/"+"all--"+inames[i]+"."+types[t],types[t]);
+	}
+
+
 	//Print in different formats
-	gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pdfs/");
-	allc->Print(opath+"individual_pdfs/"+inames[i]+".pdf","pdf");
-	gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pngs/");
-	allc->Print(opath+"individual_pngs/"+inames[i]+".png","png");
-	gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_jpgs/");
-	allc->Print(opath+"individual_jpgs/"+inames[i]+".jpg","jpg");
-	gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_roots/");
-	allc->Print(opath+"individual_roots/"+inames[i]+".root","root");
+	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pdfs/");
+	// allc->Print(opath+"individual_pdfs/"+inames[i]+".pdf","pdf");
+	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pngs/");
+	// allc->Print(opath+"individual_pngs/"+inames[i]+".png","png");
+	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_jpgs/");
+	// allc->Print(opath+"individual_jpgs/"+inames[i]+".jpg","jpg");
+	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_roots/");
+	// allc->Print(opath+"individual_roots/"+inames[i]+".root","root");
     }
 }
 
