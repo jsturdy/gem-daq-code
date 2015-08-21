@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "gem/readout/GEMDataAMCformat.h"
+#include "gem/datachecker/GEMDataChecker.h"
+
 #include <cstring>
 #include <sstream>
 #include <vector>
@@ -23,18 +26,6 @@
 #include <TBenchmark.h>
 #include <TInterpreter.h>
 #include <TApplication.h>
-
-#include "gem/readout/GEMDataAMCformat.h"
-#include "gem/datachecker/GEMDataChecker.h"
-
-/*
- *  ChipID GEB data, 21-Aug-2015
- */
-uint16_t slot[24] = 
-       { 0xa64, 0xe74, 0xac0, 0xe98, 0xe7b, 0xa9c, 0xe63, 0xe6b,
-         0xe80, 0xeaf, 0xea3, 0xb44, 0xe5b, 0xb40, 0xeb4, 0xe5f,
-         0xe97, 0xe9f, 0xea7, 0xa84, 0xa78, 0xe78, 0xeab, 0xe7f
-       };
 
 /**
 * ... Threshold Scan ROOT based application, could be used for analisys of XDAQ GEM data ...
@@ -347,7 +338,7 @@ TFile* thldread(Int_t get=0)
       uint32_t ZSFlag24 = ZSFlag;
       int islot = -1;
       for (int ibin = 0; ibin < 24; ibin++){
-	if ( (ChipID == slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
+	if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
       }//end for
 
       hi1010->Fill(b1010);

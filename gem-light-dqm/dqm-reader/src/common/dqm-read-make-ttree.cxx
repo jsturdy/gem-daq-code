@@ -99,6 +99,9 @@ TFile* thldread(Int_t get=0)
 
     if(!gem::readout::readGEBheader(inpf, geb));
     //if(OKpri) gem::readout::printGEBheader(ievent,geb);
+
+    uint64_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
+    uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
 
     if(!gem::readout::readGEBrunhed(inpf, geb)) break;
@@ -123,6 +126,12 @@ TFile* thldread(Int_t get=0)
       uint8_t   EC     = (0x0fff & vfat.EC) >> 4;
       uint64_t  lsData = vfat.lsData;
       uint64_t  msData = vfat.lsData;
+
+      uint32_t ZSFlag24 = ZSFlag;
+      int islot = -1;
+      for (int ibin = 0; ibin < 24; ibin++){
+	if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
+      }//end for
 
       if ( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
           cout << "VFAT headers do not match expectation" << endl;

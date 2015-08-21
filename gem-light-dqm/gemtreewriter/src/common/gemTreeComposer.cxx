@@ -230,9 +230,14 @@ int main(int argc, char** argv)
             dataVFAT[3]  = (0x0000ffff00000000 & vfat.lsData) >> 32;
             dataVFAT[2]  = (0x00000000ffff0000 & vfat.lsData) >> 16;
             dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
-    
             uint16_t checkedCRC = checkCRC(OKpri);
     
+            uint32_t ZSFlag24 = ZSFlag;
+            int islot = -1;
+            for (int ibin = 0; ibin < 24; ibin++){
+              if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
+            }//end for
+      
             VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
