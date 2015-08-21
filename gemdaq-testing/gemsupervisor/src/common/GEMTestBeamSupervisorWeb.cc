@@ -7,9 +7,9 @@
 XDAQ_INSTANTIATOR_IMPL(gem::supervisor::GEMTestBeamSupervisorWeb)
 
 gem::supervisor::GEMTestBeamSupervisorWeb::GEMTestBeamSupervisorWeb(xdaq::ApplicationStub * s)
-  throw (xdaq::exception::Exception):
-  //gem::base::GEMApplication(s)
-  xdaq::WebApplication(s)
+throw (xdaq::exception::Exception):
+//gem::base::GEMApplication(s)
+xdaq::WebApplication(s)
 //, xgi::framework::UIManager(this)
 {
   xgi::framework::deferredbind(this, this, &GEMTestBeamSupervisorWeb::controlPanel,      "controlPanel");
@@ -35,10 +35,10 @@ void gem::supervisor::GEMTestBeamSupervisorWeb::actionPerformed (xdata::Event& e
       ss << "vfatSleep=[" << vfatSleep_ << "]" << std::endl;
       
       /*
-      for ( std::vector<xdata::UnsignedInteger>::size_t i = 0;  i != myVector_.size() ; i++ )
-	{
-	  ss << "myVector=[" << i << "]=[" << myVector_[i] << "]"      << std::endl;
-	}
+        for ( std::vector<xdata::UnsignedInteger>::size_t i = 0;  i != myVector_.size() ; i++ )
+        {
+        ss << "myVector=[" << i << "]=[" << myVector_[i] << "]"      << std::endl;
+        }
       */
       LOG4CPLUS_INFO(this->getApplicationLogger(), ss.str());
     }
@@ -64,39 +64,39 @@ void gem::supervisor::GEMTestBeamSupervisorWeb::controlPanel(xgi::Input * in, xg
   *out << cgicc::form().set("method","GET").set("action", method) << "</br>" << std::endl;
   
   *out << "myParameter:" << cgicc::input().set("type","number"
-					       ).set("name","myParam"
-						     ).set("value", boost::str(boost::format("0x%08x")%myParameter_)
-							   ).set("size","10").set("maxlength","32") << "</br>" << std::endl;
+                                               ).set("name","myParam"
+                                                     ).set("value", boost::str(boost::format("0x%08x")%myParameter_)
+                                                           ).set("size","10").set("maxlength","32") << "</br>" << std::endl;
   *out << std::endl;
 
   *out << "vfatSleep:" << cgicc::input().set("type","number"
-					     ).set("name","vfatSleep"
-						   ).set("value", boost::str(boost::format("%f")%vfatSleep_)
-							 ).set("size","10").set("maxlength","32") << "</br>" << std::endl;
+                                             ).set("name","vfatSleep"
+                                                   ).set("value", boost::str(boost::format("%f")%vfatSleep_)
+                                                         ).set("size","10").set("maxlength","32") << "</br>" << std::endl;
   *out << std::endl;
 
   *out << "<br>testReg:" << cgicc::input().set("type","number"
-					       ).set("name","testReg"
-						     ).set("value", boost::str(boost::format("0x%08x")%testReg_)
-							   ).set("size","10").set("maxlength","32") << "</br>" << std::endl;
+                                               ).set("name","testReg"
+                                                     ).set("value", boost::str(boost::format("0x%08x")%testReg_)
+                                                           ).set("size","10").set("maxlength","32") << "</br>" << std::endl;
   *out << "</br>" << std::endl;
 
   *out << "<br>SystemID:" << cgicc::input().set("type","number"
-						).set("name","systemID"
-						      ).set("value", boost::str(boost::format("0x%08x")%systemID_)
-							    ).set("size","10").set("maxlength","32").set("readonly") << "</br>" << std::endl;
+                                                ).set("name","systemID"
+                                                      ).set("value", boost::str(boost::format("0x%08x")%systemID_)
+                                                            ).set("size","10").set("maxlength","32").set("readonly") << "</br>" << std::endl;
   *out << "</br>" << std::endl;
 
   *out << "<br>BoardID:" << cgicc::input().set("type","number"
-					       ).set("name","boardID"
-						     ).set("value", boost::str(boost::format("0x%08x")%boardID_)
-							   ).set("size","10").set("maxlength","32").set("readonly") << "</br>" << std::endl;
+                                               ).set("name","boardID"
+                                                     ).set("value", boost::str(boost::format("0x%08x")%boardID_)
+                                                           ).set("size","10").set("maxlength","32").set("readonly") << "</br>" << std::endl;
   *out << "</br>" << std::endl;
 
   *out << "<br>SystemFW:" << cgicc::input().set("type","number"
-						).set("name","systemFirmwareID"
-						      ).set("value", boost::str(boost::format("0x%08x")%systemFirmwareID_)
-							    ).set("size","10").set("maxlength","32").set("readonly") << "</br>" << std::endl;
+                                                ).set("name","systemFirmwareID"
+                                                      ).set("value", boost::str(boost::format("0x%08x")%systemFirmwareID_)
+                                                            ).set("size","10").set("maxlength","32").set("readonly") << "</br>" << std::endl;
   *out << "</br>" << std::endl;
   
   *out << cgicc::input().set("type","submit").set("value","Write").set("name","option") << std::endl;

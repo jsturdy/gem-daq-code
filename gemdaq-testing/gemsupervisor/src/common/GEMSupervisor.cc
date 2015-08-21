@@ -46,7 +46,7 @@ void gem::supervisor::GEMSupervisor::actionPerformed(xdata::Event& event)
 {
   if (event.type() == "setDefaultValues" || event.type() == "urn:xdaq-event:setDefaultValues") {
     LOG4CPLUS_DEBUG(getApplicationLogger(), "GEMSupervisor::actionPerformed() setDefaultValues" << 
-		    "Default configuration values have been loaded from xml profile");
+                    "Default configuration values have been loaded from xml profile");
     importConfigurationParameters();
     importMonitoringParameters();
     //gemMonitorP_->startMonitoring();
@@ -76,7 +76,7 @@ void gem::supervisor::GEMSupervisor::init() {
       //with the application classes that we want to supervise
       //avoids the problem of picking up all the xDAQ related processes
       //if (isGEMSupervised(*j))
-	v_supervisedApps.push_back(*j);
+      v_supervisedApps.push_back(*j);
     }
   }
 };
@@ -89,8 +89,8 @@ bool gem::supervisor::GEMSupervisor::initialize(toolbox::task::WorkLoop *wl) {
   for (std::vector<xdaq::ApplicationDescriptor*>::iterator i=v_supervisedApps.begin(); i!=v_supervisedApps.end(); i++) {
     LOG4CPLUS_INFO(getApplicationLogger(),std::string("Initializing ")+(*i)->getClassName());
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Initialize", appContextP_, appDescriptorP_, *i
-						  //std::string params
-						  );
+                                                  //std::string params
+                                                  );
   }
   return false;
 }
@@ -134,13 +134,13 @@ void gem::supervisor::GEMSupervisor::initializeAction() {
   for (std::vector<xdaq::ApplicationDescriptor*>::iterator i=v_supervisedApps.begin(); i!=v_supervisedApps.end(); i++) {
     LOG4CPLUS_INFO(getApplicationLogger(),std::string("Initializing ")+(*i)->getClassName());
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Initialize",
-						  appContextP_,
-						  //getApplicationContext(),
-						  appDescriptorP_,
-						  //getApplicationDescriptor()
-						  *i
-						  //std::string params
-						  );
+                                                  appContextP_,
+                                                  //getApplicationContext(),
+                                                  appDescriptorP_,
+                                                  //getApplicationDescriptor()
+                                                  *i
+                                                  //std::string params
+                                                  );
   }
 }
 
