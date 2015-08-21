@@ -27,6 +27,15 @@
 #include "gem/readout/GEMDataAMCformat.h"
 #include "gem/datachecker/GEMDataChecker.h"
 
+/*
+ *  ChipID GEB data, 21-Aug-2015
+ */
+uint16_t slot[24] = 
+       { 0xa64, 0xe74, 0xac0, 0xe98, 0xe7b, 0xa9c, 0xe63, 0xe6b,
+         0xe80, 0xeaf, 0xea3, 0xb44, 0xe5b, 0xb40, 0xeb4, 0xe5f,
+         0xe97, 0xe9f, 0xea7, 0xa84, 0xa78, 0xe78, 0xeab, 0xe7f
+       };
+
 /**
 * ... Threshold Scan ROOT based application, could be used for analisys of XDAQ GEM data ...
 */
@@ -145,7 +154,7 @@ TFile* thldread(Int_t get=0)
   const TString filename = "DQMlight.root";
 
   // Create a new canvas.
-  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,950,950);
+  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,1250,950);
   gROOT->SetStyle("Plain");
   gStyle->GetAttDate()->SetTextColor(1);
   gStyle->SetOptStat(111111);
@@ -157,7 +166,7 @@ TFile* thldread(Int_t get=0)
   c1->GetFrame()->SetFillColor(21);
   c1->GetFrame()->SetBorderSize(6);
   c1->GetFrame()->SetBorderMode(-1);
-  c1->Divide(3,3);
+  c1->Divide(4,3);
 
   TFile* hfile = NULL;
   hfile = new TFile(filename,"RECREATE","Threshold Scan ROOT file with histograms");
@@ -212,6 +221,13 @@ TFile* thldread(Int_t get=0)
   hiFlag->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiFlag->GetYaxis()->CenterTitle();
 
+  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       23, 0, 23 );
+  hiSlot->SetFillColor(48);
+  hiSlot->GetXaxis()->SetTitle("VFAT Slot position");
+  hiSlot->GetXaxis()->CenterTitle();
+  hiSlot->GetYaxis()->SetTitle("Entries");
+  hiSlot->GetYaxis()->CenterTitle();
+
   /* Diff CRC
   TH1C* hiCRC = new TH1C("CRC",     "CRC",             100, -0xffff, 0xffff );
   hiCRC->SetFillColor(48);
@@ -248,9 +264,9 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 30;
+  const Int_t ieventPrint = 1;
   const Int_t ieventMax   = 90000;
-  const Int_t kUPDATE     = 1;
+  const Int_t kUPDATE     = 10;
   bool  OKpri = false;
 
   /*
@@ -282,6 +298,8 @@ TFile* thldread(Int_t get=0)
     uint64_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
+
+    //if(OKpri) cout << " ZSFlag " << hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
 
     if(!gem::readout::readGEBrunhed(inpf, geb)) break;
 
@@ -326,9 +344,16 @@ TFile* thldread(Int_t get=0)
       * GEM Event Analyse
       */
 
+      uint32_t ZSFlag24 = ZSFlag;
+      int islot = -1;
+      for (int ibin = 0; ibin < 24; ibin++){
+	if ( (ChipID == slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
+      }//end for
+
       hi1010->Fill(b1010);
       hi1100->Fill(b1100);
       hiFlag->Fill(Flag);
+      hiSlot->Fill(islot);
       hi1110->Fill(b1110);
       hiChip->Fill(ChipID);
       hiBX->Fill(BX);
@@ -380,16 +405,17 @@ TFile* thldread(Int_t get=0)
     if (ievent%kUPDATE == 0 && ievent != 0) {
       c1->cd(1)->SetLogy(); hiVFAT->Draw();
       c1->cd(2)->SetLogy(); hiChip->Draw();
-      c1->cd(3)->SetLogy(); hiBX->Draw();
+      c1->cd(3);            hiSlot->Draw();
+      c1->cd(4)->SetLogy(); hiBX->Draw();
       //c1->cd(3)->SetLogy(); hiCRC->Draw();
 
-      c1->cd(4)->SetLogy(); hi1010->Draw();
-      c1->cd(5)->SetLogy(); hi1100->Draw();
-      c1->cd(6)->SetLogy(); hi1110->Draw();
+      c1->cd(5)->SetLogy(); hi1010->Draw();
+      c1->cd(6)->SetLogy(); hi1100->Draw();
+      c1->cd(7)->SetLogy(); hi1110->Draw();
 
-      c1->cd(7)->SetLogy(); hiFlag->Draw();
-      c1->cd(8); hiCh128->Draw();
-      c1->cd(9); hiVsCRC->Draw();
+      c1->cd(9)->SetLogy(); hiFlag->Draw();
+      c1->cd(10); hiCh128->Draw();
+      c1->cd(11); hiVsCRC->Draw();
       c1->Update();
       cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
