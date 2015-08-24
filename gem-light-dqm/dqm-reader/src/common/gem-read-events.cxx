@@ -8,6 +8,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <algorithm> 
 #include <vector>
 #include <cstdint>
 
@@ -66,8 +67,11 @@ using namespace std;
   \author Sergey.Baranov@cern.ch
 */
 
-/*
- *  CRC ******************************************************************
+/*******************************************************************
+ *
+ *    CRC checking function
+ *
+ *******************************************************************
  */
       uint16_t dataVFAT[11];
 
@@ -106,7 +110,6 @@ using namespace std;
       }
     }
     
-
 //! root function.
 /*!
 https://root.cern.ch/drupal/content/documentation
@@ -133,9 +136,16 @@ TFile* thldread(Int_t get=0)
   gem::readout::GEBData   geb;
   gem::readout::VFATData vfat;
 
-  string file="GEMDQMRawData.dat";
+  std::string file    = "GEMDQMRawData.dat";
+  std::string InpType = "Binary";
 
   std::ifstream inpf(file.c_str(), std::ios::in|std::ios::binary);
+  char c = inpf.get();
+  inpf.close();
+  if ( c != 1 ) InpType = "Hex";
+  cout << " Input File has type " << c << " " << "  " << InpType << endl;
+
+  inpf.open(file.c_str(), std::ios::in|std::ios::binary);
   if(!inpf.is_open()) {
     cout << "\nThe file: " << file.c_str() << " is missing.\n" << endl;
     return 0;
@@ -255,7 +265,7 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 1;
+  const Int_t ieventPrint = 3;
   const Int_t ieventMax   = 90000;
   const Int_t kUPDATE     = 10;
   bool  OKpri = false;
@@ -274,17 +284,24 @@ TFile* thldread(Int_t get=0)
    /*
     *  GEM Headers Data level
     */
-
-    if(!gem::readout::readGEMhd1(inpf, gem)) break;
-    if(!gem::readout::readGEMhd2(inpf, gem)) break;
-    if(!gem::readout::readGEMhd3(inpf, gem)) break;
-
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEMhd1(inpf, gem)) break;
+      if(!gem::readout::readGEMhd2(inpf, gem)) break;
+      if(!gem::readout::readGEMhd3(inpf, gem)) break;
+    } else {
+      if(!gem::readout::readGEMhd1Binary(inpf, gem)) break;
+      if(!gem::readout::readGEMhd2Binary(inpf, gem)) break;
+      if(!gem::readout::readGEMhd3Binary(inpf, gem)) break;
+    }
+  
    /*
     *  GEB Headers Data level
     */
-
-    if(!gem::readout::readGEBheader(inpf, geb));
-    //if(OKpri) gem::readout::printGEBheader(ievent,geb);
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEBheader(inpf, geb)) break;
+    } else {
+      if(!gem::readout::readGEBheaderBinary(inpf, geb)) break;
+    } //if(OKpri) gem::readout::printGEBheader(ievent,geb);
 
     uint64_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
@@ -292,7 +309,11 @@ TFile* thldread(Int_t get=0)
 
     //if(OKpri) cout << " ZSFlag " << hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
 
-    if(!gem::readout::readGEBrunhed(inpf, geb)) break;
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEBrunhed(inpf, geb)) break;
+    } else {
+      if(!gem::readout::readGEBrunhedBinary(inpf, geb)) break;
+    }
 
    /*
     *  GEB PayLoad Data
@@ -301,8 +322,12 @@ TFile* thldread(Int_t get=0)
     int ifake = 0;
     for(int ivfat=1; ivfat <= sumVFAT; ivfat++){
 
-      if(!gem::readout::readVFATdata(inpf, ivfat, vfat)) break;
-  
+      if (InpType == "Hex") {
+        if(!gem::readout::readVFATdata(inpf, ivfat, vfat)) break;
+      } else {
+	if(!gem::readout::readVFATdataBinary(inpf, ivfat, vfat)) break;
+      }
+
       uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
       uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
       uint8_t   Flag   = (0x000f & vfat.EC);
@@ -379,9 +404,11 @@ TFile* thldread(Int_t get=0)
    /*
     *  GEB Trailers Data level
     */
-
-    if(!gem::readout::readGEBtrailer(inpf, geb)) break;
-    //if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEBtrailer(inpf, geb)) break;
+    } else {
+      if(!gem::readout::readGEBtrailerBinary(inpf, geb)) break;
+    }//if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
 
     uint64_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
     uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
@@ -390,9 +417,14 @@ TFile* thldread(Int_t get=0)
    /*
     *  GEM Trailers Data level
     */
-    if(!gem::readout::readGEMtr2(inpf, gem)) break;
-    if(!gem::readout::readGEMtr1(inpf, gem)) break;
-   
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEMtr2(inpf, gem)) break;
+      if(!gem::readout::readGEMtr1(inpf, gem)) break;
+    } else {
+      if(!gem::readout::readGEMtr2Binary(inpf, gem)) break;
+      if(!gem::readout::readGEMtr1Binary(inpf, gem)) break;
+    }
+
     if (ievent%kUPDATE == 0 && ievent != 0) {
       c1->cd(1)->SetLogy(); hiVFAT->Draw();
       c1->cd(2)->SetLogy(); hiChip->Draw();
