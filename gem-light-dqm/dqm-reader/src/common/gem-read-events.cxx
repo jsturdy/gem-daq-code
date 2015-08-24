@@ -222,7 +222,7 @@ TFile* thldread(Int_t get=0)
   hiFlag->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiFlag->GetYaxis()->CenterTitle();
 
-  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       23, 0, 23 );
+  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       24, 0, 24 );
   hiSlot->SetFillColor(48);
   hiSlot->GetXaxis()->SetTitle("VFAT Slot position");
   hiSlot->GetXaxis()->CenterTitle();
