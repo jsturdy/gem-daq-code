@@ -3,8 +3,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "gem/readout/GEMDataAMCformat.h"
+#include "gem/datachecker/GEMDataChecker.h"
+
 #include <cstring>
 #include <sstream>
+#include <algorithm> 
 #include <vector>
 #include <cstdint>
 
@@ -23,9 +27,6 @@
 #include <TBenchmark.h>
 #include <TInterpreter.h>
 #include <TApplication.h>
-
-#include "gem/readout/GEMDataAMCformat.h"
-#include "gem/datachecker/GEMDataChecker.h"
 
 /**
 * ... Threshold Scan ROOT based application, could be used for analisys of XDAQ GEM data ...
@@ -66,8 +67,11 @@ using namespace std;
   \author Sergey.Baranov@cern.ch
 */
 
-/*
- *  CRC ******************************************************************
+/*******************************************************************
+ *
+ *    CRC checking function
+ *
+ *******************************************************************
  */
       uint16_t dataVFAT[11];
 
@@ -106,7 +110,6 @@ using namespace std;
       }
     }
     
-
 //! root function.
 /*!
 https://root.cern.ch/drupal/content/documentation
@@ -129,12 +132,20 @@ TFile* thldread(Int_t get=0)
   TApplication App("App", &argc, argv);
 #endif
  
+  gem::readout::GEMData   gem;
   gem::readout::GEBData   geb;
   gem::readout::VFATData vfat;
 
-  string file="GEMDQMRawData.dat";
+  std::string file    = "GEMDQMRawData.dat";
+  std::string InpType = "Binary";
 
-  ifstream inpf(file.c_str());
+  std::ifstream inpf(file.c_str(), std::ios::in|std::ios::binary);
+  char c = inpf.get();
+  inpf.close();
+  if ( c != 1 ) InpType = "Hex";
+  cout << " Input File has type " << c << " " << "  " << InpType << endl;
+
+  inpf.open(file.c_str(), std::ios::in|std::ios::binary);
   if(!inpf.is_open()) {
     cout << "\nThe file: " << file.c_str() << " is missing.\n" << endl;
     return 0;
@@ -144,7 +155,7 @@ TFile* thldread(Int_t get=0)
   const TString filename = "DQMlight.root";
 
   // Create a new canvas.
-  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,950,950);
+  TCanvas *c1 = new TCanvas("c1","Dynamic Filling Example",0,0,1250,950);
   gROOT->SetStyle("Plain");
   gStyle->GetAttDate()->SetTextColor(1);
   gStyle->SetOptStat(111111);
@@ -156,14 +167,14 @@ TFile* thldread(Int_t get=0)
   c1->GetFrame()->SetFillColor(21);
   c1->GetFrame()->SetBorderSize(6);
   c1->GetFrame()->SetBorderMode(-1);
-  c1->Divide(3,3);
+  c1->Divide(4,3);
 
   TFile* hfile = NULL;
   hfile = new TFile(filename,"RECREATE","Threshold Scan ROOT file with histograms");
 
-  TH1F* hiVFAT = new TH1F("VFAT", "Number VFAT blocks per event", 100,  0., 100. );
+  TH1C* hiVFAT = new TH1C("VFAT", "Number VFAT blocks per event", 100,  0., 100. );
   hiVFAT->SetFillColor(48);
-  //hiVFAT->SetStats();
+  hiVFAT->SetStats();
   hiVFAT->GetXaxis()->SetTitle("Number of VFAT Blocks");
   hiVFAT->GetXaxis()->CenterTitle();
   hiVFAT->GetYaxis()->SetTitle("Number of Event");
@@ -211,16 +222,23 @@ TFile* thldread(Int_t get=0)
   hiFlag->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiFlag->GetYaxis()->CenterTitle();
 
-  /*
-  TH1C* hiCRC = new TH1C("CRC",     "CRC",             100, 0x0, 0xffff );
+  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       24, 0, 24 );
+  hiSlot->SetFillColor(48);
+  hiSlot->GetXaxis()->SetTitle("VFAT Slot position");
+  hiSlot->GetXaxis()->CenterTitle();
+  hiSlot->GetYaxis()->SetTitle("Entries");
+  hiSlot->GetYaxis()->CenterTitle();
+
+  /* Diff CRC
+  TH1C* hiCRC = new TH1C("CRC",     "CRC",             100, -0xffff, 0xffff );
   hiCRC->SetFillColor(48);
   hiCRC->GetXaxis()->SetTitle("CRC value, max 0xffff");
   hiCRC->GetXaxis()->CenterTitle();
   hiCRC->GetYaxis()->SetTitle("Number of Events");
   hiCRC->GetYaxis()->CenterTitle();
-  */
+ */
 
-  TH2C* hiVsCRC = new TH2C("CRC", "CRC vs calCRC",     100, 0xffff, 0xffff, 100, 0xffff, 0xffff);
+  TH2C* hiVsCRC = new TH2C("CRC", "CRC vs calCRC",     100, 0x0, 0xffff, 100, 0x0, 0xffff);
   hiVsCRC->SetFillColor(48);
   hiVsCRC->GetXaxis()->SetTitle("CRC vs CRC calc, max 0xffff");
   hiVsCRC->GetXaxis()->CenterTitle();
@@ -239,7 +257,7 @@ TFile* thldread(Int_t get=0)
   stringstream histName, histTitle;
   TH1F* histos[128];
 
-  for (unsigned int hi = 0; hi < 128; ++hi) {
+  for (unsigned int hi = 0; hi < 1 /* 128 */; ++hi) {
     histName.clear(); histName.str(std::string());
     histTitle.clear(); histTitle.str(std::string());
     histName  << "channel"<<(hi+1);
@@ -247,36 +265,69 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 1;
+  const Int_t ieventPrint = 3;
   const Int_t ieventMax   = 90000;
-  const Int_t kUPDATE     = 25;
+  const Int_t kUPDATE     = 10;
   bool  OKpri = false;
 
-  for(int ievent=0; ievent<ieventMax; ievent++){
+  /*
+   *  Events Loop
+   */
+
+  for(int ievent=1; ievent <= ieventMax; ievent++){
     OKpri = OKprint(ievent,ieventPrint);
     if(inpf.eof()) break;
     if(!inpf.good()) break;
 
-    if(OKpri) cout << "\nievent " << ievent << endl;
+    if(OKpri) cout << "\nievent Start loop" << ievent << endl;
 
-    // read Event Chamber Header
-    gem::readout::readGEBheader(inpf, geb);
-    //if(OKpri) gem::readout::printGEBheader(ievent,geb);
+   /*
+    *  GEM Headers Data level
+    */
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEMhd1(inpf, gem)) break;
+      if(!gem::readout::readGEMhd2(inpf, gem)) break;
+      if(!gem::readout::readGEMhd3(inpf, gem)) break;
+    } else {
+      if(!gem::readout::readGEMhd1Binary(inpf, gem)) break;
+      if(!gem::readout::readGEMhd2Binary(inpf, gem)) break;
+      if(!gem::readout::readGEMhd3Binary(inpf, gem)) break;
+    }
+  
+   /*
+    *  GEB Headers Data level
+    */
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEBheader(inpf, geb)) break;
+    } else {
+      if(!gem::readout::readGEBheaderBinary(inpf, geb)) break;
+    } //if(OKpri) gem::readout::printGEBheader(ievent,geb);
 
     uint64_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
 
-    int iSumVFAT = 0;
-    int ifake = 0;
-    for(int ivfat=0; ivfat<sumVFAT; ivfat++){
-      iSumVFAT++;
+    //if(OKpri) cout << " ZSFlag " << hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
 
-     /*
-      *  GEM Event Reading
-      */
-      gem::readout::readVFATdata(inpf, ievent, vfat);
-  
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEBrunhed(inpf, geb)) break;
+    } else {
+      if(!gem::readout::readGEBrunhedBinary(inpf, geb)) break;
+    }
+
+   /*
+    *  GEB PayLoad Data
+    */
+
+    int ifake = 0;
+    for(int ivfat=1; ivfat <= sumVFAT; ivfat++){
+
+      if (InpType == "Hex") {
+        if(!gem::readout::readVFATdata(inpf, ivfat, vfat)) break;
+      } else {
+	if(!gem::readout::readVFATdataBinary(inpf, ivfat, vfat)) break;
+      }
+
       uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
       uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
       uint8_t   Flag   = (0x000f & vfat.EC);
@@ -285,105 +336,120 @@ TFile* thldread(Int_t get=0)
       uint16_t  CRC    = vfat.crc;
       uint16_t  BX     = vfat.BXfrOH;  
 
-      //      if ( (b1010 == 0xa) && (b1100==0xc) && (b1110==0xe) /* && (ChipID==0x68) */ ){
-
-        // CRC check
-        dataVFAT[11] = vfat.BC;
-        dataVFAT[10] = vfat.EC;
-        dataVFAT[9]  = vfat.ChipID;
-        dataVFAT[8]  = (0xffff000000000000 & vfat.msData) >> 48;
-        dataVFAT[7]  = (0x0000ffff00000000 & vfat.msData) >> 32;
-        dataVFAT[6]  = (0x00000000ffff0000 & vfat.msData) >> 16;
-        dataVFAT[5]  = (0x000000000000ffff & vfat.msData);
-        dataVFAT[4]  = (0xffff000000000000 & vfat.lsData) >> 48;
-        dataVFAT[3]  = (0x0000ffff00000000 & vfat.lsData) >> 32;
-        dataVFAT[2]  = (0x00000000ffff0000 & vfat.lsData) >> 16;
-        dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
-
-        uint16_t checkedCRC = checkCRC();
-	/*
-        if(OKpri){
-           cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
-                << "     crc " << std::setfill('0') << std::setw(4) << checkedCRC << dec << "\n" << endl;
-	} 
-        */
-  
-       /*
-        * GEM Event Analyse
-        */
-
-        hi1010->Fill(b1010);
-        hi1100->Fill(b1100);
-        hiFlag->Fill(Flag);
-        hi1110->Fill(b1110);
-        hiChip->Fill(ChipID);
-        hiBX->Fill(BX);
-        //hiCRC->Fill(CRC);
-        hiVsCRC->Fill(CRC,checkedCRC);
-    
-        //I think it would be nice to time this...
-        uint8_t chan0xf = 0;
-        for (int chan = 0; chan < 128; ++chan) {
-          if (chan < 64){
-            chan0xf = ((vfat.lsData >> chan) & 0x1);
-            histos[chan]->Fill(chan0xf);
-          if(!chan0xf) hiCh128->Fill(chan);
-    	  } else {
-            chan0xf = ((vfat.msData >> (chan-64)) & 0x1);
-      	    histos[chan]->Fill(chan0xf);
-    	  if(!chan0xf) hiCh128->Fill(chan);
-          }
-        }
-    
-        if(OKpri){
-          gem::readout::printVFATdataBits(ievent, vfat);
-          //gem::readout::printVFATdata(ievent, vfat);
-        }
-
-     /*
-      }// if 1010,1100,1110
-      else {
+      if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
+        cout << "VFAT headers do not match expectation" << endl;
+        gem::readout::printVFATdataBits(ievent, vfat);
         ifake++;
-      }// if 1010,1100,1110
+      }//end if 1010,1100,1110
+
+      // CRC check
+      dataVFAT[11] = vfat.BC;
+      dataVFAT[10] = vfat.EC;
+      dataVFAT[9]  = vfat.ChipID;
+      dataVFAT[8]  = (0xffff000000000000 & vfat.msData) >> 48;
+      dataVFAT[7]  = (0x0000ffff00000000 & vfat.msData) >> 32;
+      dataVFAT[6]  = (0x00000000ffff0000 & vfat.msData) >> 16;
+      dataVFAT[5]  = (0x000000000000ffff & vfat.msData);
+      dataVFAT[4]  = (0xffff000000000000 & vfat.lsData) >> 48;
+      dataVFAT[3]  = (0x0000ffff00000000 & vfat.lsData) >> 32;
+      dataVFAT[2]  = (0x00000000ffff0000 & vfat.lsData) >> 16;
+      dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
+      uint16_t checkedCRC = checkCRC();
+  
+     /*
+      * GEM Event Analyse
       */
 
-    }//end ivfat
+      uint32_t ZSFlag24 = ZSFlag;
+      int islot = -1;
+      for (int ibin = 0; ibin < 24; ibin++){
+	if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
+      }//end for
+
+      hi1010->Fill(b1010);
+      hi1100->Fill(b1100);
+      hiFlag->Fill(Flag);
+      hiSlot->Fill(islot);
+      hi1110->Fill(b1110);
+      hiChip->Fill(ChipID);
+      hiBX->Fill(BX);
+      //hiCRC->Fill(CRC-checkedCRC);
+      hiVsCRC->Fill(CRC,checkedCRC);
+
+      //I think it would be nice to time this...
+      uint8_t chan0xf = 0;
+
+      for(int chan = 0; chan < 128; ++chan) {
+        if(chan < 64){
+          chan0xf = ((vfat.lsData >> chan) & 0x1);
+          //histos[chan]->Fill(chan0xf);
+          if(chan0xf != 0x0) hiCh128->Fill(chan);
+    	} else {
+          chan0xf = ((vfat.msData >> (chan-64)) & 0x1);
+      	  //histos[chan]->Fill(chan0xf);
+    	  if(chan0xf != 0x0) hiCh128->Fill(chan);
+        }
+      }
+    
+      if(OKpri){
+        gem::readout::printVFATdataBits(ievent, vfat);
+        //cout << "checkedCRC  0x" << hex << CRC-checkedCRC << dec << endl;
+      }
+
+    }//end of GEB PayLoad Data
 
     hiFake->Fill(ifake);
+    hiVFAT->Fill(sumVFAT);
 
-    // read Event Chamber Header 
-    gem::readout::readGEBtrailer(inpf, geb);
-    if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
+   /*
+    *  GEB Trailers Data level
+    */
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEBtrailer(inpf, geb)) break;
+    } else {
+      if(!gem::readout::readGEBtrailerBinary(inpf, geb)) break;
+    }//if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
 
     uint64_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
     uint64_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
     uint64_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
 
+   /*
+    *  GEM Trailers Data level
+    */
+    if (InpType == "Hex") {
+      if(!gem::readout::readGEMtr2(inpf, gem)) break;
+      if(!gem::readout::readGEMtr1(inpf, gem)) break;
+    } else {
+      if(!gem::readout::readGEMtr2Binary(inpf, gem)) break;
+      if(!gem::readout::readGEMtr1Binary(inpf, gem)) break;
+    }
+
     if (ievent%kUPDATE == 0 && ievent != 0) {
       c1->cd(1)->SetLogy(); hiVFAT->Draw();
       c1->cd(2)->SetLogy(); hiChip->Draw();
-      c1->cd(3)->SetLogy(); hiBX->Draw();
+      c1->cd(3);            hiSlot->Draw();
+      c1->cd(4)->SetLogy(); hiBX->Draw();
+      //c1->cd(3)->SetLogy(); hiCRC->Draw();
 
-      c1->cd(4)->SetLogy(); hi1010->Draw();
-      c1->cd(5)->SetLogy(); hi1100->Draw();
-      c1->cd(6)->SetLogy(); hi1110->Draw();
+      c1->cd(5)->SetLogy(); hi1010->Draw();
+      c1->cd(6)->SetLogy(); hi1100->Draw();
+      c1->cd(7)->SetLogy(); hi1110->Draw();
 
-      c1->cd(7)->SetLogy(); hiFlag->Draw();
-      c1->cd(8); hiCh128->Draw();
-      c1->cd(9); hiVsCRC->Draw();
+      c1->cd(9)->SetLogy(); hiFlag->Draw();
+      c1->cd(10); hiCh128->Draw();
+      c1->cd(11); hiVsCRC->Draw();
       c1->Update();
       cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
-    if(OKpri) cout<<"ievent "<< ievent << " iSumVFAT  " << iSumVFAT << " ifake " << ifake << endl;
-
-   /*
-    * GEM End-Event Analyse
-    */
-    hiVFAT->Fill(iSumVFAT);
    
   } // End ievent
   inpf.close();
 
+ /*
+  * GEM End-Event Analyse
+  */
+    
   // Save all objects in this file
   hfile->Write();
   cout<<"=== hfile->Write()"<<endl;
