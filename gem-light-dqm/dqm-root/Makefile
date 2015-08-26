@@ -39,11 +39,9 @@ all:
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx $(LIB)/libEvent.so -o $(BIN)/reader
 	$(LS) $(BIN)
 
-	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/histogramLayeringExample.cxx $(LIB)/libEvent.so -o $(BIN)/layer
 	$(LS) $(BIN)
 
-	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/plotAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
 	$(LS) $(BIN)
 
