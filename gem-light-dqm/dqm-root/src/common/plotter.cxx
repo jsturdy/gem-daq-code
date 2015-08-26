@@ -361,7 +361,7 @@ void printPictures(TH1 *h, TString iname, TString opath, TCanvas *c, vector<TStr
 {							
     c->cd(1);
     int max=h->GetBinContent(h->GetMaximumBin());
-    h->SetMaximum(max*1.1);
+    h->SetMaximum(max);
     h->SetMinimum(0);
 
     //Focus on Valid ChipIDs
@@ -391,16 +391,15 @@ void printPictures(TH1 *h, TString iname, TString opath, TCanvas *c, vector<TStr
     }
 }
 
-//Layers all histograms in h on single canvas/pad in different colors/styles
+//Layers each histograms in h on single canvas/pad in different colors/styles
 void layerHistogram(vector<TH1*> h, vector<TString> inames, TCanvas *c, int pad=1)
 {
     int numH = h.size();
-    cout << "Number of histograms: " << numH << endl;
     vector<int> maxs;
     int max=h[0]->GetBinContent(h[0]->GetMaximumBin());
     // vector<int> mins;
     // int min=h[0]->GetBinContent(h[0]->GetMinimumBin());
-    h[0]->SetMaximum(max*1.1);
+    h[0]->SetMaximum(max);
     h[0]->SetMinimum(0);
 
     //Focus on Valid ChipIDs
@@ -417,7 +416,7 @@ void layerHistogram(vector<TH1*> h, vector<TString> inames, TCanvas *c, int pad=
     for (int i=0;i<numH;i++)
     { 
 	//Set color/style
-	
+
 	if (i==4) //avoid yellow
 	    n++; 
 	
@@ -437,12 +436,12 @@ void layerHistogram(vector<TH1*> h, vector<TString> inames, TCanvas *c, int pad=
 	    h[i]->SetFillColor(i+30+n);
 	    h[i]->SetLineColor(i+30+n);
 	}
-	else if (numH<5)
+	else if (numH==2)
 	{
 
 	    h[i]->SetMarkerColor(pow(2,i));
 	    h[i]->SetMarkerStyle(1);
-	    h[i]->SetFillStyle(i+3004);
+	    h[i]->SetFillStyle(3001+2*i);
 	    h[i]->SetFillColor(pow(2,i));
 	    h[i]->SetLineColor(pow(2,i));
 	}
@@ -453,17 +452,14 @@ void layerHistogram(vector<TH1*> h, vector<TString> inames, TCanvas *c, int pad=
 	    h[i]->SetFillStyle(i+3004);
 	    h[i]->SetFillColor(i+1+n);
 	    h[i]->SetLineColor(i+1+n);
+
 	}
 
 	//Resize as necessary
 	maxs.push_back(h[i]->GetBinContent(h[i]->GetMaximumBin()));
-	// mins.push_back(h[i]->GetBinContent(h[i]->GetMinimumBin()));
-
 	if (maxs[i]>max)
-	    h[0]->SetMaximum(maxs[i]*1.1);
-	
-	// if (mins[i]<min)
-	//     h[0]->SetMinimum(mins[i]*1.1);
+	    h[0]->SetMaximum(maxs[i]);
+
     }
 
     gStyle->SetOptStat(111111);
@@ -477,19 +473,22 @@ void layerHistogram(vector<TH1*> h, vector<TString> inames, TCanvas *c, int pad=
     for (int l=0;l<numH;l++)
 	leg->AddEntry(h[l],inames[l],"l");
     leg->Draw();
-
-
+    
 
     c->Update();
-
-
+    int no_yellow=0;
     for (int f=0;f<numH;f++)
     {	
     	//Retrieve stat box
     	TPaveStats *st = (TPaveStats*)h[f]->FindObject("stats");
    
     	//Color code
-	st->SetTextColor(pow(2,f));
+	if (f==4) 
+	    no_yellow++; //avoid yellow
+	if (numH==2)
+	    st->SetTextColor(pow(2,f));
+	else
+	    st->SetTextColor(f+1+no_yellow);
 
     	//Reposition
     	st->SetX1NDC(.78-0.22*f);  //new x start position
@@ -498,14 +497,13 @@ void layerHistogram(vector<TH1*> h, vector<TString> inames, TCanvas *c, int pad=
 }
 
 
-//Layers only histograms with names listed in vector-hnames
+//Layers and plots only histograms with names listed in hnames
 void layerSpecific(vector<vector<TH1*>> hs, vector<const char*> hnames,vector<TString> inames, TCanvas *can)
 {
     int numF = hs.size();
     int numH = hs[0].size();
     vector<TH1*> plot_hists;
     int complete=0;
-    cout << "locating histograms... " << endl;
     for (int i=0;i<numH;i++)
     {
     	const char* histname = hs[0][i]->GetName();
@@ -516,7 +514,7 @@ void layerSpecific(vector<vector<TH1*>> hs, vector<const char*> hnames,vector<TS
 	    if ( strcmp(histname,hnames[n])==0 )
 	    { 
 		complete++;
-		cout << "Found "<< hnames[n] <<endl;
+		cout << "Layering Histogram: "<< hnames[n] <<endl;
 		for (int j=0;j<numF;j++)
 		    plot_hists.push_back( hs[j][i] );
 		layerHistogram(plot_hists,inames,can,n+1);
@@ -531,7 +529,7 @@ void layerSpecific(vector<vector<TH1*>> hs, vector<const char*> hnames,vector<TS
     	cout << "Unable to locate all desired Histograms." << endl;
 }
 
-//Plots NxN canvases for every dimension of hs, with each dimension named by inames
+//Plots single-layered NxN canvases for every dimension of hs, with each dimension named by inames
 void plotEvery(vector<vector<TH1*>> hs, vector<TString> inames, TString opath, vector<TString> types)
 {
     cout << "plotEvery: Plotting Every Histograms." << endl;
@@ -568,21 +566,10 @@ void plotEvery(vector<vector<TH1*>> hs, vector<TString> inames, TString opath, v
 	    	gROOT->ProcessLine(".!mkdir -p "+opath+types[t]+"/");
 		allc->Print(opath+types[t]+"/"+"all--"+inames[i]+"."+types[t],types[t]);
 	}
-
-
-	//Print in different formats
-	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pdfs/");
-	// allc->Print(opath+"individual_pdfs/"+inames[i]+".pdf","pdf");
-	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_pngs/");
-	// allc->Print(opath+"individual_pngs/"+inames[i]+".png","png");
-	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_jpgs/");
-	// allc->Print(opath+"individual_jpgs/"+inames[i]+".jpg","jpg");
-	// gROOT->ProcessLine(".!mkdir -p "+opath+"/individual_roots/");
-	// allc->Print(opath+"individual_roots/"+inames[i]+".root","root");
     }
 }
 
-
+//Creates NxN canvas of every histogram layered
 void layerAll(vector<vector<TH1*>> hs, vector<TString> inames)
 {
     cout << "Layering all histograms." << endl;
@@ -591,7 +578,7 @@ void layerAll(vector<vector<TH1*>> hs, vector<TString> inames)
     vector<const char*> names;
     for (int i=0;i<numH;i++)
 	names.push_back(hs[0][i]->GetName());
-    TCanvas* layc = newCanvas("All Histograms Layered");
+    TCanvas* layc = newCanvas("All_Histograms_Layered");
     int c_side = ceil(sqrt(numH));
     double ipart;
     if(modf(sqrt(numH),&ipart) < 0.4)

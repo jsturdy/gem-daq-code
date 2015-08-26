@@ -69,7 +69,6 @@ int main(int argc, char** argv)
     vector<vector<TH1*>> hs;
   
    
-   
     vector<TString> ifilenames;
     vector<TFile*> ifiles;
     int numF = 0; //number of files
@@ -91,7 +90,7 @@ int main(int argc, char** argv)
 
 	    ifilenames.push_back(line);
 	    ifiles.push_back(new TFile(ifilenames[numF-1], "READ"));
-	    cout<<"Input File "<<numF+1<<": "<<line<<endl;
+	    cout<<"Input File "<<numF<<": "<<line<<endl;
 	      
 	}
     	textfile.close();
@@ -177,7 +176,7 @@ int main(int argc, char** argv)
 
     //Plot single canvas with all histograms layered
     layerAll(hs, inames);
-
+    
 
 
     vector<TH1*> hists_ready; //holds similar histogram from each file - ready to be passed to plotter
@@ -236,7 +235,7 @@ int main(int argc, char** argv)
 
 
     //Control Bit/Flag Canvas
-    cout << "Drawing Control Bit Flag Canvas" << endl;
+    cout << endl << "Drawing Control Bit Flag Canvas" << endl;
     TCanvas *cbf = newCanvas();
     cbf->SetTitle("Control Bit Flag Comparison");
     cbf->SetName("Control Bit Flag Comparison");
@@ -253,7 +252,7 @@ int main(int argc, char** argv)
 
 
     //GGSW check
-    cout << "Drawing GGSW Check Canvas" << endl;
+    cout << endl << "Drawing GGSW Check Canvas" << endl;
     TCanvas *ggsw = newCanvas();
     ggsw->SetTitle("GGSW Check");
     ggsw->SetName("GGSW Check");

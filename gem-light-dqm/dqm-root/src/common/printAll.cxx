@@ -53,7 +53,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-
     vector<TH1*> hs;
   
     TString ifilename = argv[1];
@@ -84,15 +83,11 @@ int main(int argc, char** argv)
     char oPath [64];
     strftime (oPath, 64, "./output/%m_%d-%H/%b%d_%G-%H_%M_%S/", timePtr);
     
-    TString dPath = oPath;
- 
-    
+    TString dPath = oPath;    
 
     gROOT->ProcessLine(".!mkdir -p "+dPath);
     TFile *ofile = new TFile(dPath+iname+".root", "RECREATE");
     cout<<"Output File: "<<dPath<<".root"<<endl<<endl;
-
-
 
     
     //Retrieve histograms from file
@@ -117,6 +112,7 @@ int main(int argc, char** argv)
     types.push_back("pdf");
     types.push_back("png");
     types.push_back("jpg");
+    types.push_back("root");
 
 
     //Print Canvases of each histogram individually
@@ -134,17 +130,6 @@ int main(int argc, char** argv)
     tempn.push_back(iname);
 
     plotEvery(temph, tempn, dPath, types);
-
-    
-    //Print canvases as other types
-    TString pdf = dPath;
-    pdf+="pdf/";
-    TString png = dPath;
-    png+="png/";
-
-    // printCanvases("pdf", pdf);
-    // printCanvases("png", png);
- 
 
 
     
