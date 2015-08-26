@@ -187,7 +187,7 @@ TFile* thldread(Int_t get=0)
   hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
  
-  TH1C* hiBX = new TH1C("BX",     "BX from OH",      100, 0x0, 0xffff );
+  TH1C* hiBX = new TH1C("BX",     "BX from OH",      4096, 0x0, 0xffff );
   hiBX->SetFillColor(48);
   hiBX->GetXaxis()->SetTitle("BX value, max 0xffff");
   hiBX->GetXaxis()->CenterTitle();
@@ -265,9 +265,9 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 3;
+  const Int_t ieventPrint = 1;
   const Int_t ieventMax   = 90000;
-  const Int_t kUPDATE     = 10;
+  const Int_t kUPDATE     = 1;
   bool  OKpri = false;
 
   /*
@@ -307,7 +307,7 @@ TFile* thldread(Int_t get=0)
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
 
-    //if(OKpri) cout << " ZSFlag " << hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
+    //if(OKpri) cout << " ZSFlag " << std::hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
 
     if (InpType == "Hex") {
       if(!gem::readout::readGEBrunhed(inpf, geb)) break;
@@ -359,8 +359,8 @@ TFile* thldread(Int_t get=0)
      /*
       * GEM Event Analyse
       */
-
       uint32_t ZSFlag24 = ZSFlag;
+
       int islot = -1;
       for (int ibin = 0; ibin < 24; ibin++){
 	if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
