@@ -42,7 +42,7 @@ all:
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/histogramLayeringExample.cxx $(LIB)/libEvent.so -o $(BIN)/layer
 	$(LS) $(BIN)
 
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/plotAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/printAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
 	$(LS) $(BIN)
 
 reader:
@@ -57,7 +57,7 @@ layer:
 
 printer:
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/plotAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/printAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
 	$(LS) $(BIN)
 
 

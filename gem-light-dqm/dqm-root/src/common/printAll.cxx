@@ -36,20 +36,16 @@
 #include <time.h>
 #include <math.h>
 
-#include "dataChecker.cc"
 #include "plotter.cxx"
 
 using namespace std;
 int main(int argc, char** argv)
 {
 
-    cout<<endl;
-
     if (argc!=2) 
     {
         cout << "Please provide ONE root file." << endl;
         cout << "Usage: <path>/printer input.root" << endl;
-	cout << endl;
         return 0;
     }
 
@@ -75,7 +71,6 @@ int main(int argc, char** argv)
     int len = name.Length()-loc-5;
     TSubString subname = name(loc,len);
     iname = subname;
-
     
     //Create date path to hold runs based on time
     time_t t = time(NULL);
@@ -88,7 +83,6 @@ int main(int argc, char** argv)
     gROOT->ProcessLine(".!mkdir -p "+dPath);
     TFile *ofile = new TFile(dPath+iname+".root", "RECREATE");
     cout<<"Output File: "<<dPath<<".root"<<endl<<endl;
-
     
     //Retrieve histograms from file
     TList* keylist = new TList;
@@ -114,14 +108,12 @@ int main(int argc, char** argv)
     types.push_back("jpg");
     types.push_back("root");
 
-
     //Print Canvases of each histogram individually
     for (int j=0;j<numH;j++)
     {
 	TCanvas *cv = newCanvas(hs[j]->GetName());
 	printPictures(hs[j],iname,dPath,cv,types);
     }
-   
 
     //Plot all histograms for each file on individual canvases
     vector<vector<TH1*>> temph;
@@ -131,7 +123,5 @@ int main(int argc, char** argv)
 
     plotEvery(temph, tempn, dPath, types);
 
-
-    
     return 0;
 }

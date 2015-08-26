@@ -36,25 +36,18 @@
 #include <time.h>
 #include <math.h>
 
-#include "dataChecker.cc"
 #include "plotter.cxx"
 
 using namespace std;
 int main(int argc, char** argv)
 {
-
-    cout<<endl;
-
     if (argc!=2) 
     {
         cout << "Please provide ONE text file containing root input files separated by lines." << endl;
         cout << "Usage: <path>/reader input.txt" << endl;
-	cout << endl;
         return 0;
     }
 
-
-    
     //Create output file in proper location
     time_t t = time(NULL);
     tm* timePtr = localtime(&t);
@@ -65,9 +58,7 @@ int main(int argc, char** argv)
     strftime (oName, 64, "./output/%m_%d-%H/%b%d_%G-%H_%M_%S/%b%d_%G-%H_%M_%S.root", timePtr);
     strftime (oCommand, 64, ".!mkdir -p ./output/%m_%d-%H/%b%d_%G-%H_%M_%S/", timePtr);
    
-   
     vector<vector<TH1*>> hs;
-  
    
     vector<TString> ifilenames;
     vector<TFile*> ifiles;
@@ -75,24 +66,23 @@ int main(int argc, char** argv)
     ifstream textfile (argv[1]);
     if (textfile.is_open())
     {
-	string line;
+	    string line;
     	while( getline (textfile,line) )
     	{
-	    if(line.length()<6 or line.substr(0,2)=="//")
-		continue;
-	    if(line.substr(line.length()-5,5)!=".root")
-	    {		
-		cout << "Input Files must be in .root format." << endl;
-		cout << endl;
-		return 0;
-	    }
-	    numF++;
+	        if(line.length()<6 or line.substr(0,2)=="//")
+		        continue;
+	        if(line.substr(line.length()-5,5)!=".root")
+	        {		
+		        cout << "Input Files must be in .root format." << endl;
+		        cout << endl;
+		        return 0;
+	        }
+	        numF++;
 
-	    ifilenames.push_back(line);
-	    ifiles.push_back(new TFile(ifilenames[numF-1], "READ"));
-	    cout<<"Input File "<<numF<<": "<<line<<endl;
-	      
-	}
+	        ifilenames.push_back(line);
+	        ifiles.push_back(new TFile(ifilenames[numF-1], "READ"));
+	        cout<<"Input File "<<numF<<": "<<line<<endl;
+	    }
     	textfile.close();
     }
     else 
@@ -110,14 +100,13 @@ int main(int argc, char** argv)
     vector<TString> inames; //name of file without extension
     for (int i=0;i<ifilenames.size();i++)
     {
-	TString name = ifilenames[i];
-	int counter=0;
-	int loc = name.Last('/')+1;
-	int len = name.Length()-loc-5;
-	TSubString subname = name(loc,len);
-	inames.push_back(subname);
+	    TString name = ifilenames[i];
+	    int counter=0;
+	    int loc = name.Last('/')+1;
+	    int len = name.Length()-loc-5;
+	    TSubString subname = name(loc,len);
+	    inames.push_back(subname);
     }
-
 
     gROOT->ProcessLine(oCommand);
     TFile *ofile = new TFile(oName, "RECREATE");
@@ -129,55 +118,51 @@ int main(int argc, char** argv)
     //Retrieve histograms from all files
     for (int i=0;i<numF;i++)
     {
-	TList* keylist = new TList;
-	keylist = ifiles[i]->GetListOfKeys();
-	//cout << endl << "List of keys in Input File " << i << ":" << endl;
-	//keylist->Print();
-	//cout << "==Begin Loops==" << endl;
-	
-	TIter nextkey(keylist);
-	TKey *key = new TKey;
+	    TList* keylist = new TList;
+	    keylist = ifiles[i]->GetListOfKeys();
+	    //cout << endl << "List of keys in Input File " << i << ":" << endl;
+	    //keylist->Print();
+	    //cout << "==Begin Loops==" << endl;
+	    
+	    TIter nextkey(keylist);
+	    TKey *key = new TKey;
 
-	counter=0;
-	while (key = (TKey*)nextkey())
-	{
-	    counter++;
-	    //cout << "Loop through file "<<i<<": "<< counter;
-	    TClass *cl = gROOT->GetClass(key->GetClassName());
-	    if (!cl->InheritsFrom("TH1")) 
+	    counter=0;
+	    while (key = (TKey*)nextkey())
 	    {
-		//cout << endl;
-		continue;
+	        counter++;
+	        //cout << "Loop through file "<<i<<": "<< counter;
+	        TClass *cl = gROOT->GetClass(key->GetClassName());
+	        if (!cl->InheritsFrom("TH1")) 
+	        {
+	    	//cout << endl;
+	    	continue;
+	        }
+	        //cout << " - found " << key->GetClassName() << endl;
+	        TH1 *h = (TH1*)key->ReadObj();
+	        tempH.push_back(h);
 	    }
-	    //cout << " - found " << key->GetClassName() << endl;
-	    TH1 *h = (TH1*)key->ReadObj();
-	    tempH.push_back(h);
-	}
 
-	hs.push_back(tempH);
-	tempH.clear();
+	    hs.push_back(tempH);
+	    tempH.clear();
     }
 
     //Make sure all files have same number of histograms
     for(int i=0;i<numF;i++)
     {
-	for(int j=0;j<hs[i].size();j++)
-	{
-	    if((i+1)!=numF and hs[i].size() != hs[i+1].size())
+	    for(int j=0;j<hs[i].size();j++)
 	    {
-		cout<<"Histogram sizes do not match!"<<endl;
-		return 0;
+	        if((i+1)!=numF and hs[i].size() != hs[i+1].size())
+	        {
+	    	cout<<"Histogram sizes do not match!"<<endl;
+	    	return 0;
+	        }
 	    }
-	}
     }
     int numH = hs[0].size(); //number of histograms in each file
 
-
-
     //Plot single canvas with all histograms layered
     layerAll(hs, inames);
-    
-
 
     vector<TH1*> hists_ready; //holds similar histogram from each file - ready to be passed to plotter
 
@@ -185,38 +170,34 @@ int main(int argc, char** argv)
     char layerAnyways = 'n';
     for (int i=0;i<numH;i++)
     {
-	hists_ready.erase(hists_ready.begin(),hists_ready.end());
-	//Make sure histograms have same title
-      	for(int j=0;j<numF-1;j++)
-	{
-	    if (strcmp(hs[j][i]->GetName(),hs[j+1][i]->GetName())!=0 and layerAnyways!='y')
+	    hists_ready.erase(hists_ready.begin(),hists_ready.end());
+	    //Make sure histograms have same title
+        for(int j=0;j<numF-1;j++)
 	    {
-		cout << "Histogram names do not match!" << endl;
-		cout << "Attempt to layer anyways? [y/n] ";
-		cin >> layerAnyways;
-		if (layerAnyways != 'y')
-		    return 0;
+	        if (strcmp(hs[j][i]->GetName(),hs[j+1][i]->GetName())!=0 and layerAnyways!='y')
+	        {
+	    	cout << "Histogram names do not match!" << endl;
+	    	cout << "Attempt to layer anyways? [y/n] ";
+	    	cin >> layerAnyways;
+	    	if (layerAnyways != 'y')
+	    	    return 0;
+	        }
 	    }
-	}
-	
-	for(int k=0;k<numF;k++)
-	    hists_ready.push_back(hs[k][i]);
-
-     
-	TCanvas *mainc = newCanvas();
-	mainc->Divide(1,1);
-	const char* cname = hs[0][i]->GetName();
-	//char* fcname;
-	//strcat(fcname, cname);
-	mainc->SetTitle(cname);
-	mainc->SetName(cname);
 	    
-	layerHistogram(hists_ready,inames,mainc,1);
-	mainc->Write();
-    
+	    for(int k=0;k<numF;k++)
+	        hists_ready.push_back(hs[k][i]);
+         
+	    TCanvas *mainc = newCanvas();
+	    mainc->Divide(1,1);
+	    const char* cname = hs[0][i]->GetName();
+	    //char* fcname;
+	    //strcat(fcname, cname);
+	    mainc->SetTitle(cname);
+	    mainc->SetName(cname);
+	        
+	    layerHistogram(hists_ready,inames,mainc,1);
+	    mainc->Write();
     }
-
-    
 
     //CRC Canvas
     cout << endl << "Drawing CRC Canvas" << endl;
@@ -229,10 +210,6 @@ int main(int argc, char** argv)
     crc_names.push_back("CRC1_vs_CRC2");
     crc_names.push_back("DiffCRC");  
     layerSpecific(hs,crc_names,inames,crc); 
-
-
-
-
 
     //Control Bit/Flag Canvas
     cout << endl << "Drawing Control Bit Flag Canvas" << endl;
@@ -249,8 +226,6 @@ int main(int argc, char** argv)
     cbf_names.push_back("Flag");
     layerSpecific(hs,cbf_names,inames,cbf);
 
-
-
     //GGSW check
     cout << endl << "Drawing GGSW Check Canvas" << endl;
     TCanvas *ggsw = newCanvas();
@@ -261,8 +236,6 @@ int main(int argc, char** argv)
     ggsw_names.push_back("VFAT");
     ggsw_names.push_back("ChipID");
     layerSpecific(hs,ggsw_names,inames,ggsw);
-
-
 
     //Print canvases as other types
     TString pdf = oPath;
@@ -277,8 +250,6 @@ int main(int argc, char** argv)
     printCanvases("png", png);
     printCanvases("jpg", jpg);
     //printCanvases("root", root);
-
-
 
     return 0;
 }

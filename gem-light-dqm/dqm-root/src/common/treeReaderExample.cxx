@@ -34,7 +34,6 @@
 #include <TTree.h>
 #include <TBranch.h>
 
-//#include "dataChecker.cc"
 #include "gem/datachecker/GEMDataChecker.h"
 #include "plotter.cxx"
 
