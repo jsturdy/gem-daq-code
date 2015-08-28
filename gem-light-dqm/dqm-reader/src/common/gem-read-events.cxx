@@ -187,7 +187,7 @@ TFile* thldread(Int_t get=0)
   hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
  
-  TH1C* hiBX = new TH1C("BX",     "BX from OH",      100, 0x0, 0xffff );
+  TH1C* hiBX = new TH1C("BX",     "BX from OH",      4096, 0x0, 0xffff );
   hiBX->SetFillColor(48);
   hiBX->GetXaxis()->SetTitle("BX value, max 0xffff");
   hiBX->GetXaxis()->CenterTitle();
