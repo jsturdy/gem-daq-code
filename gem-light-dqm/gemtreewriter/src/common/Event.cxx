@@ -27,6 +27,7 @@
 //        uint32_t ZSFlag;                // ZeroSuppresion flags, 24 bits
 //        uint16_t ChamID;                // Chamber ID, 12 bits
 //        uint32_t sumVFAT;               // Rest part of the header, reserved for the moment
+//        uint64_t fRunHeader;            // RunType:4 VT1:8 VT2:8 minTH:8 maxTH:8 Step:8 - Threshold Scan Header
 //        std::vector<VFATdata> vfats;
 //        uint16_t OHcrc;                 // OH Check Sum, 16 bits
 //        uint16_t OHwCount;              // OH Counter, 16 bits

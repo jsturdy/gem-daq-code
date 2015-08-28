@@ -209,6 +209,7 @@ int main(int argc, char** argv)
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
         uint32_t sumVFAT = (0x000000000fffffff & geb.header);
+        uint16_t  BX     = 0;
 
         if (InpType == "Hex") {
           if(!gem::readout::readGEBrunhed(inpf, geb)) break;
@@ -238,9 +239,10 @@ int main(int argc, char** argv)
             uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
             uint16_t  ChipID = (0x0fff & vfat.ChipID);
             uint16_t  CRC    = vfat.crc;
-            uint16_t  BX     = vfat.BXfrOH;  
             uint64_t  lsData = vfat.lsData;
             uint64_t  msData = vfat.msData;
+
+            BX     = vfat.BXfrOH;  
 
             if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
               cout << "VFAT headers do not match expectation" << endl;
@@ -303,7 +305,7 @@ int main(int argc, char** argv)
           if(!gem::readout::readGEMtr1Binary(inpf, gem)) break;
         }
         
-        ev->Build(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
         ev->Clear();

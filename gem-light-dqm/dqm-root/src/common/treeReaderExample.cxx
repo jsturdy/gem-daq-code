@@ -34,7 +34,7 @@
 #include <TTree.h>
 #include <TBranch.h>
 
-#include "dataChecker.cc"
+#include "gem/datachecker/GEMDataChecker.h"
 #include "plotter.cxx"
 
 /**
@@ -46,6 +46,11 @@
 */
 
 using namespace std;
+//namespace gem {
+//  namespace datachecker{
+//    class GEMDataChecker;
+//  }
+//}
 int main(int argc, char** argv)
 {
     if (argc<3) 
@@ -136,7 +141,9 @@ int main(int argc, char** argv)
                         dataVFAT[3]  = (0x0000ffff00000000 & v_vfat.at(k).lsData()) >> 32;
                         dataVFAT[2]  = (0x00000000ffff0000 & v_vfat.at(k).lsData()) >> 16;
                         dataVFAT[1]  = (0x000000000000ffff & v_vfat.at(k).lsData());
-                        dataChecker *dc = new dataChecker();
+                        //GEMDataChecker *dc = new GEMDataChecker();
+                        gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker::GEMDataChecker();
+                        //uint16_t checkedCRC = dc->gem::datachecker::GEMDataChecker::checkCRC(dataVFAT, 0);
                         uint16_t checkedCRC = dc->checkCRC(dataVFAT, 0);
                         std::cout << "read  crc            " << std::hex << v_vfat.at(k).crc() << std::endl;
                         std::cout << "check crc            " << std::hex << checkedCRC << std::endl;
