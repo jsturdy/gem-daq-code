@@ -35,6 +35,7 @@
 #include <TBranch.h>
 
 #include "gem/datachecker/GEMDataChecker.h"
+#include "gem/readout/GEMslotContens.h"
 #include "plotter.cxx"
 
 /**
@@ -76,6 +77,7 @@ int main(int argc, char** argv)
     TFile *ofile = new TFile(ofilename, "RECREATE");
     //book histograms
     TH1F* hiVFAT    = new TH1F("VFAT", "Number_VFAT_blocks_per_event", 24,  0., 24. );
+    TH1F* hiVFATsn  = new TH1F("VFATsn", "VFAT_slot_number", 24,  0., 24. );
     TH1C* hiChip    = new TH1C("ChipID", "ChipID",         4096, 0x0, 0xfff );
     TH1C* hi1010    = new TH1C("1010", "Control_Bits_1010", 16, 0x0, 0xf );
     TH1C* hi1100    = new TH1C("1100", "Control_Bits_1100", 16, 0x0, 0xf );
@@ -112,8 +114,8 @@ int main(int argc, char** argv)
             // loop over vfats
             for (Int_t k = 0; k < v_vfat.size(); k++)
             {
-                if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) )
-                    {
+                //if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) )
+                //    {
                         // fill the control bits histograms
                         hi1010->Fill(v_vfat.at(k).b1010());
                         hi1100->Fill(v_vfat.at(k).b1100());
@@ -121,6 +123,10 @@ int main(int argc, char** argv)
                         // fill Flag and chip id histograms
                         hiFlag->Fill(v_vfat.at(k).Flag());
                         hiChip->Fill(v_vfat.at(k).ChipID());
+                        // calculate and fill VFAT slot number
+                        uint32_t t_chipID = static_cast<uint32_t>(v_vfat.at(k).ChipID());
+                        int sn = gem::readout::GEBslotIndex(t_chipID);
+                        hiVFATsn->Fill(sn);
                         // calculate and fill the crc and crc_diff
                         hiCRC->Fill(v_vfat.at(k).crc());
                         uint16_t dataVFAT[11];
@@ -165,9 +171,9 @@ int main(int argc, char** argv)
                           if(!chan0xf) hiCh128->Fill(chan);
                           }
                         }
-                    } else {
-                        ifake++;
-                    }
+                    //} else {
+                    //    ifake++;
+                    //}
             }
         }
         hiVFAT->Fill(nVFAT);
