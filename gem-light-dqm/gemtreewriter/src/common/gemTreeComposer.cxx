@@ -246,7 +246,7 @@ int main(int argc, char** argv)
 
             if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
               cout << "VFAT headers do not match expectation" << endl;
-              gem::readout::printVFATdataBits(ievent, vfat);
+              //gem::readout::printVFATdataBits(ievent, vfat);
               ifake++;
             }//end if 1010,1100,1110
       
@@ -274,7 +274,10 @@ int main(int argc, char** argv)
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 
-            if(OKpri) gem::readout::printVFATdataBits(ievent, vfat);
+            if(OKpri){
+              gem::readout::printVFATdataBits(ievent, vfat);
+              cout << " islot " << islot << endl;
+            }
 
         }//end of GEB PayLoad Data
 
