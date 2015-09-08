@@ -222,7 +222,7 @@ TFile* thldread(Int_t get=0)
   hiFlag->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiFlag->GetYaxis()->CenterTitle();
 
-  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       25, -1, 24 );
+  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       24, 0, 24 );
   hiSlot->SetFillColor(48);
   hiSlot->GetXaxis()->SetTitle("VFAT Slot position");
   hiSlot->GetXaxis()->CenterTitle();
@@ -266,8 +266,8 @@ TFile* thldread(Int_t get=0)
   }
 
   const Int_t ieventPrint = 3;
-  const Int_t ieventMax   = 900; //900000;
-  const Int_t kUPDATE     = 1;
+  const Int_t ieventMax   = 900000;
+  const Int_t kUPDATE     = 10;
   bool  OKpri = false;
 
   gem::readout::getSlotCfg();
