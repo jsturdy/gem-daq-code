@@ -222,7 +222,7 @@ TFile* thldread(Int_t get=0)
   hiFlag->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiFlag->GetYaxis()->CenterTitle();
 
-  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       24, 0, 24 );
+  TH1I* hiSlot = new TH1I("Slot"  , "VFAT Slot",       25, -1, 24 );
   hiSlot->SetFillColor(48);
   hiSlot->GetXaxis()->SetTitle("VFAT Slot position");
   hiSlot->GetXaxis()->CenterTitle();
@@ -265,10 +265,12 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 2;
-  const Int_t ieventMax   = 90000;
-  const Int_t kUPDATE     = 10;
+  const Int_t ieventPrint = 3;
+  const Int_t ieventMax   = 900; //900000;
+  const Int_t kUPDATE     = 1;
   bool  OKpri = false;
+
+  gem::readout::getSlotCfg();
 
   /*
    *  Events Loop
@@ -307,7 +309,13 @@ TFile* thldread(Int_t get=0)
     uint64_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
     uint64_t sumVFAT = (0x000000000fffffff & geb.header);
 
+   /*
+    * GEM Event Analyse
+    */
+    uint32_t ZSFlag24 = ZSFlag;
+
     //if(OKpri) cout << " ZSFlag " << std::hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
+    cout << " sumVFAT " << sumVFAT << endl;
 
     if (InpType == "Hex") {
       if(!gem::readout::readGEBrunhed(inpf, geb)) break;
@@ -336,7 +344,22 @@ TFile* thldread(Int_t get=0)
       uint16_t  CRC    = vfat.crc;
       uint16_t  BX     = vfat.BXfrOH;  
 
-      if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
+      int islot = -1;      
+      for (int ibin = 0; ibin < 24; ibin++){
+	if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ){
+          islot = ibin;
+        }
+      }//end for
+      int islotChipID = gem::readout::GEBslotIndex( (uint32_t)vfat.ChipID );
+
+      if (islot < 0 || islot > 23 || islot != islotChipID ){
+        cout << "warning:  wrong slot index !!!" << endl;
+        gem::readout::show24bits(ZSFlag24);
+        cout << " ievent " << ievent << " ivfat " << ivfat << " ChipID " << hex << ChipID << dec << " islot " << islot << 
+	  " GEBslotIndex " << gem::readout::GEBslotIndex( (uint32_t)vfat.ChipID ) << endl;
+      } 
+
+      if ( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
         cout << "VFAT headers do not match expectation" << endl;
         gem::readout::printVFATdataBits(ievent, vfat);
         ifake++;
@@ -356,16 +379,6 @@ TFile* thldread(Int_t get=0)
       dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
       uint16_t checkedCRC = checkCRC();
   
-     /*
-      * GEM Event Analyse
-      */
-      uint32_t ZSFlag24 = ZSFlag;
-
-      int islot = -1;
-      for (int ibin = 0; ibin < 24; ibin++){
-	if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
-      }//end for
-
       hi1010->Fill(b1010);
       hi1100->Fill(b1100);
       hiFlag->Fill(Flag);
@@ -441,7 +454,7 @@ TFile* thldread(Int_t get=0)
       c1->cd(10); hiCh128->Draw();
       c1->cd(11); hiVsCRC->Draw();
       c1->Update();
-      cout << "event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
+      cout << "end of event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
    
   } // End ievent
