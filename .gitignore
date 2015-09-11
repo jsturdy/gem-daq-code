@@ -46,3 +46,4 @@ perf.data
 xdaq.prof.*
 perf.output.*
 xdaqexamples
+*.pyc
