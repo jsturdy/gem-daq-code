@@ -35,7 +35,7 @@
 #include <TBranch.h>
 
 #include "gem/datachecker/GEMDataChecker.h"
-#include "gem/readout/GEMslotContens.h"
+#include "gem/readout/GEMDataAMCformat.h"
 #include "plotter.cxx"
 
 /**
@@ -47,6 +47,14 @@
 */
 
 using namespace std;
+
+uint16_t gem::readout::GEMslotContents::slot[24] = {
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+};
+bool gem::readout::GEMslotContents::isFileRead = false;
+
 //namespace gem {
 //  namespace datachecker{
 //    class GEMDataChecker;
@@ -60,6 +68,8 @@ int main(int argc, char** argv)
         cout << "Usage: <path>/reader inputFile.root outputFile.root" << endl;
         return 0;
     }
+    gem::readout::GEMslotContents::getSlotCfg();
+
     TString ifilename = argv[1];
     TString ofilename = argv[2];
     // read the tree generated with gtc
@@ -125,7 +135,7 @@ int main(int argc, char** argv)
                         hiChip->Fill(v_vfat.at(k).ChipID());
                         // calculate and fill VFAT slot number
                         uint32_t t_chipID = static_cast<uint32_t>(v_vfat.at(k).ChipID());
-                        int sn = gem::readout::GEBslotIndex(t_chipID);
+                        int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
                         hiVFATsn->Fill(sn);
                         // calculate and fill the crc and crc_diff
                         hiCRC->Fill(v_vfat.at(k).crc());
