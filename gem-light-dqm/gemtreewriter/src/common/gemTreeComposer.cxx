@@ -1,3 +1,5 @@
+#include "gem/readout/GEMDataAMCformat.h"
+
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -25,8 +27,6 @@
 #else
     #include "Event.h"
 #endif
-
-#include "gem/readout/GEMDataAMCformat.h"
 
 /**
 * GEM Tree Composer (gtc) application provides translation of the GEM output HEX file to ROOT-based TTree with GEM Events
@@ -71,6 +71,17 @@
 */
 
 using namespace std;
+
+uint16_t gem::readout::GEMslotContents::slot[24] = {
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+};
+bool gem::readout::GEMslotContents::isFileRead = false;
+
+typedef gem::readout::GEMDataAMCformat::GEMData  AMCGEMData;
+typedef gem::readout::GEMDataAMCformat::GEBData  AMCGEBData;
+typedef gem::readout::GEMDataAMCformat::VFATData AMCVFATData;
 
  /*
   *  CRC ******************************************************************
@@ -167,14 +178,16 @@ int main(int argc, char** argv)
     Event *ev = new Event(); 
     GEMtree.Branch("GEMEvents", &ev);
 
-    gem::readout::GEMData   gem;
-    gem::readout::GEBData   geb;
-    gem::readout::VFATData vfat;
+    AMCGEMData  gem;
+    AMCGEBData  geb;
+    AMCVFATData vfat;
 
     const Int_t ieventPrint = 3;
     const Int_t ieventMax   = 9000000;
     const Int_t kUPDATE     = 10;
     bool OKpri = false;
+
+    gem::readout::GEMslotContents::getSlotCfg();
 
     for(int ievent=0; ievent<ieventMax; ievent++)
     {
@@ -188,23 +201,23 @@ int main(int argc, char** argv)
         *  GEM Headers Data level
         */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEMhd1(inpf, gem)) break;
-          if(!gem::readout::readGEMhd2(inpf, gem)) break;
-          if(!gem::readout::readGEMhd3(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd1(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd2(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd3(inpf, gem)) break;
         } else {
-          if(!gem::readout::readGEMhd1Binary(inpf, gem)) break;
-          if(!gem::readout::readGEMhd2Binary(inpf, gem)) break;
-          if(!gem::readout::readGEMhd3Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd1Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd2Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd3Binary(inpf, gem)) break;
         }
     
        /*
         *  GEB Headers Data level
         */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEBheader(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBheader(inpf, geb)) break;
         } else {
-          if(!gem::readout::readGEBheaderBinary(inpf, geb)) break;
-        } //if(OKpri) gem::readout::printGEBheader(ievent,geb);
+          if(!gem::readout::GEMDataAMCformat::readGEBheaderBinary(inpf, geb)) break;
+        } //if(OKpri) gem::readout::GEMDataAMCformat::printGEBheader(ievent,geb);
     
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
@@ -212,9 +225,9 @@ int main(int argc, char** argv)
         uint16_t  BX     = 0;
 
         if (InpType == "Hex") {
-          if(!gem::readout::readGEBrunhed(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
         } else {
-          if(!gem::readout::readGEBrunhedBinary(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBrunhedBinary(inpf, geb)) break;
         }
     
        /*
@@ -226,9 +239,9 @@ int main(int argc, char** argv)
         for(int ivfat=0; ivfat<sumVFAT; ivfat++){
 
             if (InpType == "Hex") {
-              if(!gem::readout::readVFATdata(inpf, ivfat, vfat)) break;
+              if(!gem::readout::GEMDataAMCformat::readVFATdata(inpf, ivfat, vfat)) break;
             } else {
-              if(!gem::readout::readVFATdataBinary(inpf, ivfat, vfat)) break;
+              if(!gem::readout::GEMDataAMCformat::readVFATdataBinary(inpf, ivfat, vfat)) break;
             }
       
             uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
@@ -246,7 +259,7 @@ int main(int argc, char** argv)
 
             if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
               cout << "VFAT headers do not match expectation" << endl;
-              //gem::readout::printVFATdataBits(ievent, vfat);
+              //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
               ifake++;
             }//end if 1010,1100,1110
       
@@ -267,7 +280,7 @@ int main(int argc, char** argv)
             uint32_t ZSFlag24 = ZSFlag;
             int islot = -1;
             for (int ibin = 0; ibin < 24; ibin++){
-              if ( (ChipID == gem::readout::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
+              if ( (ChipID == gem::readout::GEMslotContents::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
             }//end for
       
             VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
@@ -275,7 +288,7 @@ int main(int argc, char** argv)
             delete VFATdata_;
 
             if(OKpri){
-              gem::readout::printVFATdataBits(ievent, vfat);
+              gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
               cout << " islot " << islot << endl;
             }
 
@@ -285,10 +298,10 @@ int main(int argc, char** argv)
         *  GEB Trailers Data level
         */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEBtrailer(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBtrailer(inpf, geb)) break;
         } else {
-          if(!gem::readout::readGEBtrailerBinary(inpf, geb)) break;
-        }//if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
+          if(!gem::readout::GEMDataAMCformat::readGEBtrailerBinary(inpf, geb)) break;
+        }//if(OKpri) gem::readout::GEMDataAMCformat::printGEBtrailer(ievent, geb);
     
         uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
         uint16_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
@@ -301,11 +314,11 @@ int main(int argc, char** argv)
         *  GEM Trailers Data level
         */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEMtr2(inpf, gem)) break;
-          if(!gem::readout::readGEMtr1(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr2(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr1(inpf, gem)) break;
         } else {
-          if(!gem::readout::readGEMtr2Binary(inpf, gem)) break;
-          if(!gem::readout::readGEMtr1Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr2Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr1Binary(inpf, gem)) break;
         }
         
         ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
