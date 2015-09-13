@@ -19,15 +19,14 @@
 *.csh
 *.dat
 *.err
+*.pyc
 gemBase
 gemCore
 gemManager
 gemSupervisor
 gemRCMS
-#glib
 glib-testing
 test
-#vfat
 rcms
 vfat-testing
 ##setup
@@ -46,4 +45,8 @@ perf.data
 xdaq.prof.*
 perf.output.*
 xdaqexamples
-*.pyc
+**/output/*.pdf
+**/output/*/*.pdf
+**/output/*/*/*.pdf
+**/output/*/*.root
+**/output/*/*/*.root
