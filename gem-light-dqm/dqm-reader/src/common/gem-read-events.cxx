@@ -265,9 +265,9 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 3;
+  const Int_t ieventPrint = 1;
   const Int_t ieventMax   = 900000;
-  const Int_t kUPDATE     = 10;
+  const Int_t kUPDATE     = 1;
   bool  OKpri = false;
 
   gem::readout::getSlotCfg();
