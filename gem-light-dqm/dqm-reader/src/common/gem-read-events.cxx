@@ -1,10 +1,11 @@
 #ifndef __CINT__
+#include "gem/readout/GEMDataAMCformat.h"
+#include "gem/datachecker/GEMDataChecker.h"
+
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "gem/readout/GEMDataAMCformat.h"
-#include "gem/datachecker/GEMDataChecker.h"
 
 #include <cstring>
 #include <sstream>
@@ -66,7 +67,7 @@ uint16_t gem::readout::GEMslotContents::slot[24] = {
   0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
 };
 bool gem::readout::GEMslotContents::isFileRead = false;
- 
+
 typedef gem::readout::GEMDataAMCformat::GEMData  AMCGEMData;
 typedef gem::readout::GEMDataAMCformat::GEBData  AMCGEBData;
 typedef gem::readout::GEMDataAMCformat::VFATData AMCVFATData;
