@@ -326,8 +326,11 @@ TFile* thldread(Int_t get=0)
     */
     uint32_t ZSFlag24 = ZSFlag;
 
-    //if(OKpri) cout << " ZSFlag " << std::hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
-    cout << " sumVFAT " << sumVFAT << endl;
+    if(OKpri){ 
+      cout << " ZSFlag " << std::hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
+      cout << " sumVFAT " << sumVFAT << endl;
+      gem::readout::GEMDataAMCformat::show24bits(ZSFlag24);
+    }
 
     if (InpType == "Hex") {
       if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
