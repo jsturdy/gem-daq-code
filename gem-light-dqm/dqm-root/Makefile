@@ -23,6 +23,7 @@ ShortPackage=dqm-root
 PackageName=dqm-root
 
 IncludeDirs = /usr/include/root
+IncludeDirs+= $(BUILD_HOME)/$(Project)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
 IncludeDirs+= $(BUILD_HOME)/$(Project)/gemtreewriter/include
 IncludeDirs+= ${BUILD_HOME}/gemdaq-testing/gemreadout/include
@@ -44,6 +45,10 @@ all:
 
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/printAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
 	$(LS) $(BIN)
+
+rundqm:
+	mkdir -p $(BIN)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
 
 reader:
 	mkdir -p $(BIN)

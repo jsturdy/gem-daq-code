@@ -1,3 +1,6 @@
+#ifndef DEBUG
+#define DEBUG 1
+#endif
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -6,6 +9,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdint>
+#include <stdexcept>
 #include <TFile.h>
 #include <TKey.h>
 #include <TDirectory.h>
@@ -35,7 +39,7 @@
 #include <TBranch.h>
 
 #include "gem/datachecker/GEMDataChecker.h"
-#include "gem/readout/GEMslotContens.h"
+#include "gem/readout/GEMslotContents.h"
 #include "plotter.cxx"
 
 /**
@@ -47,26 +51,30 @@
 */
 
 using namespace std;
-//namespace gem {
-//  namespace datachecker{
-//    class GEMDataChecker;
-//  }
-//}
-class treeReader {
+
+uint16_t gem::readout::GEMslotContents::slot[24] = {
+      0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+      0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+      0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+    };
+bool gem::readout::GEMslotContents::isFileRead = false;
+
+class gemTreeReader {
   public:
-    treeReader(const std::string &ifilename)
+    gemTreeReader(const std::string &ifilename)
     {
       std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
       if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
-      ifile = new TFile(ifilename, "READ");
-      this->bookHistograms();
+      ifile = new TFile(ifilename.c_str(), "READ");
       std::string ofilename = ifilename.substr(0,ifilename.size()-9);
       ofilename += ".analyzed.root";
-      ofile = new TFile(ofilename, "RECREATE");
+      ofile = new TFile(ofilename.c_str(), "RECREATE");
+      this->bookHistograms();
     }
-    ~treeReader(){}
+    ~gemTreeReader(){}
     void createHistograms()
     {
+      this->fillHistograms();
     }
   private:
     TFile *ifile;
@@ -100,99 +108,93 @@ class treeReader {
     }
     void fillHistograms()
     {
+      if (DEBUG) std::cout << "[gemTreeReader]: Starting filling the histograms" << std::endl;
       TTree *tree = (TTree*)ifile->Get("GEMtree");
       Event *event = new Event();
       TBranch *branch = tree->GetBranch("GEMEvents");
       branch->SetAddress(&event);
       Int_t nentries = tree->GetEntries();
+      if (DEBUG) std::cout << "[gemTreeReader]: Number of entries in the TTree : " << nentries << std::endl;
       Int_t nVFAT = 0;
       Int_t ifake = 0;
       // loop over tree entries
       for (Int_t i = 0; i < nentries; i++)
       {
-          // clear number of VFATs
-          nVFAT = 0;
-          // Retrieve next entry
-          branch->GetEntry(i);
-          cout << "Event number " << i << endl;
-          // create vector of GEBdata. For data format details look at Event.h
-          vector<GEBdata> v_geb;
-          v_geb = event->gebs();
-          // loop over gebs
-          for (Int_t j = 0; j < v_geb.size(); j++)
+        // clear number of VFATs
+        nVFAT = 0;
+        // Retrieve next entry
+        branch->GetEntry(i);
+        if (DEBUG) std::cout << "[gemTreeReader]: Processing event " << i << std::endl;
+        // create vector of GEBdata. For data format details look at Event.h
+        vector<GEBdata> v_geb;
+        v_geb = event->gebs();
+        // loop over gebs
+        for (Int_t j = 0; j < v_geb.size(); j++)
+        {
+          // create vector of VFATdata. For data format details look at Event.h
+          vector<VFATdata> v_vfat;
+          v_vfat = v_geb.at(j).vfats();
+          // Increment number of VFATs in the given event
+          nVFAT += v_vfat.size();
+          // loop over vfats
+          for (Int_t k = 0; k < v_vfat.size(); k++)
           {
-              // create vector of VFATdata. For data format details look at Event.h
-              vector<VFATdata> v_vfat;
-              v_vfat = v_geb.at(j).vfats();
-              // Increment number of VFATs in the given event
-              nVFAT += v_vfat.size();
-              // loop over vfats
-              for (Int_t k = 0; k < v_vfat.size(); k++)
-              {
-                  //if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) )
-                  //    {
-                          // fill the control bits histograms
-                          hi1010->Fill(v_vfat.at(k).b1010());
-                          hi1100->Fill(v_vfat.at(k).b1100());
-                          hi1110->Fill(v_vfat.at(k).b1110());
-                          // fill Flag and chip id histograms
-                          hiFlag->Fill(v_vfat.at(k).Flag());
-                          hiChip->Fill(v_vfat.at(k).ChipID());
-                          // calculate and fill VFAT slot number
-                          uint32_t t_chipID = static_cast<uint32_t>(v_vfat.at(k).ChipID());
-                          int sn = gem::readout::GEBslotIndex(t_chipID);
-                          hiVFATsn->Fill(sn);
-                          // calculate and fill the crc and crc_diff
-                          hiCRC->Fill(v_vfat.at(k).crc());
-                          uint16_t dataVFAT[11];
-                          // CRC check
-                          uint16_t b1010 = (0x000f & v_vfat.at(k).b1010());
-                          uint16_t b1100 = (0x000f & v_vfat.at(k).b1100());
-                          uint16_t b1110 = (0x000f & v_vfat.at(k).b1110());
-                          uint16_t flag = (0x000f & v_vfat.at(k).Flag());
-                          uint16_t ec = (0x00ff & v_vfat.at(k).EC());
-                          dataVFAT[11] = (0xf000 & (b1010 << 12)) | (0x0fff & v_vfat.at(k).BC());
-                          dataVFAT[10] = ((0xf000 & (b1100 << 12)) | (0x0ff0 & (ec << 4))) | (0x000f & flag);
-                          dataVFAT[9]  = (0xf000 & (b1110 << 12)) | (0x0fff & v_vfat.at(k).ChipID());
-                          dataVFAT[8]  = (0xffff000000000000 & v_vfat.at(k).msData()) >> 48;
-                          dataVFAT[7]  = (0x0000ffff00000000 & v_vfat.at(k).msData()) >> 32;
-                          dataVFAT[6]  = (0x00000000ffff0000 & v_vfat.at(k).msData()) >> 16;
-                          dataVFAT[5]  = (0x000000000000ffff & v_vfat.at(k).msData());
-                          dataVFAT[4]  = (0xffff000000000000 & v_vfat.at(k).lsData()) >> 48;
-                          dataVFAT[3]  = (0x0000ffff00000000 & v_vfat.at(k).lsData()) >> 32;
-                          dataVFAT[2]  = (0x00000000ffff0000 & v_vfat.at(k).lsData()) >> 16;
-                          dataVFAT[1]  = (0x000000000000ffff & v_vfat.at(k).lsData());
-                          //GEMDataChecker *dc = new GEMDataChecker();
-                          gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker::GEMDataChecker();
-                          //uint16_t checkedCRC = dc->gem::datachecker::GEMDataChecker::checkCRC(dataVFAT, 0);
-                          uint16_t checkedCRC = dc->checkCRC(dataVFAT, 0);
-                          std::cout << "read  crc            " << std::hex << v_vfat.at(k).crc() << std::endl;
-                          std::cout << "check crc            " << std::hex << checkedCRC << std::endl;
-                          hiDiffCRC->Fill(v_vfat.at(k).crc()-checkedCRC);
-                          hi2DCRC->Fill(v_vfat.at(k).crc(), checkedCRC);
-                          delete dc;
-                          //I think it would be nice to time this...
-                          uint16_t chan0xf = 0;
-                          for (int chan = 0; chan < 128; ++chan) {
-                            if (chan < 64){
-                              chan0xf = ((v_vfat.at(k).lsData() >> chan) & 0x1);
-                              //histos[chan]->Fill(chan0xf);
-                            if(!chan0xf) {
-                               hiCh128->Fill(chan);
-                            }
-                            } else {
-                              chan0xf = ((v_vfat.at(k).msData() >> (chan-64)) & 0x1);
-                              //histos[chan]->Fill(chan0xf);
-                            if(!chan0xf) hiCh128->Fill(chan);
-                            }
-                          }
-                      //} else {
-                      //    ifake++;
-                      //}
+            // fill the control bits histograms
+            hi1010->Fill(v_vfat.at(k).b1010());
+            hi1100->Fill(v_vfat.at(k).b1100());
+            hi1110->Fill(v_vfat.at(k).b1110());
+            // fill Flag and chip id histograms
+            hiFlag->Fill(v_vfat.at(k).Flag());
+            hiChip->Fill(v_vfat.at(k).ChipID());
+            // calculate and fill VFAT slot number
+            uint32_t t_chipID = static_cast<uint32_t>(v_vfat.at(k).ChipID());
+            //gem::readout::GEMslotContents m_GEMslotContents;
+            int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
+            hiVFATsn->Fill(sn);
+            // calculate and fill the crc and crc_diff
+            hiCRC->Fill(v_vfat.at(k).crc());
+            uint16_t dataVFAT[11];
+            // CRC check
+            uint16_t b1010 = (0x000f & v_vfat.at(k).b1010());
+            uint16_t b1100 = (0x000f & v_vfat.at(k).b1100());
+            uint16_t b1110 = (0x000f & v_vfat.at(k).b1110());
+            uint16_t flag = (0x000f & v_vfat.at(k).Flag());
+            uint16_t ec = (0x00ff & v_vfat.at(k).EC());
+            dataVFAT[11] = (0xf000 & (b1010 << 12)) | (0x0fff & v_vfat.at(k).BC());
+            dataVFAT[10] = ((0xf000 & (b1100 << 12)) | (0x0ff0 & (ec << 4))) | (0x000f & flag);
+            dataVFAT[9]  = (0xf000 & (b1110 << 12)) | (0x0fff & v_vfat.at(k).ChipID());
+            dataVFAT[8]  = (0xffff000000000000 & v_vfat.at(k).msData()) >> 48;
+            dataVFAT[7]  = (0x0000ffff00000000 & v_vfat.at(k).msData()) >> 32;
+            dataVFAT[6]  = (0x00000000ffff0000 & v_vfat.at(k).msData()) >> 16;
+            dataVFAT[5]  = (0x000000000000ffff & v_vfat.at(k).msData());
+            dataVFAT[4]  = (0xffff000000000000 & v_vfat.at(k).lsData()) >> 48;
+            dataVFAT[3]  = (0x0000ffff00000000 & v_vfat.at(k).lsData()) >> 32;
+            dataVFAT[2]  = (0x00000000ffff0000 & v_vfat.at(k).lsData()) >> 16;
+            dataVFAT[1]  = (0x000000000000ffff & v_vfat.at(k).lsData());
+            gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker::GEMDataChecker();
+            uint16_t checkedCRC = dc->checkCRC(dataVFAT, 0);
+            if (DEBUG) std::cout << "[gemTreeReader]: CRC read from vfat : " << std::hex << v_vfat.at(k).crc() << std::endl;
+            if (DEBUG) std::cout << "[gemTreeReader]: CRC recalculated   : " << std::hex << checkedCRC << std::endl;
+            hiDiffCRC->Fill(v_vfat.at(k).crc()-checkedCRC);
+            hi2DCRC->Fill(v_vfat.at(k).crc(), checkedCRC);
+            delete dc;
+            //I think it would be nice to time this...
+            uint16_t chan0xf = 0;
+            for (int chan = 0; chan < 128; ++chan) {
+              if (chan < 64){
+                chan0xf = ((v_vfat.at(k).lsData() >> chan) & 0x1);
+              if(chan0xf) {
+                 hiCh128->Fill(chan);
               }
+              } else {
+                chan0xf = ((v_vfat.at(k).msData() >> (chan-64)) & 0x1);
+              if(chan0xf) hiCh128->Fill(chan);
+              }
+            }
           }
-          hiVFAT->Fill(nVFAT);
-          hiFake->Fill(ifake);
+        }
+        hiVFAT->Fill(nVFAT);
+        hiFake->Fill(ifake);
       }
       
       setTitles(hiVFAT, "Number VFAT blocks per Event", "Number of Events");   

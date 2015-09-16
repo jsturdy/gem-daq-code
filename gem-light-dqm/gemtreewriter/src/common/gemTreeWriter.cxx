@@ -1,4 +1,4 @@
-#define DEBUG 0
+#define DEBUG 1
 
 #include <iomanip> 
 #include <iostream>
@@ -78,50 +78,70 @@ class gemTreeWriter {
     ~gemTreeWriter(){}
     void makeTree(std::string ifile)
     {
-      std::string tmp = ifile.substr(ifile.size()-4. ifile.size());
+      std::string tmp;
+      tmp = ifile.substr(ifile.size()-4, ifile.size());
       if (tmp!=".dat") {
         std::cout << "Error! Input file should be *.dat format" << std::endl;
         return;
       }
       tmp = ifile.substr(0, ifile.size()-4);
-      tmp += "*.raw.root";
-      makeTree(ifile, tmp);
+      tmp += ".raw.root";
+      ofilename = tmp;
+      if (DEBUG) std::cout << "[gemTreeWriter]: File names resolved" << std::endl;
+      
+      this->makeTree(ifile, tmp);
     }
     void makeTree(std::string ifile, std::string ofile)
     {
-      TFile *hfile = new TFile(ofile,"RECREATE","Threshold Scan ROOT file with histograms");
+      if (DEBUG) std::cout << "[gemTreeWriter]: Entering makeTree(str,str)" << std::endl;
+      TFile *hfile = new TFile(ofile.c_str(),"RECREATE","Threshold Scan ROOT file with histograms");
       TTree GEMtree("GEMtree","A Tree with GEM Events");
       Event *ev = new Event(); 
       GEMtree.Branch("GEMEvents", &ev);
       std::ifstream inpf(ifile.c_str(), std::ios::in|std::ios::binary);
+      char c = inpf.get();
+      inpf.close();
+      (c==1)?InpType="Bin":InpType="Hex";
+      std::cout << "[gemTreeWriter]: Input File has type " << c << " " << "  " << InpType << std::endl;
+    
       inpf.open(ifile.c_str());
-      inpf.open(ifile.c_str());
-      if(!inpf.is_open()) {std::cout << "\nThe file: " << ifile.c_str() << " is missing.\n" << std::endl;}
+      if(!inpf.is_open()) {
+        std::cout << "\nThe file: " << ifile.c_str() << " is missing.\n" << std::endl;
+        return;
+      };
+      if (DEBUG) std::cout << "[gemTreeWriter]: File " << ifile << " is opened "<< std::endl;
       ievent=0;
       while(true){
-        if(inpf.eof()) break;
-        if(!inpf.good()) break;
-        if DEBUG std::cout << "Processing event " << ievent << std::endl;
+        if (DEBUG) std::cout << "[gemTreeWriter]: Entering while loop" << std::endl;
+        if(inpf.eof()) {
+          std::cout << "[gemTreeWriter]: End of " << ifile << " file." << std::endl;
+          break;
+        }
+        if(!inpf.good()){
+          std::cout << "[gemTreeWriter]: File " << ifile << " is bad" << std::endl;
+          break;
+        }
+        if (DEBUG) std::cout << "[gemTreeWriter]: Processing event " << ievent << std::endl;
         /*
          *  GEM Headers Data level
          */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEMhd1(inpf, gem)) break;
-          if(!gem::readout::readGEMhd2(inpf, gem)) break;
-          if(!gem::readout::readGEMhd3(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd1(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd2(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd3(inpf, gem)) break;
         } else {
-          if(!gem::readout::readGEMhd1Binary(inpf, gem)) break;
-          if(!gem::readout::readGEMhd2Binary(inpf, gem)) break;
-          if(!gem::readout::readGEMhd3Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd1Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd2Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd3Binary(inpf, gem)) break;
         }
     
         /*
          *  GEB Headers Data level
          */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEBheader(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBheader(inpf, geb)) break;
         } else {
-          if(!gem::readout::readGEBheaderBinary(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBheaderBinary(inpf, geb)) break;
         } //if(OKpri) gem::readout::printGEBheader(ievent,geb);
     
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
@@ -130,22 +150,23 @@ class gemTreeWriter {
         uint16_t  BX     = 0;
 
         if (InpType == "Hex") {
-          if(!gem::readout::readGEBrunhed(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
         } else {
-          if(!gem::readout::readGEBrunhedBinary(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBrunhedBinary(inpf, geb)) break;
         }
     
        /*
         *  GEB PayLoad Data
         */
         GEBdata *GEBdata_ = new GEBdata(ZSFlag, ChamID, sumVFAT);
+        GEBdata_->setRunHeader(geb.runhed);
 
         int ifake = 0;
         for(int ivfat=0; ivfat<sumVFAT; ivfat++){
           if (InpType == "Hex") {
-            if(!gem::readout::readVFATdata(inpf, ivfat, vfat)) break;
+            if(!gem::readout::GEMDataAMCformat::readVFATdata(inpf, ivfat, vfat)) break;
           } else {
-            if(!gem::readout::readVFATdataBinary(inpf, ivfat, vfat)) break;
+            if(!gem::readout::GEMDataAMCformat::readVFATdataBinary(inpf, ivfat, vfat)) break;
           }
       
           uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
@@ -167,10 +188,10 @@ class gemTreeWriter {
          *  GEB Trailers Data level
          */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEBtrailer(inpf, geb)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEBtrailer(inpf, geb)) break;
         } else {
-          if(!gem::readout::readGEBtrailerBinary(inpf, geb)) break;
-        }//if(OKpri) gem::readout::printGEBtrailer(ievent, geb);
+          if(!gem::readout::GEMDataAMCformat::readGEBtrailerBinary(inpf, geb)) break;
+        }
     
         uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
         uint16_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
@@ -183,34 +204,28 @@ class gemTreeWriter {
          *  GEM Trailers Data level
          */
         if (InpType == "Hex") {
-          if(!gem::readout::readGEMtr2(inpf, gem)) break;
-          if(!gem::readout::readGEMtr1(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr2(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr1(inpf, gem)) break;
         } else {
-          if(!gem::readout::readGEMtr2Binary(inpf, gem)) break;
-          if(!gem::readout::readGEMtr1Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr2Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr1Binary(inpf, gem)) break;
         }
         
         ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
         ev->Clear();
+        ievent++;
       }// End loop on events
       inpf.close();
       hfile->Write();// Save file with tree
     }
+    std::string getOutputFileName(){return ofilename;}
   private:
+    std::string ofilename;
     int ievent;
     std::string InpType;
-    gem::readout::GEMData   gem;
-    gem::readout::GEBData   geb;
-    gem::readout::VFATData vfat;
-    void checkInputFileFormat(std::string ifile)
-    {
-      std::ifstream inpf(ifile.c_str(), std::ios::in|std::ios::binary);
-      char c = inpf.get();
-      inpf.close();
-      (c==1)?InpType="Bin":InpType="Hex";
-      if DEBUG std::cout << "File type: " << InpType << std::endl;
-      //if ( c != 1 ) InpType = "Hex" else InpType = "Bin";
-    }
+    gem::readout::GEMDataAMCformat::GEMData   gem;
+    gem::readout::GEMDataAMCformat::GEBData   geb;
+    gem::readout::GEMDataAMCformat::VFATData vfat;
 };
