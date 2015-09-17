@@ -277,9 +277,9 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 1;
+  const Int_t ieventPrint = 0;
   const Int_t ieventMax   = 900000;
-  const Int_t kUPDATE     = 1;
+  const Int_t kUPDATE     = 100;
   bool  OKpri = false;
 
   gem::readout::GEMslotContents::getSlotCfg();
@@ -371,7 +371,7 @@ TFile* thldread(Int_t get=0)
         cout << "warning:  wrong slot index !!!" << endl;
         gem::readout::GEMDataAMCformat::show24bits(ZSFlag24);
         cout << " ievent " << ievent << " ivfat " << ivfat << " ChipID " << hex << ChipID << dec << " islot " << islot << 
-	  " GEBslotIndex " << gem::readout::GEMslotContents::GEBslotIndex( (uint32_t)vfat.ChipID ) << endl;
+	  " GEBslotIndex " << islotChipID << endl;
       } 
 
       if ( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
