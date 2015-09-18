@@ -20,6 +20,7 @@
 *.dat
 *.err
 *.pyc
+*.txt
 gemBase
 gemCore
 gemManager
