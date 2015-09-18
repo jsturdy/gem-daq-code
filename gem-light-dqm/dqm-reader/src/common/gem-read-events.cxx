@@ -199,9 +199,9 @@ TFile* thldread(Int_t get=0)
   hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
  
-  TH1C* hiBX = new TH1C("BX",     "BX from OH",      4096, 0x0, 0xffff );
+  TH1C* hiBX = new TH1C("BX",     "BX from OH",      4096, 0x0, 0xffffffff );
   hiBX->SetFillColor(48);
-  hiBX->GetXaxis()->SetTitle("BX value, max 0xffff");
+  hiBX->GetXaxis()->SetTitle("BX value, max 0xffffffff");
   hiBX->GetXaxis()->CenterTitle();
   hiBX->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiBX->GetYaxis()->CenterTitle();
@@ -279,7 +279,7 @@ TFile* thldread(Int_t get=0)
 
   const Int_t ieventPrint = 0;
   const Int_t ieventMax   = 900000;
-  const Int_t kUPDATE     = 100;
+  const Int_t kUPDATE     = 1000;
   bool  OKpri = false;
 
   gem::readout::GEMslotContents::getSlotCfg();
@@ -357,7 +357,7 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
-      uint16_t  BX     = vfat.BXfrOH;  
+      uint32_t  BX     = vfat.BXfrOH;  
 
       int islot = -1;      
       for (int ibin = 0; ibin < 24; ibin++){
@@ -464,10 +464,10 @@ TFile* thldread(Int_t get=0)
       c1->cd(5)->SetLogy(); hi1010->Draw();
       c1->cd(6)->SetLogy(); hi1100->Draw();
       c1->cd(7)->SetLogy(); hi1110->Draw();
+      c1->cd(8)->SetLogy(); hiFlag->Draw();
 
-      c1->cd(9)->SetLogy(); hiFlag->Draw();
-      c1->cd(10); hiCh128->Draw();
-      c1->cd(11); hiVsCRC->Draw();
+      c1->cd(9); hiCh128->Draw();
+      c1->cd(10); hiVsCRC->Draw();
       c1->Update();
       cout << "end of event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
