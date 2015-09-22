@@ -36,7 +36,7 @@
 
 #include "gem/datachecker/GEMDataChecker.h"
 #include "plotter.cxx"
-#include "gem/readout/GEMslotContens.h"
+#include "gem/readout/GEMslotContents.h"
 
 /**
   * GEM Tree Reader example (reader) application 
