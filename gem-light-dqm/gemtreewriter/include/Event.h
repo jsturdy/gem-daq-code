@@ -85,6 +85,18 @@ class GEBdata {
         uint32_t fZSFlag;                // ZeroSuppresion flags, 24 bits
         uint16_t fChamID;                // Chamber ID, 12 bits
         uint32_t fsumVFAT;               // Rest part of the header, reserved for the moment
+        uint64_t fRunHeader;             // RunType:4 VT1:8 VT2:8 minTH:8 maxTH:8 Step:8 - Threshold Scan Header
+        // 0 data, 1 local-data, 2 cosmic-data, 3 threshold scan, 4 S-curve, 5 latency
+                                         // – Run Control header will be filled in according applications.
+        //uint8_t fRunType;              // Run Type (TS, LS, Cosmic or Collision)
+        //uint8_t fVT1;
+        //uint8_t fVT2;
+        //uint8_t fMinThreshold;
+        //uint8_t fMaxThreshold;
+        //uint8_t fStep;
+        /*
+         * Need to add the header instances for other types of run
+         */
         std::vector<VFATdata> fvfats;
         uint16_t fOHcrc;                 // OH Check Sum, 16 bits
         uint16_t fOHwCount;              // OH Counter, 16 bits
@@ -98,15 +110,15 @@ class GEBdata {
             fChamID(ChamID_),
             fsumVFAT(sumVFAT_){}
         ~GEBdata(){}
-
+        void setRunHeader(const uint64_t &runHeader_){fRunHeader = runHeader_;}
         void addVFATData(const VFATdata &vfat_){fvfats.push_back(vfat_);}
-
         void setTrailer(const uint16_t &OHcrc_, const uint16_t &OHwCount_, const uint16_t &ChamStatus_, const uint16_t &GEBres_)
         {fOHcrc = OHcrc_; fOHwCount = OHwCount_; fChamStatus = ChamStatus_; fGEBres = GEBres_;}
 
         uint32_t ZSFlag    (){ return fZSFlag;     }       
         uint16_t ChamID    (){ return fChamID;     }       
         uint32_t sumVFAT   (){ return fsumVFAT;    }       
+        uint32_t runHeader (){ return fRunHeader;  }       
         uint16_t OHcrc     (){ return fOHcrc;      }       
         uint16_t OHwCount  (){ return fOHwCount;   }       
         uint16_t ChamStatus(){ return fChamStatus; }       

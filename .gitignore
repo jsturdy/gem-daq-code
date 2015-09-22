@@ -45,3 +45,8 @@ perf.data
 xdaq.prof.*
 perf.output.*
 xdaqexamples
+**/output/*.pdf
+**/output/*/*.pdf
+**/output/*/*/*.pdf
+**/output/*/*.root
+**/output/*/*/*.root
