@@ -38,12 +38,9 @@ LIB=$(BUILD_HOME)/$(Project)/gemtreewriter/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 all:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx $(LIB)/libEvent.so -o $(BIN)/reader
-	$(LS) $(BIN)
-
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/histogramLayeringExample.cxx $(LIB)/libEvent.so -o $(BIN)/layer
-	$(LS) $(BIN)
-
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/printAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
 	$(LS) $(BIN)
 
 rundqm:
