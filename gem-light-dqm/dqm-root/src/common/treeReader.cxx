@@ -170,6 +170,7 @@ class gemTreeReader {
           // loop over vfats
           for (Int_t k = 0; k < v_vfat.size(); k++)
           {
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT # "  <<  k << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: EC of the vfat inside loop===> "  <<  static_cast<uint32_t>(v_vfat.at(k).EC()) << std::hex << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: BC of the vfat inside loop===> "  <<  v_vfat.at(k).BC() << std::hex << std::endl;   
             // fill the control bits histograms
@@ -184,8 +185,9 @@ class gemTreeReader {
             //gem::readout::GEMslotContents m_GEMslotContents;
             int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
             hiVFATsn->Fill(sn);
-            vfatId[sn]++;
+            if (sn>(-1)) vfatId[sn]++;
             // fill occupancy plots
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Start filling occupancy plots "  << std::endl;   
             for(Int_t m=0; m<24; m++){
               if(sn == m){
                 uint16_t chan0xfFiredchip = 0;
@@ -200,8 +202,10 @@ class gemTreeReader {
                  }
               } 
             }
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Finish filling occupancy plots "  << std::endl;   
             // calculate and fill the crc and crc_diff
             hiCRC->Fill(v_vfat.at(k).crc());
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Preparing array for CRC check"  << std::endl;   
             uint16_t dataVFAT[11];
             // CRC check
             uint16_t b1010 = (0x000f & v_vfat.at(k).b1010());
@@ -221,6 +225,7 @@ class gemTreeReader {
             dataVFAT[3]    = (0x0000ffff00000000 & v_vfat.at(k).lsData()) >> 32;
             dataVFAT[2]    = (0x00000000ffff0000 & v_vfat.at(k).lsData()) >> 16;
             dataVFAT[1]    = (0x000000000000ffff & v_vfat.at(k).lsData());
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Starting CRC check"  << std::endl;   
             gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker::GEMDataChecker();
             uint16_t checkedCRC = dc->checkCRC(dataVFAT, 0);
             if (DEBUG) std::cout << "[gemTreeReader]: CRC read from vfat : " << std::hex << v_vfat.at(k).crc() << std::endl;
