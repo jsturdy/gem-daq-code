@@ -247,13 +247,13 @@ class gemTreeReader {
           {
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: EC of the vfat inside loop===> "  <<  static_cast<uint32_t>(v_vfat.at(k).EC()) << std::hex << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: BC of the vfat inside loop===> "  <<  v_vfat.at(k).BC() << std::hex << std::endl;   
-            //
-            //if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) ){
-            //  this->fillVFATHistograms(&v_vfat.at(k), g_hiVFAT, g_hiVFATsn, g_hiCh128, g_hCh_notfired, g_hichnotfired, g_DiffBXandBC, g_RatioBXandBC, g_hiChip, g_hi1010, g_hi1100, g_hi1110, g_hiFlag, g_hiCRC, g_hiDiffCRC, g_hichfired, g_hi2DCRC, &g_firedchannels, &g_notfiredchannels);
-            //} else {
-            //  this->fillVFATHistograms(&v_vfat.at(k), b_hiVFAT, b_hiVFATsn, b_hiCh128, b_hCh_notfired, b_hichnotfired, b_DiffBXandBC, b_RatioBXandBC, b_hiChip, b_hi1010, b_hi1100, b_hi1110, b_hiFlag, b_hiCRC, b_hiDiffCRC, b_hichfired, b_hi2DCRC, &b_firedchannels, &b_notfiredchannels);
-            //}
-            //
+            
+            if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) ){
+              this->fillVFATHistograms(&v_vfat.at(k), g_hiVFAT, g_hiVFATsn, g_hiCh128, g_hCh_notfired, g_hichnotfired, g_DiffBXandBC, g_RatioBXandBC, g_hiChip, g_hi1010, g_hi1100, g_hi1110, g_hiFlag, g_hiCRC, g_hiDiffCRC, g_hichfired, g_hi2DCRC, &g_firedchannels, &g_notfiredchannels);
+            } else {
+              this->fillVFATHistograms(&v_vfat.at(k), b_hiVFAT, b_hiVFATsn, b_hiCh128, b_hCh_notfired, b_hichnotfired, b_DiffBXandBC, b_RatioBXandBC, b_hiChip, b_hi1010, b_hi1100, b_hi1110, b_hiFlag, b_hiCRC, b_hiDiffCRC, b_hichfired, b_hi2DCRC, &b_firedchannels, &b_notfiredchannels);
+            }
+            
             // fill the control bits histograms
 
             t_hi1010->Fill(v_vfat.at(k).b1010());
@@ -267,7 +267,7 @@ class gemTreeReader {
             //gem::readout::GEMslotContents m_GEMslotContents;
             int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
             t_hiVFATsn->Fill(sn);
-            vfatId[sn]++;
+            if (sn>(-1)) vfatId[sn]++;
             // fill occupancy plots
             for(Int_t m=0; m<24; m++){
               if(sn == m){
