@@ -1,5 +1,5 @@
-#ifndef gem_hw_glib_GLIBManagerWeb_h
-#define gem_hw_glib_GLIBManagerWeb_h
+#ifndef gem_hw_optohybrid_OptoHybridManagerWeb_h
+#define gem_hw_optohybrid_OptoHybridManagerWeb_h
 
 #include <memory>
 
@@ -7,19 +7,19 @@
 
 namespace gem {
   namespace hw {
-    namespace glib {
+    namespace optohybrid {
       
-      class GLIBManager;
+      class OptoHybridManager;
 
-      class GLIBManagerWeb : public gem::base::GEMWebApplication
+      class OptoHybridManagerWeb : public gem::base::GEMWebApplication
         {
-          //friend class GLIBMonitor;
-          //friend class GLIBManager;
+          //friend class OptoHybridMonitor;
+          //friend class OptoHybridManager;
 
         public:
-          GLIBManagerWeb(GLIBManager *glibApp);
+          OptoHybridManagerWeb(OptoHybridManager *optohybridApp);
 	  
-          virtual ~GLIBManagerWeb();
+          virtual ~OptoHybridManagerWeb();
 
         protected:
 
@@ -38,11 +38,11 @@ namespace gem {
         private:
           size_t activeCard;
 	  
-          //GLIBManagerWeb(GLIBManagerWeb const&);
+          //OptoHybridManagerWeb(OptoHybridManagerWeb const&);
 	  
         };
 
-    } // namespace gem::glib
+    } // namespace gem::optohybrid
   } // namespace gem::hw
 } // namespace gem
 

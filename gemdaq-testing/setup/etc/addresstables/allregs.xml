@@ -95,7 +95,6 @@
   <node id="status_2"   address="0x00000007"  mask="0xffffffff"  permission="r"
 	description="Currently unused"/>
 
-
   <node id="ctrl_sram" address="0x00000008"  permission="rw"
 	description="SRAM interface control register">
     <node id="sram1_user_logic"	mask="0x00000001"/>
@@ -118,9 +117,9 @@
   <node id="spi_txdata"  address="0x0000000a"  mask="0xffffffff"  permission="rw"
 	description="SPI interface: data from FPGA to clock synthesizer"/>
   
-  <node id="spi_command"  address="0x0000000b"  mask="0xffffffff"  permission="rw"
+  <node id="spi_command"  address="0x0000000b"  permission="rw"
 	description="SPI interface: configuration (polarity, phase, frequency, etc.,">
-    <!--node id="spi_autoclear"  mask="0xf0000000"/-->
+    <node id="spi_autoclear"  mask="0xf0000000"/>
   </node> <!--end spi_command-->
   
   <node id="spi_rxdata"  address="0x0000000c"  mask="0xffffffff"  permission="r"
@@ -175,7 +174,7 @@
     <node id="mac_b4"         mask="0x000000ff" description=""/>
   </node> <!--end mac_info1-->
 
-  <node id="sram1"  address="0x0000001d"  permission="r" description="" >
+  <node id="mac_info2"  address="0x0000001d"  permission="r" description="" >
     <node id="mac_b3"  mask="0xff000000" />
     <node id="mac_b2"  mask="0x00ff0000" />
     <node id="mac_b1"  mask="0x0000ff00" />
