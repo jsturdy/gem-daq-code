@@ -42,8 +42,8 @@
 	description="Currently unused"/>
 
   <node id="SRAM" address="0x8"
-	module="file://${BUILD_HOME}/data/glib_sram_registers.xml"
-	description="SRAM interface control register"/>
+	module="file://${BUILD_HOME}/data/glib_sram_ctrl_status_registers.xml"
+	description="SRAM interface control and status registers, and banks 1 and 2"/>
   
   <node id="SPI"  address="0xa"
 	module="file://${BUILD_HOME}/data/glib_spi_registers.xml"
@@ -95,7 +95,7 @@
 	  description="5.3 and up this is B5"/>
     <node id="B0"         address="0x1"  mask="0x000000ff"
 	  description="5.3 and up this is B6"/>
-  </node> <!--end mac_info2-->
+  </node> <!--end mac_info-->
 
   <node id="IP_INFO"  address="0x0000001e"  permission="r"
 	description="only in firmware versions < 5.3">
@@ -104,9 +104,8 @@
     <node id="B1"   mask="0x0000ff00" />
     <node id="B0"   mask="0x000000ff" />
   </node> <!--end ip_info-->
-
-  <!--
-  <node id="HW_ID"  address="0x0000001e"  permission="r"
+  
+  <!--node id="HW_ID"  address="0x0000001e"  permission="r"
 	description="only in firmware versions 5.3 and up">
     <node id="B1"   address="0x0"  mask="0x0000ff00" />
     <node id="B2"   address="0x0"  mask="0x000000ff" />
@@ -114,5 +113,7 @@
     <node id="B4"   address="0x0"  mask="0x00ff0000" />
     <node id="B5"   address="0x1"  mask="0x0000ff00" />
     <node id="B6"   address="0x1"  mask="0x000000ff" />
-  </node--> <!--end ip_info-->
+  </node-->
+  <!--end ip_info-->
+  
 </node>
