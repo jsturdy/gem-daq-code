@@ -256,11 +256,11 @@ class gemTreeReader {
         // Retrieve next entry
         branch->GetEntry(i);
         // retrieve bunch crossing from evet
-        uint16_t t_BX_event = event->BXID();
+        uint32_t t_BX_event = event->BXID();
         uint16_t t_BC;
-        uint16_t g_BX_event;
+        uint32_t g_BX_event;
         uint16_t g_BC;
-        uint16_t b_BX_event;
+        uint32_t b_BX_event;
         uint16_t b_BC;
         // create vector of GEBdata. For data format details look at Event.h
         vector<GEBdata> v_geb;

@@ -108,7 +108,7 @@ Event::~Event()
 void Event::Build(const uint8_t &AmcNo_, 
     const uint8_t &b0000_,
     const uint32_t &LV1ID_, 
-    const uint16_t &BXID_, 
+    const uint32_t &BXID_, 
     const uint32_t &DataLgth_, 
     const uint16_t &OrN_, 
     const uint16_t &BoardID_, 
