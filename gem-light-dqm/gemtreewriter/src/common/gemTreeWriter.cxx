@@ -8,6 +8,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdint>
+#include <bitset>
 
 #include <TFile.h>
 #include <TNtuple.h>
@@ -112,7 +113,6 @@ class gemTreeWriter {
       if (DEBUG) std::cout << "[gemTreeWriter]: File " << ifile << " is opened "<< std::endl;
       ievent=0;
       while(true){
-        if (DEBUG) std::cout << "[gemTreeWriter]: Entering while loop" << std::endl;
         if(inpf.eof()) {
           std::cout << "[gemTreeWriter]: End of " << ifile << " file." << std::endl;
           break;
@@ -147,7 +147,9 @@ class gemTreeWriter {
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
         uint32_t sumVFAT = (0x000000000fffffff & geb.header);
-        uint16_t  BX     = 0;
+        uint32_t  BX     = 0;
+
+        if (DEBUG) std::cout << "[gemTreeWriter]: Number of VFAT blocks in a given GEB " << sumVFAT << std::hex << std::endl;
 
         if (InpType == "Hex") {
           if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
@@ -163,6 +165,7 @@ class gemTreeWriter {
 
         int ifake = 0;
         for(int ivfat=0; ivfat<sumVFAT; ivfat++){
+          if (DEBUG) std::cout << std::dec << "[gemTreeWriter]: Reading VFAT block N " << ivfat << std::dec << std::endl;
           if (InpType == "Hex") {
             if(!gem::readout::GEMDataAMCformat::readVFATdata(inpf, ivfat, vfat)) break;
           } else {
@@ -180,6 +183,14 @@ class gemTreeWriter {
           uint64_t  lsData = vfat.lsData;
           uint64_t  msData = vfat.msData;
           BX     = vfat.BXfrOH;  
+          if (DEBUG) std::cout << "[gemTreeWriter]: Control bit b1010 " << std::bitset<8>(b1010) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: BC                " << std::bitset<16>(BC) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: Control bit b1100 " << std::bitset<8>(b1100) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: EC                " << std::bitset<8>(EC) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: Flag              " << std::bitset<8>(Flag) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: Control bit b1110 " << std::bitset<8>(b1110) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: ChipID            " << std::bitset<16>(ChipID) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: CRC               " << std::bitset<16>(CRC) << std::endl;
           VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
           GEBdata_->addVFATData(*VFATdata_);
           delete VFATdata_;
@@ -200,6 +211,7 @@ class gemTreeWriter {
 
         GEBdata_->setTrailer(OHcrc, OHwCount, ChamStatus, GEBres);
 
+        if (DEBUG) std::cout << "[gemTreeWriter]: GEB trailer set" << std::endl;
         /*
          *  GEM Trailers Data level
          */
@@ -212,8 +224,10 @@ class gemTreeWriter {
         }
         
         ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        if (DEBUG) std::cout << "[gemTreeWriter]: Build event" << std::endl;
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
+        if (DEBUG) std::cout << "[gemTreeWriter]: Fill TTree" << std::endl;
         ev->Clear();
         ievent++;
       }// End loop on events
