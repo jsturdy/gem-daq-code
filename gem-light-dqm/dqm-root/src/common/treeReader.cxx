@@ -238,6 +238,7 @@ class gemTreeReader {
       // loop over tree entries
       for (Int_t i = 0; i < nentries; i++)
       {
+        if (DEBUG) std::cout << "[gemTreeReader]: Processing event " << i << std::endl;
         // clear number of VFATs
         Int_t nVFAT = 0;
         Int_t t_firedchannels = 0;
@@ -248,10 +249,12 @@ class gemTreeReader {
         Int_t g_notfiredchannels = 0;
         Int_t vfatId[NVFAT];
         bool eventIsOK = true;
-        for (int l = 0; i<NVFAT; i++){vfatId[l] = 0;}
+        for (int l = 0; l<NVFAT; l++){
+          vfatId[l] = 0;
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter when initializing event"  <<  vfatId[l]  << std::endl;   
+        }
         // Retrieve next entry
         branch->GetEntry(i);
-        if (DEBUG) std::cout << "[gemTreeReader]: Processing event " << i << std::endl;
         // retrieve bunch crossing from evet
         uint16_t t_BX_event = event->BXID();
         uint16_t t_BC;
@@ -275,12 +278,13 @@ class gemTreeReader {
           {
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: EC of the vfat inside loop===> "  <<  static_cast<uint32_t>(v_vfat.at(k).EC()) << std::hex << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: BC of the vfat inside loop===> "  <<  v_vfat.at(k).BC() << std::hex << std::endl;   
-            
             uint32_t t_chipID = static_cast<uint32_t>(v_vfat.at(k).ChipID());
             gem::readout::GEMslotContents::initSlots();
             int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Slot number of responded chip "  <<  sn  << std::endl;   
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter before incrementing"  <<  vfatId[sn]  << std::endl;   
             if (sn>(-1)) vfatId[sn]++;
-
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter "  <<  vfatId[sn]  << std::endl;   
             if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) && (sn > (-1)) && (sn < NVFAT)){
               this->fillVFATHistograms(&v_vfat.at(k), g_hiVFAT, g_hiVFATsn, g_hiCh128, g_hCh_notfired, g_hichnotfired, g_DiffBXandBC, g_RatioBXandBC, g_hiChip, g_hi1010, g_hi1100, g_hi1110, g_hiFlag, g_hiCRC, g_hiDiffCRC, g_hichfired, g_hi2DCRC, &g_firedchannels, &g_notfiredchannels);
               eventIsOK = true;
@@ -351,7 +355,10 @@ class gemTreeReader {
         t_DiffBXandBC->Fill(diffBXandBC); 
         t_RatioBXandBC->Fill(ratioBXandBC);
         t_hiVFAT->Fill(nVFAT);
-	      for(Int_t x=0; x<NVFAT; x++) t_h_VFATfired_perevent[x]->Fill(vfatId[x]);
+	      for(Int_t x=0; x<NVFAT; x++) {
+          t_h_VFATfired_perevent[x]->Fill(vfatId[x]);
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter when filling event"  <<  vfatId[x]  << std::endl;   
+        }
         t_hichfired->Fill(t_firedchannels);
         t_hichnotfired->Fill(t_notfiredchannels);
         if (eventIsOK){
