@@ -204,14 +204,14 @@ TFile* thldread(Int_t get=0)
   hiVFAT->GetYaxis()->SetTitle("Number of Event");
   hiVFAT->GetYaxis()->CenterTitle();
  
-  TH1C* hiChip = new TH1C("ChipID", "ChipID",         4096, 0x0, 0xfff );
+  TH1C* hiChip = new TH1C("ChipID", "ChipID",        4096, 0x0, 0xfff );
   hiChip->SetFillColor(48);
   hiChip->GetXaxis()->SetTitle("ChipID value, max 0xfff");
   hiChip->GetXaxis()->CenterTitle();
   hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
  
-  TH1C* hiBX = new TH1C("BX",     "BX from OH",      4096, 0x0, 0xffffffff );
+  TH1C* hiBX = new TH1C("BX",     "BX from OH",       100, 0x0, 0xffffffff );
   hiBX->SetFillColor(48);
   hiBX->GetXaxis()->SetTitle("BX value, max 0xffffffff");
   hiBX->GetXaxis()->CenterTitle();
@@ -368,7 +368,8 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
-      uint32_t  BX     = vfat.BXfrOH;  
+
+      uint32_t  BX     = vfat.BXfrOH;
 
       int islot = -1;      
       for (int ibin = 0; ibin < 24; ibin++){
@@ -379,17 +380,17 @@ TFile* thldread(Int_t get=0)
       int islotChipID = gem::readout::GEMslotContents::GEBslotIndex( (uint32_t)vfat.ChipID );
 
       if (islot < 0 || islot > 23 || islot != islotChipID ){
-        cout << "warning:  wrong slot index !!!" << endl;
-        gem::readout::GEMDataAMCformat::show24bits(ZSFlag24);
-        cout << " ievent " << ievent << " ivfat " << ivfat << " ChipID " << hex << ChipID << dec << " islot " << islot << 
+        //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
+        //gem::readout::GEMDataAMCformat::show24bits(ZSFlag24);
+        cout << "warning: ievent " << ievent << " ivfat " << ivfat << " ChipID " << hex << ChipID << dec << " islot " << islot << 
 	  " GEBslotIndex " << islotChipID << endl;
       } 
 
       if ( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
-        cout << "VFAT headers do not match expectation &  GEBslotIndex " << islotChipID << endl;
-        gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
-
         ifake++;
+        cout << "VFAT headers do not match expectation &  GEBslotIndex " << islotChipID << " ifake " << ifake << endl;
+        //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
+
       }//end if 1010,1100,1110
 
       // CRC check
