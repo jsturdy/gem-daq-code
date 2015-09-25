@@ -277,9 +277,9 @@ TFile* thldread(Int_t get=0)
     histos[hi] = new TH1F(histName.str().c_str(), histTitle.str().c_str(), 100, 0., 0xf );
   }
 
-  const Int_t ieventPrint = 3;
+  const Int_t ieventPrint = 1;
   const Int_t ieventMax   = 900000;
-  const Int_t kUPDATE     = 10;
+  const Int_t kUPDATE     = 1;
   bool  OKpri = false;
 
   gem::readout::GEMslotContents::getSlotCfg();
@@ -326,8 +326,11 @@ TFile* thldread(Int_t get=0)
     */
     uint32_t ZSFlag24 = ZSFlag;
 
-    //if(OKpri) cout << " ZSFlag " << std::hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
-    cout << " sumVFAT " << sumVFAT << endl;
+    if(OKpri){ 
+      cout << " ZSFlag " << std::hex << ZSFlag << " ChamID " << ChamID << std::dec << " sumVFAT " << sumVFAT << endl;
+      cout << " sumVFAT " << sumVFAT << endl;
+      gem::readout::GEMDataAMCformat::show24bits(ZSFlag24);
+    }
 
     if (InpType == "Hex") {
       if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
