@@ -291,7 +291,6 @@ TFile* thldread(Int_t get=0)
 
   const Int_t ieventPrint = 0;
   const Int_t ieventMax   = 900000;
-  const Int_t kUPDATE     = 1;
   bool  OKpri = false;
 
   gem::readout::GEMslotContents::getSlotCfg();
