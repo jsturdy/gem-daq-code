@@ -69,7 +69,7 @@ class VFATdata {
         uint8_t   b1010  (){ return  fb1010;  }
         uint16_t  BC     (){ return  fBC;     }
         uint8_t   b1100  (){ return  fb1100;  }
-        uint8_t  EC     (){ return  fEC;     }
+        uint8_t   EC     (){ return  fEC;     }
         uint8_t   Flag   (){ return  fFlag;   }
         uint8_t   b1110  (){ return  fb1110;  }
         uint16_t  ChipID (){ return  fChipID; }
@@ -154,7 +154,7 @@ class Event : public TObject {
         uint8_t fAmcNo;
         uint8_t fb0000;
         uint32_t fLV1ID;                    // What is this? Which var format should be used?
-        uint16_t fBXID;                     // Is it Bunch crossing ID? Should it be Int_t?
+        uint32_t fBXID;                     // Is it Bunch crossing ID? Should it be Int_t?
         uint32_t fDataLgth;                 // What is this?
         //uint64_t header2;             // User:32      OrN:16     BoardID:16
         uint16_t fOrN;                   // What is this?
@@ -183,7 +183,7 @@ class Event : public TObject {
         void Build(const uint8_t &AmcNo_, 
             const uint8_t &b0000_,
             const uint32_t &LV1ID_, 
-            const uint16_t &BXID_, 
+            const uint32_t &BXID_, 
             const uint32_t &DataLgth_, 
             const uint16_t &OrN_, 
             const uint16_t &BoardID_, 
@@ -204,7 +204,7 @@ class Event : public TObject {
         uint8_t AmcNo(){ return fAmcNo; }
         uint8_t b0000(){ return fb0000; }
         uint32_t LV1ID(){ return fLV1ID;}       
-        uint16_t BXID(){ return fBXID; }        
+        uint32_t BXID(){ return fBXID; }        
         uint32_t DataLgth(){ return fDataLgth;  }     
         uint16_t OrN(){ return fOrN;       }    
         uint16_t BoardID(){ return fBoardID;   }
