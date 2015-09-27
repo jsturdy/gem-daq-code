@@ -13,7 +13,7 @@ fi
 
 if [ -r $1 ]; then
   echo $1 "will compile soon"
-  g++ -g -std=c++0x -I /usr/local/Cellar/root/5.34.32/include/root $1 `root-config --libs --glibs` -o myDQMlight
+  g++ -g -std=c++0x -I /usr/local/Cellar/root/5.34.32/include/root -I${BUILD_HOME}/gemdaq-testing/gemreadout/include $1 `root-config --libs --glibs` -o myDQMlight
   ls -ltF myDQMlight
 else
   echo "any file for compilation is missing"
