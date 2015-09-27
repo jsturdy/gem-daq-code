@@ -30,6 +30,7 @@
 #endif
 
 #include "gem/readout/GEMDataAMCformat.h"
+#include "gem/datachecker/GEMDataChecker.h"
 
 /**
 * GEM Tree Composer (gtc) application provides translation of the GEM output HEX file to ROOT-based TTree with GEM Events
@@ -122,6 +123,7 @@ class gemTreeWriter {
           break;
         }
         if (DEBUG) std::cout << "[gemTreeWriter]: Processing event " << ievent << std::endl;
+        eventStatus = true;
         /*
          *  GEM Headers Data level
          */
@@ -183,6 +185,14 @@ class gemTreeWriter {
           uint64_t  lsData = vfat.lsData;
           uint64_t  msData = vfat.msData;
           BX     = vfat.BXfrOH;  
+          setVFATBlockWords(vfat);
+          gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker::GEMDataChecker();
+          uint16_t CRC_calc = dc->checkCRC(vfatBlockWords, 0);
+          delete dc;
+          uint32_t t_chipID = static_cast<uint32_t>(ChipID);
+          gem::readout::GEMslotContents::initSlots();
+          int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
+          bool blockStatus = checkBlock(b1010, b1100, b1110, sn, CRC, CRC_calc);
           if (DEBUG) std::cout << "[gemTreeWriter]: Control bit b1010 " << std::bitset<8>(b1010) <<  std::endl;
           if (DEBUG) std::cout << "[gemTreeWriter]: BC                " << std::bitset<16>(BC) <<  std::endl;
           if (DEBUG) std::cout << "[gemTreeWriter]: Control bit b1100 " << std::bitset<8>(b1100) <<  std::endl;
@@ -191,7 +201,8 @@ class gemTreeWriter {
           if (DEBUG) std::cout << "[gemTreeWriter]: Control bit b1110 " << std::bitset<8>(b1110) <<  std::endl;
           if (DEBUG) std::cout << "[gemTreeWriter]: ChipID            " << std::bitset<16>(ChipID) <<  std::endl;
           if (DEBUG) std::cout << "[gemTreeWriter]: CRC               " << std::bitset<16>(CRC) << std::endl;
-          VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
+          if (DEBUG) std::cout << "[gemTreeWriter]: CRC calculated    " << std::bitset<16>(CRC_calc) << std::endl;
+          VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC, CRC_calc, sn, blockStatus);
           GEBdata_->addVFATData(*VFATdata_);
           delete VFATdata_;
         }//end of GEB PayLoad Data
@@ -223,7 +234,7 @@ class gemTreeWriter {
           if(!gem::readout::GEMDataAMCformat::readGEMtr1Binary(inpf, gem)) break;
         }
         
-        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0, eventStatus);
         if (DEBUG) std::cout << "[gemTreeWriter]: Build event" << std::endl;
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
@@ -242,4 +253,29 @@ class gemTreeWriter {
     gem::readout::GEMDataAMCformat::GEMData   gem;
     gem::readout::GEMDataAMCformat::GEBData   geb;
     gem::readout::GEMDataAMCformat::VFATData vfat;
+    uint16_t vfatBlockWords[12];
+    bool eventStatus;
+    void setVFATBlockWords(const gem::readout::GEMDataAMCformat::VFATData &vfat_)
+    {
+      vfatBlockWords[11] = vfat_.BC;
+      vfatBlockWords[10] = vfat_.EC;
+      vfatBlockWords[9]  = vfat_.ChipID;
+      vfatBlockWords[8]  = (0xffff000000000000 & vfat_.msData) >> 48;
+      vfatBlockWords[7]  = (0x0000ffff00000000 & vfat_.msData) >> 32;
+      vfatBlockWords[6]  = (0x00000000ffff0000 & vfat_.msData) >> 16;
+      vfatBlockWords[5]  = (0x000000000000ffff & vfat_.msData);
+      vfatBlockWords[4]  = (0xffff000000000000 & vfat_.lsData) >> 48;
+      vfatBlockWords[3]  = (0x0000ffff00000000 & vfat_.lsData) >> 32;
+      vfatBlockWords[2]  = (0x00000000ffff0000 & vfat_.lsData) >> 16;
+      vfatBlockWords[1]  = (0x000000000000ffff & vfat_.lsData);
+    }
+    bool checkBlock(const uint8_t &b1010_, const uint8_t &b1100_, const uint8_t &b1110_, const int &sn_, const uint16_t &crc_, const uint16_t &crc_calc_)
+    {
+      if ((b1010_ == 0xa) && (b1100_ == 0xc) && (b1110_ == 0xe) && (sn_ > (-1)) && (sn_ < 24) && (crc_ == crc_calc_)) {
+        return true;
+      }else {
+        eventStatus = false;
+        return false;
+      }
+    }
 };
