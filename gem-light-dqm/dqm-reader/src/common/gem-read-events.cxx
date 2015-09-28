@@ -46,7 +46,7 @@
 
   It's possible to make a GEM data file by xDAQ GEMGLIBsuprvisor or get as example from CERN web:
 
-  ln -s /afs/cern.ch/user/b/baranov/www/xdaq/Testing/15.July.2015/GEM_DAQ_Fri_Jul_17_14-46-56_2015.dat GEMDQMRawData.dat
+  ln -s ...Jul_17_14-46-56_2015.dat GEMDQMRawData.dat
 
   You need a ROOT code for analysis:
 
@@ -211,12 +211,26 @@ TFile* thldread(Int_t get=0)
   hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
  
-  TH1F* hiBX = new TH1F("BX",     "BX from OH",       100, 0x0, 0xffffffff );
+  TH1F* hiBX = new TH1F("BX",     "BX/OH",            100, 0x0, 0xffffffff );
   hiBX->SetFillColor(48);
   hiBX->GetXaxis()->SetTitle("BX value, max 32 Bit");
   hiBX->GetXaxis()->CenterTitle();
   hiBX->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiBX->GetYaxis()->CenterTitle();
+ 
+  TH1F* hiBC = new TH1F("BC",     "BC",               100, 0x0, 0xfff );
+  hiBC->SetFillColor(48);
+  hiBC->GetXaxis()->SetTitle("BC value, max 0xfff");
+  hiBC->GetXaxis()->CenterTitle();
+  hiBC->GetYaxis()->SetTitle("Number of VFAT Blocks");
+  hiBC->GetYaxis()->CenterTitle();
+ 
+  TH1F* hiEC = new TH1F("EC",     "EC",               256, 0x0, 0xff );
+  hiEC->SetFillColor(48);
+  hiEC->GetXaxis()->SetTitle("EC value, max 0xff");
+  hiEC->GetXaxis()->CenterTitle();
+  hiEC->GetYaxis()->SetTitle("Number of VFAT Blocks");
+  hiEC->GetYaxis()->CenterTitle();
  
   TH1F* hi1010 = new TH1F("1010", "Control Bits 1010", 16, 0x0, 0xf );
   hi1010->SetFillColor(48);
@@ -369,6 +383,8 @@ TFile* thldread(Int_t get=0)
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
 
+      uint16_t  BC     = (0x0fff & vfat.BC);
+      uint8_t   EC     = (0x0ff0 & vfat.EC) >> 4;
       uint32_t  BX     = vfat.BXfrOH;
 
       int islot = -1;      
@@ -414,6 +430,8 @@ TFile* thldread(Int_t get=0)
       hi1110->Fill(b1110);
       hiChip->Fill(ChipID);
       hiBX->Fill(BX);
+      hiBC->Fill(BC);
+      hiEC->Fill(EC);
       //hiCRC->Fill(CRC-checkedCRC);
       hiVsCRC->Fill(CRC,checkedCRC);
 
@@ -481,6 +499,9 @@ TFile* thldread(Int_t get=0)
 
       c1->cd(9); hiCh128->Draw();
       c1->cd(10); hiVsCRC->Draw();
+      c1->cd(11)->SetLogy(); hiEC->Draw();
+      c1->cd(12)->SetLogy(); hiBC->Draw();
+
       c1->Update();
       cout << "end of event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
