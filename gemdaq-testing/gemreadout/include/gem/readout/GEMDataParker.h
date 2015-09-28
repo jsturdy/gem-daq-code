@@ -1,8 +1,6 @@
 #ifndef gem_readout_GEMDataParker_h
 #define gem_readout_GEMDataParker_h
 
-//#include "gem/readout/GEMDataParker.h"
-//#include "gem/readout/GEMslotContents.h"
 #include "gem/readout/GEMDataAMCformat.h"
 
 #include "xdata/String.h"
@@ -28,17 +26,14 @@ namespace gem {
                             std::string const& errFileName, 
                             std::string const& outputType
                            );
-      ~GEMDataParker       () {};
+      ~GEMDataParker() {};
 
       uint64_t* dumpData   ( uint8_t const& mask );
-      void dumpDataToDisk  ( uint8_t const& link,
-                             uint64_t bufferCount[4]
-                           );
-      int  getGLIBData     ( uint8_t const& link,
-                             uint64_t bufferCount[4]
-                           );
+      void dumpDataToDisk  ( uint8_t const& link );
+      int  getGLIBData     ( uint8_t const& link );
 
-      void GEMfillHeaders  ( int const& BC,
+      void GEMfillHeaders  ( uint32_t const& BC,
+                             uint32_t const& BX,
                              gem::readout::GEMDataAMCformat::GEMData& gem,
                              gem::readout::GEMDataAMCformat::GEBData& geb 
                            );
@@ -48,13 +43,22 @@ namespace gem {
       void GEMfillTrailers ( gem::readout::GEMDataAMCformat::GEMData& gem,
                              gem::readout::GEMDataAMCformat::GEBData& geb
                            );
-      void writeGEMevent   ( gem::readout::GEMDataAMCformat::GEMData& gem,
+      void writeGEMevent   ( std::string outFile,
+                             bool const& OKprint,
+                             std::string const& TypeDataFlag,
+                             gem::readout::GEMDataAMCformat::GEMData& gem,
                              gem::readout::GEMDataAMCformat::GEBData& geb,
                              gem::readout::GEMDataAMCformat::VFATData& vfat
                            );
+      /*
+      // SOAP interface, updates the header used for calibration runs
+      xoap::MessageReference updateCalibHeaders(xoap::MessageReference message)
+      throw (xoap::exception::Exception);
+      */
+
     private:
 
-      log4cplus::Logger gemLogger_;
+      log4cplus::Logger m_gemLogger;
       gem::hw::glib::HwGLIB* glibDevice_;
       std::string outFileName_;
       std::string errFileName_;
