@@ -227,7 +227,7 @@ TFile* thldread(Int_t get=0)
  
   TH1F* hiEC = new TH1F("EC",     "EC",               256, 0x0, 0xff );
   hiEC->SetFillColor(48);
-  hiEC->GetXaxis()->SetTitle("EC value, max 0xff");
+  hiEC->GetXaxis()->SetTitle("EC value, max 0xff ");
   hiEC->GetXaxis()->CenterTitle();
   hiEC->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiEC->GetYaxis()->CenterTitle();
