@@ -222,7 +222,7 @@ int main(int argc, char** argv)
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
         uint32_t sumVFAT = (0x000000000fffffff & geb.header);
-        uint16_t  BX     = 0;
+        uint32_t BX      = 0;
 
         if (InpType == "Hex") {
           if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
