@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -z "$BUILD_HOME" ]]; then
-  echo BUILD_HOME should be defined  !!!
+  echo BUILD_HOME should be defined !!!
   exit
 else
   echo BUILD_HOME  ${BUILD_HOME}
