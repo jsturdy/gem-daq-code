@@ -202,19 +202,25 @@ class gemTreeWriter {
           if (DEBUG) std::cout << "[gemTreeWriter]: ChipID            " << std::bitset<16>(ChipID) <<  std::endl;
           if (DEBUG) std::cout << "[gemTreeWriter]: CRC               " << std::bitset<16>(CRC) << std::endl;
           if (DEBUG) std::cout << "[gemTreeWriter]: CRC calculated    " << std::bitset<16>(CRC_calc) << std::endl;
+          if (DEBUG) std::cout << "[gemTreeWriter]: Block status      " << blockStatus << std::endl;
           VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC, CRC_calc, sn, blockStatus);
           GEBdata_->addVFATData(*VFATdata_);
           delete VFATdata_;
+          if (DEBUG) std::cout << "[gemTreeWriter]: VFAT filled and deleted    " << std::endl;
         }//end of GEB PayLoad Data
         /*
          *  GEB Trailers Data level
          */
+        if (DEBUG) std::cout << "[gemTreeWriter]: Attempt to read GEB trailer" << std::endl;
         if (InpType == "Hex") {
+          if (DEBUG) std::cout << "[gemTreeWriter]: input type HEX" << std::endl;
           if(!gem::readout::GEMDataAMCformat::readGEBtrailer(inpf, geb)) break;
         } else {
+          if (DEBUG) std::cout << "[gemTreeWriter]: input type BIN" << std::endl;
           if(!gem::readout::GEMDataAMCformat::readGEBtrailerBinary(inpf, geb)) break;
         }
     
+        if (DEBUG) std::cout << "[gemTreeWriter]: GEB trailer read, try to set" << std::endl;
         uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
         uint16_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
         uint16_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
@@ -234,9 +240,11 @@ class gemTreeWriter {
           if(!gem::readout::GEMDataAMCformat::readGEMtr1Binary(inpf, gem)) break;
         }
         
-        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0, eventStatus);
         if (DEBUG) std::cout << "[gemTreeWriter]: Build event" << std::endl;
+        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0, eventStatus);
+        if (DEBUG) std::cout << "[gemTreeWriter]: Event built" << std::endl;
         ev->addGEBdata(*GEBdata_);
+        if (DEBUG) std::cout << "[gemTreeWriter]: GEB data added" << std::endl;
         GEMtree.Fill();
         if (DEBUG) std::cout << "[gemTreeWriter]: Fill TTree" << std::endl;
         ev->Clear();

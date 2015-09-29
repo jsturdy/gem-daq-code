@@ -115,7 +115,7 @@ void Event::Build(const uint8_t &AmcNo_,
     const uint8_t &LV1IDT_, 
     const uint8_t &b0000T_, 
     const uint32_t &DataLgthT_,
-    bool &isEventGood_)
+    bool isEventGood_)
 {
     //Save current Object count
     Int_t ObjectNumber = TProcessID::GetObjectCount();
