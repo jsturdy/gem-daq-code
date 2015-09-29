@@ -70,6 +70,7 @@ class gemTreeReader {
       std::string ofilename = ifilename.substr(0,ifilename.size()-9);
       ofilename += ".analyzed.root";
       ofile = new TFile(ofilename.c_str(), "RECREATE");
+      if (DEBUG) std::cout << std::dec << "[gemTreeReader]: File for histograms created, start to book histograms " << std::endl;   
       this->bookHistograms();
     }
     ~gemTreeReader(){}
@@ -116,32 +117,39 @@ class gemTreeReader {
       std::string type[NVFAT] = {"Slot0" , "Slot1" , "Slot2" , "Slot3" , "Slot4" , "Slot5" , "Slot6" , "Slot7", 
                               "Slot8" , "Slot9" , "Slot10", "Slot11", "Slot12", "Slot13", "Slot14", "Slot15", 
                               "Slot16", "Slot17", "Slot18", "Slot19", "Slot20", "Slot21", "Slot22", "Slot23"};
+      if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Make directories and create histograms inside" << std::endl;   
       for (int i = 0; i < 3; i++) {
         dir[i] = ofile->mkdir(dirname[i].c_str());
+        if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Directory " << i+1 << " created" << std::endl;   
         dir[i]->cd();
-        hiVFAT         [i] = new TH1F((dirname[i].append("_VFAT")).c_str(), "Number VFAT blocks per event", 24,  0., 24. );
-        hiVFATsn       [i] = new TH1F((dirname[i].append("_VFATsn")).c_str(), "VFAT slot number", 24,  0., 24. );
-        hiDiffBXandBC  [i] = new TH1C((dirname[i].append("_DiffBXandBC")).c_str(), "Difference of BX and BC", 100000, 0x0, 0x1869F );
-        hiRatioBXandBC [i] = new TH1C((dirname[i].append("_RatioBXandBC")).c_str(), "Ratio of BX and BC", 1000, 0x0, 0xa );
-        hiChip         [i] = new TH1C((dirname[i].append("_ChipID")).c_str(), "ChipID",         4096, 0x0, 0xfff );
-        hi1010         [i] = new TH1C((dirname[i].append("_1010")).c_str(), "Control Bits 1010", 16, 0x0, 0xf );
-        hi1100         [i] = new TH1C((dirname[i].append("_1100")).c_str(), "Control Bits 1100", 16, 0x0, 0xf );
-        hi1110         [i] = new TH1C((dirname[i].append("_1110")).c_str(), "Control Bits 1110", 16, 0x0, 0xf );
-        hiFlag         [i] = new TH1C((dirname[i].append("_Flag")).c_str()  , "Flag",            16, 0x0, 0xf );
-        hiCRC          [i] = new TH1C((dirname[i].append("_CRC")).c_str(),     "CRC",             100, 0x0, 0xffff );
-        hiDiffCRC      [i] = new TH1C((dirname[i].append("_DiffCRC")).c_str(), "CRC_Diff",    100, 0xffff, 0xffff );
-        hichfired      [i] = new TH1C((dirname[i].append("_chfired")).c_str(), "Channels fired per event",      500, 0., 500. );
-        hichnotfired   [i] = new TH1C((dirname[i].append("_chnotfired")).c_str(), "Channels not fired per event",      500, 0., 500. );
-        hiCh_notfired  [i] = new TH1F((dirname[i].append("_Ch_notfired")).c_str(), "Strips",          128, 0., 128. );
-        hiCh128        [i] = new TH1F((dirname[i].append("_Ch128")).c_str(), "Strips",          128, 0., 128. );
-        hi2DCRC        [i] = new TH2C((dirname[i].append("_CRC1_vs_CRC2")).c_str(), "CRC1 vs_ RC2", 100, 0x0000, 0xffff, 100, 0x0000, 0xffff);
+        hiVFAT         [i] = new TH1F((dirname[i]+"_VFAT").c_str(), "Number VFAT blocks per event", 24,  0., 24. );
+        hiVFATsn       [i] = new TH1F((dirname[i]+"_VFATsn").c_str(), "VFAT slot number", 24,  0., 24. );
+        hiDiffBXandBC  [i] = new TH1C((dirname[i]+"_DiffBXandBC").c_str(), "Difference of BX and BC", 100000, 0x0, 0x1869F );
+        hiRatioBXandBC [i] = new TH1C((dirname[i]+"_RatioBXandBC").c_str(), "Ratio of BX and BC", 1000, 0x0, 0xa );
+        hiChip         [i] = new TH1C((dirname[i]+"_ChipID").c_str(), "ChipID",         4096, 0x0, 0xfff );
+        hi1010         [i] = new TH1C((dirname[i]+"_1010").c_str(), "Control Bits 1010", 16, 0x0, 0xf );
+        hi1100         [i] = new TH1C((dirname[i]+"_1100").c_str(), "Control Bits 1100", 16, 0x0, 0xf );
+        hi1110         [i] = new TH1C((dirname[i]+"_1110").c_str(), "Control Bits 1110", 16, 0x0, 0xf );
+        hiFlag         [i] = new TH1C((dirname[i]+"_Flag").c_str()  , "Flag",            16, 0x0, 0xf );
+        hiCRC          [i] = new TH1C((dirname[i]+"_CRC").c_str(),     "CRC",             100, 0x0, 0xffff );
+        hiDiffCRC      [i] = new TH1C((dirname[i]+"_DiffCRC").c_str(), "CRC_Diff",    100, 0xffff, 0xffff );
+        hichfired      [i] = new TH1C((dirname[i]+"_chfired").c_str(), "Channels fired per event",      500, 0., 500. );
+        hichnotfired   [i] = new TH1C((dirname[i]+"_chnotfired").c_str(), "Channels not fired per event",      500, 0., 500. );
+        hiCh_notfired  [i] = new TH1F((dirname[i]+"_Ch_notfired").c_str(), "Strips",          128, 0., 128. );
+        hiCh128        [i] = new TH1F((dirname[i]+"_Ch128").c_str(), "Strips",          128, 0., 128. );
+        hi2DCRC        [i] = new TH2C((dirname[i]+"_CRC1_vs_CRC2").c_str(), "CRC1 vs_ RC2", 100, 0x0000, 0xffff, 100, 0x0000, 0xffff);
+        if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Main histograms ["<<i<<"] created" << std::endl;   
         for(int j=0; j < NVFAT; j++){
-          sprintf (name  , (dirname[i].append("_hiVFATfired_perevent_%s")).c_str(), type[j].c_str());
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Start 2d array of histograms ["<<i<<"]["<<j<<"] creation" << std::endl;   
+          sprintf (name  , (dirname[i]+"_hiVFATfired_perevent_%s").c_str(), type[j].c_str());
           sprintf (title , "VFAT chip %s fired per event", type[j].c_str());
-          sprintf (name1 , (dirname[i].append("_hiCh128chipFired_%s")).c_str(), type[j].c_str());
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Get name and title for hiVFATfired_perevent["<<i<<"]["<<j<<"]: name : " << name << " title : " << title << std::endl;   
+          sprintf (name1 , (dirname[i]+"_hiCh128chipFired_%s").c_str(), type[j].c_str());
           sprintf (title1, "Strips fired for VFAT chip %s", type[j].c_str());
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Get name and title for hiCh128chipFired["<<i<<"]["<<j<<"]" << std::endl;   
           hiVFATfired_perevent[i][j] = new TH1F(name, title, 20, 0., 20.);
           hiCh128chipFired    [i][j] = new TH1F(name1, title1, 128, 0., 128.);
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: 2d array of histograms ["<<i<<"]["<<j<<"] created" << std::endl;   
         }
       }
     }
@@ -206,47 +214,27 @@ class gemTreeReader {
             dir[0]->cd();
             this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[0], hiCh128[0], hiCh_notfired[0], hiChip[0], hi1010[0], hi1100[0], hi1110[0], hiFlag[0], hiCRC[0], hiDiffCRC[0], hi2DCRC[0], hiCh128chipFired[0], firedchannels[0], notfiredchannels[0]);
             // fill histograms for good and bad events
-            //if (v_vfat.at(k).isBlockGood()){
-            //  dir[1]->cd();
-            //  this->fillVFATHistograms(&v_vfat.at(k), hiVFAT[1], hiVFATsn[1], hiCh128[1], hiCh_notfired[1], hichnotfired[1], hiDiffBXandBC[1], hiRatioBXandBC[1], hiChip[1], hi1010[1], hi1100[1], hi1110[1], hiFlag[1], hiCRC[1], hiDiffCRC[1], hichfired[1], hi2DCRC[1], &g_firedchannels, &g_notfiredchannels);
-            //} else {
-            //  dir[2]->cd();
-            //  this->fillVFATHistograms(&v_vfat.at(k), hiVFAT[2], hiVFATsn[2], hiCh128[2], hiCh_notfired[2], hichnotfired[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiChip[2], hi1010[2], hi1100[2], hi1110[2], hiFlag[2], hiCRC[2], hiDiffCRC[2], hichfired[2], hi2DCRC[2], &g_firedchannels, &g_notfiredchannels);
-            //}
+            if (eventIsOK){
+              dir[1]->cd();
+              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[1], hiCh128[1], hiCh_notfired[1], hiChip[1], hi1010[1], hi1100[1], hi1110[1], hiFlag[1], hiCRC[1], hiDiffCRC[1], hi2DCRC[1], hiCh128chipFired[1], firedchannels[1], notfiredchannels[1]);
+            } else {
+              dir[2]->cd();
+              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[2], hiCh128[2], hiCh_notfired[2], hiChip[2], hi1010[2], hi1100[2], hi1110[2], hiFlag[2], hiCRC[2], hiDiffCRC[2], hi2DCRC[2], hiCh128chipFired[2], firedchannels[2], notfiredchannels[2]);
+            }
             
             BC = v_vfat.at(k).BC();
 
           }// end of loop over VFATs
         }// end of loop over GEBs
+        dir[0]->cd();
         this->fillEventHistograms(BX, BC, nVFAT[0], firedchannels[0], notfiredchannels[0], hiDiffBXandBC[0], hiRatioBXandBC[0], hiVFAT[0], hichfired[0], hichnotfired[0], hiVFATfired_perevent[0], vfatId[0]);
-        //t_DiffBXandBC->Fill(diffBXandBC); 
-        //t_RatioBXandBC->Fill(ratioBXandBC);
-        //t_hiVFAT->Fill(nVFAT);
-	      //for(Int_t x=0; x<NVFAT; x++) {
-        //  t_h_VFATfired_perevent[x]->Fill(vfatId[x]);
-        //  if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter when filling event"  <<  vfatId[x]  << std::endl;   
-        //}
-        //t_hichfired->Fill(t_firedchannels);
-        //t_hichnotfired->Fill(t_notfiredchannels);
-        //if (eventIsOK){
-        //  diffBXandBC =  fabs(g_BX_event - g_BC);  
-  	    //  ratioBXandBC = (double) g_BX_event / g_BC;
-        //  g_DiffBXandBC->Fill(diffBXandBC); 
-        //  g_RatioBXandBC->Fill(ratioBXandBC);
-        //  g_hiVFAT->Fill(nVFAT);
-  	    //  for(Int_t x=0; x<NVFAT; x++) g_h_VFATfired_perevent[x]->Fill(vfatId[x]);
-        //  g_hichfired->Fill(g_firedchannels);
-        //  g_hichnotfired->Fill(g_notfiredchannels);
-        //} else {
-        //  diffBXandBC =  fabs(b_BX_event - b_BC);  
-  	    //  ratioBXandBC = (double) b_BX_event / b_BC;
-        //  b_DiffBXandBC->Fill(diffBXandBC); 
-        //  b_RatioBXandBC->Fill(ratioBXandBC);
-        //  b_hiVFAT->Fill(nVFAT);
-  	    //  for(Int_t x=0; x<NVFAT; x++) b_h_VFATfired_perevent[x]->Fill(vfatId[x]);
-        //  b_hichfired->Fill(b_firedchannels);
-        //  b_hichnotfired->Fill(b_notfiredchannels);
-        //}
+        if (eventIsOK){
+          dir[1]->cd();
+          this->fillEventHistograms(BX, BC, nVFAT[1], firedchannels[1], notfiredchannels[1], hiDiffBXandBC[1], hiRatioBXandBC[1], hiVFAT[1], hichfired[1], hichnotfired[1], hiVFATfired_perevent[1], vfatId[1]);
+        } else {
+          dir[2]->cd();
+          this->fillEventHistograms(BX, BC, nVFAT[2], firedchannels[2], notfiredchannels[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiVFAT[2], hichfired[2], hichnotfired[2], hiVFATfired_perevent[2], vfatId[2]);
+        }
       }// end of loop over events
       
       //setTitles(t_hiVFAT, "Number VFAT blocks per Event", "Number of Events");   
@@ -313,8 +301,11 @@ class gemTreeReader {
         }
       }// end of loop over channels 
 
-      for(Int_t m=0; m < NVFAT; m++){
+      for(int m=0; m < NVFAT; m++){
         if(sn_ == m){
+          if (DEBUG) std::cout << "[gemTreeReader]: Starting to fill hiCh128chipFired for slot : " << m << std::dec << std::endl;
+          if (DEBUG) std::cout << "[gemTreeReader]: LS data           " << std::bitset<64>(m_vfat->lsData()) <<  std::endl;
+          if (DEBUG) std::cout << "[gemTreeReader]: MS data           " << std::bitset<64>(m_vfat->msData()) <<  std::endl;
           uint16_t chan0xfFiredchip = 0;
           for (int chan = 0; chan < 128; ++chan) {
             if (chan < 64){

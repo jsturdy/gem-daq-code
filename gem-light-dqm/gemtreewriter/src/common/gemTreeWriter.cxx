@@ -250,7 +250,13 @@ class gemTreeWriter {
         ev->Clear();
         ievent++;
       }// End loop on events
-      inpf.close();
+      if (DEBUG) std::cout << "[gemTreeWriter]: Exit while loop " << std::endl;
+      if (inpf.is_open()) { 
+        if (DEBUG) std::cout << "[gemTreeWriter]: Input file is still open " << std::endl;
+        inpf.close();
+        if (DEBUG) std::cout << "[gemTreeWriter]: Close input file " << std::endl;
+      }
+      if (DEBUG) std::cout << "[gemTreeWriter]: Write root file " << std::endl;
       hfile->Write();// Save file with tree
     }
     std::string getOutputFileName(){return ofilename;}
