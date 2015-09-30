@@ -48,7 +48,6 @@ all:
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gemTreeComposer.cxx $(LIB)/libEvent.so -o $(BIN)/gtc
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx $(LIB)/libEvent.so -o $(BIN)/reader
 	$(LS) $(BIN)
 event:
 	mkdir -p $(OBJ)
@@ -58,8 +57,6 @@ event:
 	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(DIC)/EventDict.cxx -o $(OBJ)/EventDict.o
 	mkdir -p $(LIB)
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
-reader:
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx $(LIB)/libEvent.so -o $(BIN)/reader
 clean:
 	rm -rf $(BIN) $(OBJ) $(DIC) $(LIB)
 print-env:
