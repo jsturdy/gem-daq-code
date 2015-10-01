@@ -42,6 +42,7 @@
 #include "gem/datachecker/GEMDataChecker.h"
 #include "gem/readout/GEMslotContents.h"
 #include "plotter.cxx"
+#include "logger.cxx"
 
 /**
 * GEM Tree Reader example (reader) application 
@@ -67,7 +68,7 @@ class gemTreeReader {
       std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
       if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
       ifile = new TFile(ifilename.c_str(), "READ");
-      std::string ofilename = ifilename.substr(0,ifilename.size()-9);
+      ofilename = ifilename.substr(0,ifilename.size()-9);
       ofilename += ".analyzed.root";
       ofile = new TFile(ofilename.c_str(), "RECREATE");
       if (DEBUG) std::cout << std::dec << "[gemTreeReader]: File for histograms created, start to book histograms " << std::endl;   
@@ -81,6 +82,7 @@ class gemTreeReader {
   private:
     TFile *ifile;
     TFile *ofile;
+    std::string ofilename;
 
     TH1F* hiVFAT                     [3]; // Number of VFATs in event
     TH1F* hiVFATsn                   [3]; // VFAT slot number distribution
@@ -170,6 +172,12 @@ class gemTreeReader {
       if (DEBUG) std::cout << "[gemTreeReader]: Number of entries in the TTree : " << nentries << std::endl;
       // init counters
       for (int c_=0; c_<4; c_++) counters_[c_] = 0;
+      //initialize logger
+      std::string tmp_ = ofilename.substr(0, ofilename.size()-14);
+      tmp_ += ".log";
+      std::string run_ = ofilename.substr(16,16);
+      //std::string run_ = tmp_.substr(16, tmp_.size()-4);
+      logger* logger_ = new logger(tmp_,run_);
       // loop over tree entries
       for (Int_t i = 0; i < nentries; i++)
       {
@@ -256,8 +264,10 @@ class gemTreeReader {
           dir[2]->cd();
           this->fillEventHistograms(BX, BC, nVFAT[2], nBadVFAT[2], nGoodVFAT[2], firedchannels[2], notfiredchannels[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiVFAT[2], hiFake[2], hiSignal[2], hichfired[2], hichnotfired[2], hiVFATfired_perevent[2], vfatId[2]);
         }
+        logger_->addEvent(i,eventIsOK,nVFAT[0],nGoodVFAT[0],nBadVFAT[0]);
       }// end of loop over events
-      
+      logger_->writeLog();
+      delete logger_;
       for (int st = 0; st < 3; st++){
         dir[st]->cd();
         setTitles(hiVFAT[st], "Number VFAT blocks per Event", "Number of Events");   
@@ -273,6 +283,10 @@ class gemTreeReader {
         setTitles(hi2DCRC[st], "CRC VFAT", "CRC calc");  
       }
       ofile->Write();
+      TString prefix[3] = {"hist/all_events/", "hist/good_events/", "hist/bad_events/"};
+      for (int id = 0; id < 3; id++){
+        printHistograms(dir[id],"pdf",prefix[id]);
+      }
     }
 
     void fillVFATHistograms(VFATdata *m_vfat, TH1F* m_hiVFATsn, TH1F* m_hiCh128, TH1F* m_hiCh_notfired, TH1I* m_hiChip, TH1I* m_hi1010, TH1I* m_hi1100, TH1I* m_hi1110, TH1I* m_hiFlag, TH1I* m_hiCRC, TH1I* m_hiDiffCRC, TH2I* m_hi2DCRC, TH2I* m_hi2DCRCperVFAT[], TH1F* m_hiCh128chipFired[], int & firedchannels, int & notfiredchannels)

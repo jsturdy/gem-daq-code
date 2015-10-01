@@ -1,3 +1,6 @@
+#include <string>
+#include <iostream>
+#include <sstream>
 class logger{
   public:
     logger(std::string m_filename, std::string m_run){
@@ -13,33 +16,37 @@ class logger{
       averageBadBlockPerBadEvent_ = 0;
       badEventsList_.clear();
     }
-    addEvent(long int m_eventNumber, bool m_isEventGood, m_nVFATBlocks, int m_nGoodVFATBlocks_, int m_nBadVFATBlocks_){
+    void addEvent(long int m_eventNumber, bool m_isEventGood, int m_nVFATBlocks, int m_nGoodVFATBlocks, int m_nBadVFATBlocks){
       nEvents_++;
       if (m_isEventGood){ nGoodEvents_++;} else { nBadEvents_++; badEventsList_.push_back(m_eventNumber);}
-      nVFATBlocks_ += m_nVFATBlocks_;
-      nGoodVFATBlocks_ += m_nGoodVFATBlocks_;
-      nBadVFATBlocks_ += m_nBadVFATBlocks_;
+      nVFATBlocks_ += m_nVFATBlocks;
+      nGoodVFATBlocks_ += m_nGoodVFATBlocks;
+      nBadVFATBlocks_ += m_nBadVFATBlocks;
     }
-    writeLog(){
+    void writeLog(){
       averageBlockPerEvent_ = (double) nVFATBlocks_/nEvents_;
       averageBadBlockPerBadEvent_ = (double) nBadVFATBlocks_/nBadEvents_;
       ofstream myfile;
       myfile.open (filename_);
-      myfile << "GEM Log For Run " << run << "\n" ;
-      myfile << "Number of events processed     : " << nEvents << "\n" ;
-      myfile << "Number of good events          : " << nGoodEvents << "\n" ;
-      myfile << "Number of bad events           : " << nBadEvents << "\n" ;
+      myfile << "GEM Log For Run " << run_ << "\n" ;
+      myfile << "Number of events processed     : " << nEvents_ << "\n" ;
+      myfile << "Number of good events          : " << nGoodEvents_ << "\n" ;
+      myfile << "Number of bad events           : " << nBadEvents_ << "\n" ;
       myfile << "Number of VFAT blocks          : " << nVFATBlocks_ << "\n" ;
       myfile << "Number of good VFAT blocks     : " << nGoodVFATBlocks_ << "\n" ;
       myfile << "Number of bad VFAT blocks      : " << nBadVFATBlocks_ << "\n" ;
       myfile << "Average N blocks per event     : " << averageBlockPerEvent_ << "\n" ;
       myfile << "Average N bad blocks per event : " << averageBadBlockPerBadEvent_ << "\n" ;
       std::string tmp = "{ ";
-      for (int it = badEventsList_.begin(); it < (badEventsList_.end() - 1); it++){
-        tmp += badEventsList_.at(it);
+      for (int it = 0; it < (badEventsList_.size() - 1); it++){
+        std::stringstream ss;
+        ss << badEventsList_.at(it);
+        tmp += ss.str();
         tmp += ", ";
       }
-      tmp += badEventsList_.back();
+      std::stringstream ss;
+      ss << badEventsList_.back();
+      tmp += ss.str();
       tmp += " }";
       myfile << "List of the bad events : \n" << tmp << "\n" ;
       myfile.close();
