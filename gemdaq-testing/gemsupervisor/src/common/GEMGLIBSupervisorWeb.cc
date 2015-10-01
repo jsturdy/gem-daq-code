@@ -411,7 +411,7 @@ void gem::supervisor::GEMGLIBSupervisorWeb::webTrigger(xgi::Input * in, xgi::Out
   hw_semaphore_.take();
 
   INFO(" webTrigger: sending L1A");
-  optohybridDevice_->SendL1A(100);
+  optohybridDevice_->SendL1A(1);
 
   L1ACount_[0] = optohybridDevice_->GetL1ACount(0); //external
   L1ACount_[1] = optohybridDevice_->GetL1ACount(1); //internal
@@ -593,11 +593,11 @@ void gem::supervisor::GEMGLIBSupervisorWeb::configureAction(toolbox::Event::Refe
   tmpURI << "chtcp-2.0://localhost:10203?target=" << confParams_.bag.deviceIP.toString() << ":50001";
   //glibDevice_ = glib_shared_ptr(new gem::hw::glib::HwGLIB());
   glibDevice_ = glib_shared_ptr(new gem::hw::glib::HwGLIB("HwGLIB", tmpURI.str(),
-                                                          "file://setup/etc/addresstables/glib_address_table.xml"));
+                                                          "file://${GEM_ADDRESS_TABLE_PATH}/glib_address_table.xml"));
   //glibDevice_->connectDevice();
 
   optohybridDevice_ = optohybrid_shared_ptr(new gem::hw::optohybrid::HwOptoHybrid("HwOptoHybrid", tmpURI.str(),
-                                                                                  "file://setup/etc/addresstables/optohybrid_address_table.xml"));
+                                                                                  "file://${GEM_ADDRESS_TABLE_PATH}/optohybrid_address_table.xml"));
   //optohybridDevice_->setDeviceIPAddress(confParams_.bag.deviceIP);
   //optohybridDevice_->connectDevice();
 
@@ -627,7 +627,7 @@ void gem::supervisor::GEMGLIBSupervisorWeb::configureAction(toolbox::Event::Refe
 
     if (VfatName != ""){ 
       vfat_shared_ptr tmpVFATDevice(new gem::hw::vfat::HwVFAT2(VfatName, tmpURI.str(),
-                                                               "file://setup/etc/addresstables/geb_vfat_address_table.xml"));
+                                                               "file://${GEM_ADDRESS_TABLE_PATH}/geb_vfat_address_table.xml"));
       tmpVFATDevice->setDeviceIPAddress(confParams_.bag.deviceIP);
       //tmpVFATDevice->connectDevice();
       tmpVFATDevice->setRunMode(0);
@@ -682,7 +682,7 @@ void gem::supervisor::GEMGLIBSupervisorWeb::configureAction(toolbox::Event::Refe
   tmpType = confParams_.bag.outputType.toString();
 
   // Book GEM Data Parker
-  gemDataParker = new gem::readout::GEMDataParker(*glibDevice_, tmpFileName, errFileName, tmpType);
+  gemDataParker = std::shared_ptr<gem::readout::GEMDataParker>(new gem::readout::GEMDataParker(*glibDevice_, tmpFileName, errFileName, tmpType));
 
   // Data Stream close
   outf.close();
