@@ -283,6 +283,7 @@ class gemTreeReader {
         setTitles(hi2DCRC[st], "CRC VFAT", "CRC calc");  
       }
       ofile->Write();
+      drawStack(dir[1], dir[2], 4, 2, "pdf", "hist/stacks/");
       TString prefix[3] = {"hist/all_events/", "hist/good_events/", "hist/bad_events/"};
       for (int id = 0; id < 3; id++){
         printHistograms(dir[id],"pdf",prefix[id]);
