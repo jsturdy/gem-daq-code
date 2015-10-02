@@ -46,7 +46,7 @@
 
   It's possible to make a GEM data file by xDAQ GEMGLIBsuprvisor or get as example from CERN web:
 
-  ln -s /afs/cern.ch/user/b/baranov/www/xdaq/Testing/15.July.2015/GEM_DAQ_Fri_Jul_17_14-46-56_2015.dat GEMDQMRawData.dat
+  ln -s ...Jul_17_14-46-56_2015.dat GEMDQMRawData.dat
 
   You need a ROOT code for analysis:
 
@@ -196,7 +196,7 @@ TFile* thldread(Int_t get=0)
   TFile* hfile = NULL;
   hfile = new TFile(filename,"RECREATE","Threshold Scan ROOT file with histograms");
 
-  TH1C* hiVFAT = new TH1C("VFAT", "Number VFAT blocks per event", 100,  0., 100. );
+  TH1F* hiVFAT = new TH1F("VFAT", "Number VFAT blocks per event", 100,  0., 100. );
   hiVFAT->SetFillColor(48);
   hiVFAT->SetStats();
   hiVFAT->GetXaxis()->SetTitle("Number of VFAT Blocks");
@@ -204,42 +204,56 @@ TFile* thldread(Int_t get=0)
   hiVFAT->GetYaxis()->SetTitle("Number of Event");
   hiVFAT->GetYaxis()->CenterTitle();
  
-  TH1C* hiChip = new TH1C("ChipID", "ChipID",         4096, 0x0, 0xfff );
+  TH1F* hiChip = new TH1F("ChipID", "ChipID",        4096, 0x0, 0xfff );
   hiChip->SetFillColor(48);
   hiChip->GetXaxis()->SetTitle("ChipID value, max 0xfff");
   hiChip->GetXaxis()->CenterTitle();
   hiChip->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiChip->GetYaxis()->CenterTitle();
  
-  TH1C* hiBX = new TH1C("BX",     "BX from OH",      4096, 0x0, 0xffffffff );
+  TH1F* hiBX = new TH1F("BX",     "BX/OH",            100, 0x0, 0xffffffff );
   hiBX->SetFillColor(48);
-  hiBX->GetXaxis()->SetTitle("BX value, max 0xffffffff");
+  hiBX->GetXaxis()->SetTitle("BX value, max 32 Bit");
   hiBX->GetXaxis()->CenterTitle();
   hiBX->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiBX->GetYaxis()->CenterTitle();
  
-  TH1C* hi1010 = new TH1C("1010", "Control Bits 1010", 16, 0x0, 0xf );
+  TH1F* hiBC = new TH1F("BC",     "BC",               100, 0x0, 0xfff );
+  hiBC->SetFillColor(48);
+  hiBC->GetXaxis()->SetTitle("BC value, max 0xfff");
+  hiBC->GetXaxis()->CenterTitle();
+  hiBC->GetYaxis()->SetTitle("Number of VFAT Blocks");
+  hiBC->GetYaxis()->CenterTitle();
+ 
+  TH1F* hiEC = new TH1F("EC",     "EC",               256, 0x0, 0xff );
+  hiEC->SetFillColor(48);
+  hiEC->GetXaxis()->SetTitle("EC value, max 0xff ");
+  hiEC->GetXaxis()->CenterTitle();
+  hiEC->GetYaxis()->SetTitle("Number of VFAT Blocks");
+  hiEC->GetYaxis()->CenterTitle();
+ 
+  TH1F* hi1010 = new TH1F("1010", "Control Bits 1010", 16, 0x0, 0xf );
   hi1010->SetFillColor(48);
   hi1010->GetXaxis()->SetTitle("1010 marker, max 0xf");
   hi1010->GetXaxis()->CenterTitle();
   hi1010->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1010->GetYaxis()->CenterTitle();
 
-  TH1C* hi1100 = new TH1C("1100", "Control Bits 1100", 16, 0x0, 0xf );
+  TH1F* hi1100 = new TH1F("1100", "Control Bits 1100", 16, 0x0, 0xf );
   hi1100->SetFillColor(48);
   hi1100->GetXaxis()->SetTitle("1100 marker value, max 0xf");
   hi1100->GetXaxis()->CenterTitle();
   hi1100->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1100->GetYaxis()->CenterTitle();
 
-  TH1C* hi1110 = new TH1C("1110", "Control Bits 1110", 16, 0x0, 0xf );
+  TH1F* hi1110 = new TH1F("1110", "Control Bits 1110", 16, 0x0, 0xf );
   hi1110->SetFillColor(48);
   hi1110->GetXaxis()->SetTitle("1110 marker value, max 0xf");
   hi1110->GetXaxis()->CenterTitle();
   hi1110->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1110->GetYaxis()->CenterTitle();
 
-  TH1C* hiFlag = new TH1C("Flag"  , "Flag",            16, 0x0, 0xf );
+  TH1F* hiFlag = new TH1F("Flag"  , "Flag",            16, 0x0, 0xf );
   hiFlag->SetFillColor(48);
   hiFlag->GetXaxis()->SetTitle("Flag marker value, max 0xf");
   hiFlag->GetXaxis()->CenterTitle();
@@ -254,7 +268,7 @@ TFile* thldread(Int_t get=0)
   hiSlot->GetYaxis()->CenterTitle();
 
   /* Diff CRC
-  TH1C* hiCRC = new TH1C("CRC",     "CRC",             100, -0xffff, 0xffff );
+  TH1F* hiCRC = new TH1F("CRC",     "CRC",             100, -0xffff, 0xffff );
   hiCRC->SetFillColor(48);
   hiCRC->GetXaxis()->SetTitle("CRC value, max 0xffff");
   hiCRC->GetXaxis()->CenterTitle();
@@ -267,7 +281,7 @@ TFile* thldread(Int_t get=0)
   hiVsCRC->GetXaxis()->SetTitle("CRC vs CRC calc, max 0xffff");
   hiVsCRC->GetXaxis()->CenterTitle();
 
-  TH1C* hiFake = new TH1C("iFake", "Fake Events",      100, 0., 100. );
+  TH1F* hiFake = new TH1F("iFake", "Fake Events",      100, 0., 100. );
   hiFake->SetFillColor(48);
 
   // Booking of all 128 histograms for each VFAT2 channel
@@ -291,7 +305,6 @@ TFile* thldread(Int_t get=0)
 
   const Int_t ieventPrint = 0;
   const Int_t ieventMax   = 900000;
-  const Int_t kUPDATE     = 1;
   bool  OKpri = false;
 
   gem::readout::GEMslotContents::getSlotCfg();
@@ -369,7 +382,10 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
-      uint32_t  BX     = vfat.BXfrOH;  
+
+      uint16_t  BC     = (0x0fff & vfat.BC);
+      uint8_t   EC     = (0x0ff0 & vfat.EC) >> 4;
+      uint32_t  BX     = vfat.BXfrOH;
 
       int islot = -1;      
       for (int ibin = 0; ibin < 24; ibin++){
@@ -380,17 +396,17 @@ TFile* thldread(Int_t get=0)
       int islotChipID = gem::readout::GEMslotContents::GEBslotIndex( (uint32_t)vfat.ChipID );
 
       if (islot < 0 || islot > 23 || islot != islotChipID ){
-        cout << "warning:  wrong slot index !!!" << endl;
-        gem::readout::GEMDataAMCformat::show24bits(ZSFlag24);
-        cout << " ievent " << ievent << " ivfat " << ivfat << " ChipID " << hex << ChipID << dec << " islot " << islot << 
+        //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
+        //gem::readout::GEMDataAMCformat::show24bits(ZSFlag24);
+        cout << "warning: ievent " << ievent << " ivfat " << ivfat << " ChipID " << hex << ChipID << dec << " islot " << islot << 
 	  " GEBslotIndex " << islotChipID << endl;
       } 
 
       if ( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
-        cout << "VFAT headers do not match expectation &  GEBslotIndex " << islotChipID << endl;
-        gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
-
         ifake++;
+        cout << "VFAT headers do not match expectation &  GEBslotIndex " << islotChipID << " ifake " << ifake << endl;
+        //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
+
       }//end if 1010,1100,1110
 
       // CRC check
@@ -414,6 +430,8 @@ TFile* thldread(Int_t get=0)
       hi1110->Fill(b1110);
       hiChip->Fill(ChipID);
       hiBX->Fill(BX);
+      hiBC->Fill(BC);
+      hiEC->Fill(EC);
       //hiCRC->Fill(CRC-checkedCRC);
       hiVsCRC->Fill(CRC,checkedCRC);
 
@@ -481,6 +499,9 @@ TFile* thldread(Int_t get=0)
 
       c1->cd(9); hiCh128->Draw();
       c1->cd(10); hiVsCRC->Draw();
+      c1->cd(11)->SetLogy(); hiEC->Draw();
+      c1->cd(12)->SetLogy(); hiBC->Draw();
+
       c1->Update();
       cout << "end of event " << ievent << " ievent%kUPDATE " << ievent%kUPDATE << endl;
     }
