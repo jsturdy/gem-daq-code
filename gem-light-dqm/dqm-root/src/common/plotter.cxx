@@ -337,23 +337,23 @@ void setTitles(TH1 *h, TString xtitle, TString ytitle, TString ztitle)
 
 // Print all histograms in separate files
 // Type = "png", "eps", etc.
-void printHistograms(TString type, TString prefix="")
+void printHistograms(TDirectory* dir, TString type, TString prefix="")
 {
-    
-    TIter next(gDirectory->GetListOfKeys());
-    TKey *key;
-    while ((key = (TKey*)next())) 
-    {
-        TClass *cl = gROOT->GetClass(key->GetClassName());
-        if (!cl->InheritsFrom("TH1")) continue;
-        TH1 *h = (TH1*)key->ReadObj();
-        TCanvas *c = newCanvas();
-        h->Draw();
-        TString name =  h->GetTitle();
-        if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
-        c->Print(prefix+name+"."+type,type);
-        delete c;
-    }
+  dir->cd();
+  TIter next(gDirectory->GetListOfKeys());
+  TKey *key;
+  while ((key = (TKey*)next())) 
+  {
+      TClass *cl = gROOT->GetClass(key->GetClassName());
+      if (!cl->InheritsFrom("TH1")) continue;
+      TH1 *h = (TH1*)key->ReadObj();
+      TCanvas *c = newCanvas();
+      h->Draw();
+      TString name =  h->GetTitle();
+      if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
+      c->Print(prefix+name+"."+type,type);
+      delete c;
+  }
 }
 
 //Prints each individual histogram to picture formats
