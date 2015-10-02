@@ -303,11 +303,13 @@ namespace gem {
           //user core functionality
           /** Read the user firmware register using m_controlLink
            * @returns a hex number corresponding to the build date
+           * OBSOLETE in V2 firmware
            **/
           uint32_t getUserFirmware();
 	  
           /** Read the user firmware register using m_controlLink
            * @returns a std::string corresponding to the build date
+           * OBSOLETE in V2 firmware
            **/
           std::string getUserFirmwareDate();
 
@@ -316,6 +318,7 @@ namespace gem {
            * @returns a hex number corresponding to the build date
            * is private to ensure that it is only used internally
            * link agnostic versions should be used outside of HwGLIB
+           * OBSOLETE in V2 firmware
            **/
           uint32_t getUserFirmware(uint8_t const& link);
 	  
@@ -323,6 +326,7 @@ namespace gem {
            * @returns a string corresponding to the build date
            * is private to ensure that it is only used internally
            * link agnostic versions should be used outside of HwGLIB
+           * OBSOLETE in V2 firmware
            **/
           std::string getUserFirmwareDate(uint8_t const& link);
 	  
@@ -355,6 +359,28 @@ namespace gem {
               LinkReset(link->first,resets);
           };
 	  
+          /** Set the Trigger source
+           * @param uint8_t mode 0 from software, 1 from TTC decoder (AMC13), 2 from both
+           **/
+          void setTrigSource(uint8_t const& mode, uint8_t const& link=0x0) {
+            std::stringstream regName;
+            regName << "GLIB_LINKS.LINK" << (int)m_controlLink;
+            switch (mode) {
+            case(0):
+              writeReg(getDeviceBaseNode(),regName.str()+".TRIGGER.SOURCE",mode);
+              return;
+            case(1):
+              writeReg(getDeviceBaseNode(),regName.str()+".TRIGGER.SOURCE",mode);
+              return;
+            case(2):
+              writeReg(getDeviceBaseNode(),regName.str()+".TRIGGER.SOURCE",mode);
+              return;
+            default:
+              writeReg(getDeviceBaseNode(),regName.str()+".TRIGGER.SOURCE",0x2);
+              return;
+            }
+          };
+
           /** Read the Trigger source
            * @retval uint8_t 0 from GLIB, 1 from AMC13, 2 from both
            **/
