@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+#include <cstdlib>
 #include <sstream>
 #include <vector>
 #include <cstdint>
@@ -77,12 +78,18 @@ class gemTreeReader {
     ~gemTreeReader(){}
     void createHistograms()
     {
+      std::string path = std::getenv("BUILD_HOME");
+      path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips0-1.csv";
+      for (int im = 0; im < NVFAT; im++){maps[im] = path;}
       this->fillHistograms();
     }
   private:
     TFile *ifile;
     TFile *ofile;
     std::string ofilename;
+
+    std::vector<std::pair<int,int>> strip_maps[NVFAT];
+    std::string maps[NVFAT];
 
     TH1F* hiVFAT                     [3]; // Number of VFATs in event
     TH1F* hiVFATsn                   [3]; // VFAT slot number distribution
@@ -105,6 +112,8 @@ class gemTreeReader {
     TH1F* hiVFATfired_perevent[3][NVFAT];
     TH1F* hiCh128chipFired    [3][NVFAT];
     TH2I* hi2DCRCperVFAT      [3][NVFAT];
+    TH1I* hiClusterSize              [3];
+    TH2I* hiBeamProfile              [3];
 
     TDirectory *dir[3];
 
@@ -143,6 +152,8 @@ class gemTreeReader {
         hiCh_notfired  [i] = new TH1F((dirname[i]+"_Ch_notfired").c_str(), "Strips",          128, 0., 128. );
         hiCh128        [i] = new TH1F((dirname[i]+"_Ch128").c_str(), "Strips",          128, 0., 128. );
         hi2DCRC        [i] = new TH2I((dirname[i]+"_CRC1_vs_CRC2").c_str(), "CRC1 vs CRC2", 100, 0x0000, 0xffff, 100, 0x0000, 0xffff);
+        hiClusterSize  [i] = new TH1I((dirname[i]+"_ClusterSize").c_str(), "Cluster size", 384,  0, 384 );
+        hiBeamProfile  [i] = new TH2I((dirname[i]+"_BeamProfile").c_str(), "Beam Profile", 8, 0, 8, 384, 0, 384);
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Main histograms ["<<i<<"] created" << std::endl;   
         for(int j=0; j < NVFAT; j++){
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Start 2d array of histograms ["<<i<<"]["<<j<<"] creation" << std::endl;   
@@ -373,5 +384,42 @@ class gemTreeReader {
       }
       m_hichfired->Fill(m_firedchannels);
       m_hichnotfired->Fill(m_notfiredchannels);
+    }
+    void readMap(int slot)
+    {
+      std::string ifpath_ = maps[slot];
+      std::ifstream icsvfile_;
+      icsvfile_.open(ifpath_);
+      if(!icsvfile_.is_open()) {
+        std::cout << "\nThe file: " << icsvfile_ << " is missing.\n" << std::endl;
+        return;
+      }  
+      while(true){
+        if(icsvfile_.eof()) {
+          std::cout << "[gemTreeWriter]: End of " << ifpath_ << " file." << std::endl;
+          break;
+        }
+        std::string line;
+        std::getline(icsvfile_, line);
+        std::istringstream iss(line);
+        if ( !icsvfile_.good() ) break;
+        std::pair<int,int> map_;
+        std::string val;
+        std::getline(iss,val,',');
+        std::stringstream convertor(val);
+        convertor >> std::dec >> map_.first;
+        std::getline(iss,val,',');
+        convertor.str(val);
+        convertor >> std::dec >> map_.second;
+        strip_maps[slot].push_back(map_);
+      }
+    }
+    void printMaps()
+    {
+      for (int ism = 0; ism < NVFAT; ism++) for_each (strip_maps[ism].begin(), strip_maps[ism].end(), printSingleMap);
+    }
+    void printSingleMap(std::pair<int,int> pair_)
+    {
+      std::cout << "Strip : " << pair_.first << " Channel : " << pair_.second << std::endl;
     }
 };
