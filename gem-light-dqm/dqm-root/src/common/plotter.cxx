@@ -369,7 +369,7 @@ void retrieveHistograms(TDirectory* dir, vector<TH1*>& v)
       h->AddDirectory(kFALSE);
       v.push_back(h);
   }
-  cout << "[retrieveHistograms]: Size of v : " << v.size() << endl;
+  //cout << "[retrieveHistograms]: Size of v : " << v.size() << endl;
 }
 
 void drawStack(TDirectory* dir1, TDirectory* dir2, int cl1, int cl2, TString type, TString prefix="")
@@ -377,11 +377,10 @@ void drawStack(TDirectory* dir1, TDirectory* dir2, int cl1, int cl2, TString typ
   vector<TH1*> v1;
   vector<TH1*> v2;
   retrieveHistograms(dir1, v1);
-  cout << "Size of v1 : " << v1.size() << endl;
+  //cout << "Size of v1 : " << v1.size() << endl;
   retrieveHistograms(dir2, v2);
-  cout << "Size of v2 : " << v2.size() << endl;
+  //cout << "Size of v2 : " << v2.size() << endl;
   for (int i = 0; i < v1.size(); i++){
-      cout << "Q" << endl;
     TH1* h_1 = v1.at(i);
     h_1->SetLineColor(cl1);
     h_1->SetFillColor(cl1);

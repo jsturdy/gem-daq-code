@@ -80,7 +80,10 @@ class gemTreeReader {
     {
       std::string path = std::getenv("BUILD_HOME");
       path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips0-1.csv";
+      if (DEBUG) std::cout << "[gemTreeReader]: path to maps : " << path << std::endl; 
       for (int im = 0; im < NVFAT; im++){maps[im] = path;}
+      for (int ivm = 0; ivm < NVFAT; ivm++) this->readMap(ivm);
+      //this->printMaps();
       this->fillHistograms();
     }
   private:
@@ -88,7 +91,8 @@ class gemTreeReader {
     TFile *ofile;
     std::string ofilename;
 
-    std::vector<std::pair<int,int>> strip_maps[NVFAT];
+    //std::vector<std::pair<int,int>> strip_maps[NVFAT];
+    std::map<int,int> strip_maps[NVFAT];
     std::string maps[NVFAT];
 
     TH1F* hiVFAT                     [3]; // Number of VFATs in event
@@ -144,7 +148,7 @@ class gemTreeReader {
         hi1110         [i] = new TH1I((dirname[i]+"_1110").c_str(), "Control Bits 1110", 15, 0x0, 0xf );
         hiFlag         [i] = new TH1I((dirname[i]+"_Flag").c_str()  , "Flag",            15, 0x0, 0xf );
         hiCRC          [i] = new TH1I((dirname[i]+"_CRC").c_str(),     "CRC",             100, 0x0, 0xffff );
-        hiDiffCRC      [i] = new TH1I((dirname[i]+"_DiffCRC").c_str(), "CRC_Diff",    100, 0xffff, 0xffff );
+        hiDiffCRC      [i] = new TH1I((dirname[i]+"_DiffCRC").c_str(), "CRC_Diff",    100, -32767, 32767 );
         hiFake         [i] = new TH1I((dirname[i]+"_Fake").c_str(), "Number of bad VFAT blocks in event",    24, 0x0, 0x18 );
         hiSignal       [i] = new TH1I((dirname[i]+"_Signal").c_str(), "Number of good VFAT blocks in event",    24, 0x0, 0x18 );
         hichfired      [i] = new TH1I((dirname[i]+"_chfired").c_str(), "Channels fired per event",      500, 0., 500. );
@@ -192,6 +196,7 @@ class gemTreeReader {
       // loop over tree entries
       for (Int_t i = 0; i < nentries; i++)
       {
+        //if ((DEBUG) && (i>10)) break;
         if (DEBUG) std::cout << "[gemTreeReader]: Processing event " << i << std::endl;
         // clear number of VFATs
         int nVFAT[3] = {0,0,0};
@@ -239,7 +244,7 @@ class gemTreeReader {
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter "  <<  vfatId[v_vfat.at(k).SlotNumber()]  << std::endl;   
             // fill histograms for all events
             dir[0]->cd();
-            this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[0], hiCh128[0], hiCh_notfired[0], hiChip[0], hi1010[0], hi1100[0], hi1110[0], hiFlag[0], hiCRC[0], hiDiffCRC[0], hi2DCRC[0], hi2DCRCperVFAT[0], hiCh128chipFired[0], firedchannels[0], notfiredchannels[0]);
+            this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[0], hiCh128[0], hiCh_notfired[0], hiChip[0], hi1010[0], hi1100[0], hi1110[0], hiFlag[0], hiCRC[0], hiDiffCRC[0], hi2DCRC[0], hi2DCRCperVFAT[0], hiCh128chipFired[0], hiBeamProfile[0], firedchannels[0], notfiredchannels[0]);
             if (v_vfat.at(k).isBlockGood()){
               nGoodVFAT[0]++;
             }else {
@@ -253,7 +258,7 @@ class gemTreeReader {
                 nBadVFAT[1]++;
               }
               dir[1]->cd();
-              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[1], hiCh128[1], hiCh_notfired[1], hiChip[1], hi1010[1], hi1100[1], hi1110[1], hiFlag[1], hiCRC[1], hiDiffCRC[1], hi2DCRC[1], hi2DCRCperVFAT[1], hiCh128chipFired[1], firedchannels[1], notfiredchannels[1]);
+              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[1], hiCh128[1], hiCh_notfired[1], hiChip[1], hi1010[1], hi1100[1], hi1110[1], hiFlag[1], hiCRC[1], hiDiffCRC[1], hi2DCRC[1], hi2DCRCperVFAT[1], hiCh128chipFired[1], hiBeamProfile[1], firedchannels[1], notfiredchannels[1]);
             } else {
               if (v_vfat.at(k).isBlockGood()){
                 nGoodVFAT[2]++;
@@ -261,7 +266,7 @@ class gemTreeReader {
                 nBadVFAT[2]++;
               }
               dir[2]->cd();
-              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[2], hiCh128[2], hiCh_notfired[2], hiChip[2], hi1010[2], hi1100[2], hi1110[2], hiFlag[2], hiCRC[2], hiDiffCRC[2], hi2DCRC[2], hi2DCRCperVFAT[2], hiCh128chipFired[2], firedchannels[2], notfiredchannels[2]);
+              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[2], hiCh128[2], hiCh_notfired[2], hiChip[2], hi1010[2], hi1100[2], hi1110[2], hiFlag[2], hiCRC[2], hiDiffCRC[2], hi2DCRC[2], hi2DCRCperVFAT[2], hiCh128chipFired[2], hiBeamProfile[2], firedchannels[2], notfiredchannels[2]);
             }
             BC = v_vfat.at(k).BC();
           }// end of loop over VFATs
@@ -301,7 +306,7 @@ class gemTreeReader {
       }
     }
 
-    void fillVFATHistograms(VFATdata *m_vfat, TH1F* m_hiVFATsn, TH1F* m_hiCh128, TH1F* m_hiCh_notfired, TH1I* m_hiChip, TH1I* m_hi1010, TH1I* m_hi1100, TH1I* m_hi1110, TH1I* m_hiFlag, TH1I* m_hiCRC, TH1I* m_hiDiffCRC, TH2I* m_hi2DCRC, TH2I* m_hi2DCRCperVFAT[], TH1F* m_hiCh128chipFired[], int & firedchannels, int & notfiredchannels)
+    void fillVFATHistograms(VFATdata *m_vfat, TH1F* m_hiVFATsn, TH1F* m_hiCh128, TH1F* m_hiCh_notfired, TH1I* m_hiChip, TH1I* m_hi1010, TH1I* m_hi1100, TH1I* m_hi1110, TH1I* m_hiFlag, TH1I* m_hiCRC, TH1I* m_hiDiffCRC, TH2I* m_hi2DCRC, TH2I* m_hi2DCRCperVFAT[], TH1F* m_hiCh128chipFired[], TH2I* m_hiBeamProfile, int & firedchannels, int & notfiredchannels)
     {
       // fill the control bits histograms
       m_hi1010->Fill(m_vfat->b1010());
@@ -360,10 +365,22 @@ class gemTreeReader {
           for (int chan = 0; chan < 128; ++chan) {
             if (chan < 64){
               chan0xfFiredchip = ((m_vfat->lsData() >> chan) & 0x1);
-              if(chan0xfFiredchip) m_hiCh128chipFired[m]->Fill(chan);
+              if(chan0xfFiredchip) {
+                m_hiCh128chipFired[m]->Fill(chan);
+                int m_i = (int) m_vfat->SlotNumber()/8;
+                int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + (m_vfat->SlotNumber()%3)*128;
+                if (DEBUG) std::cout << "[gemTreeReader]: Beam profile x : " << m_i << " Beam profile y : " << m_j <<  std::endl;
+                m_hiBeamProfile->Fill(m_i,m_j);
+              }
             } else {
               chan0xfFiredchip = ((m_vfat->msData() >> (chan-64)) & 0x1);
-              if(chan0xfFiredchip) m_hiCh128chipFired[m]->Fill(chan);
+              if(chan0xfFiredchip) {
+                m_hiCh128chipFired[m]->Fill(chan);
+                int m_i = (int) m_vfat->SlotNumber()/8;
+                int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + (m_vfat->SlotNumber()%3)*128;
+                if (DEBUG) std::cout << "[gemTreeReader]: Beam profile x : " << m_i << " Beam profile y : " << m_j <<  std::endl;
+                m_hiBeamProfile->Fill(m_i,m_j);
+              }
             }
           }
         } 
@@ -401,25 +418,33 @@ class gemTreeReader {
         }
         std::string line;
         std::getline(icsvfile_, line);
+        if (DEBUG) std::cout << "[gemTreeReader]: Read line : " << line << std::endl; 
         std::istringstream iss(line);
         if ( !icsvfile_.good() ) break;
         std::pair<int,int> map_;
         std::string val;
         std::getline(iss,val,',');
+        if (DEBUG) std::cout << "[gemTreeReader]: First val : " << val << std::endl; 
         std::stringstream convertor(val);
-        convertor >> std::dec >> map_.first;
-        std::getline(iss,val,',');
-        convertor.str(val);
         convertor >> std::dec >> map_.second;
-        strip_maps[slot].push_back(map_);
+        if (DEBUG) std::cout << "[gemTreeReader]: First val recorded : " << map_.first << std::endl; 
+        std::getline(iss,val,',');
+        if (DEBUG) std::cout << "[gemTreeReader]: Second val : " << val << std::endl; 
+        convertor.str("");
+        convertor.clear();
+        convertor << val;
+        convertor >> std::dec >> map_.first;
+        if (DEBUG) std::cout << "[gemTreeReader]: Second val recorded : " << map_.second << std::endl; 
+        strip_maps[slot].insert(map_);
       }
     }
     void printMaps()
     {
-      for (int ism = 0; ism < NVFAT; ism++) for_each (strip_maps[ism].begin(), strip_maps[ism].end(), printSingleMap);
-    }
-    void printSingleMap(std::pair<int,int> pair_)
-    {
-      std::cout << "Strip : " << pair_.first << " Channel : " << pair_.second << std::endl;
+      std::map<int,int>::iterator it;
+      for (int ism = 0; ism < NVFAT; ism++){
+        for (it = strip_maps[ism].begin(); it != strip_maps[ism].end(); ++it){
+          std::cout << "Channel : " << it->first << " Strip : " << it->second << std::endl;
+        }
+      }
     }
 };
