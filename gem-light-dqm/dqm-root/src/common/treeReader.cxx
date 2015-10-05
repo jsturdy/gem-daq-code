@@ -367,8 +367,8 @@ class gemTreeReader {
               chan0xfFiredchip = ((m_vfat->lsData() >> chan) & 0x1);
               if(chan0xfFiredchip) {
                 m_hiCh128chipFired[m]->Fill(chan);
-                int m_i = (int) m_vfat->SlotNumber()/8;
-                int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + (m_vfat->SlotNumber()%3)*128;
+                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + ((int) m_vfat->SlotNumber()/8)*128;
                 if (DEBUG) std::cout << "[gemTreeReader]: Beam profile x : " << m_i << " Beam profile y : " << m_j <<  std::endl;
                 m_hiBeamProfile->Fill(m_i,m_j);
               }
@@ -376,8 +376,8 @@ class gemTreeReader {
               chan0xfFiredchip = ((m_vfat->msData() >> (chan-64)) & 0x1);
               if(chan0xfFiredchip) {
                 m_hiCh128chipFired[m]->Fill(chan);
-                int m_i = (int) m_vfat->SlotNumber()/8;
-                int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + (m_vfat->SlotNumber()%3)*128;
+                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + ((int) m_vfat->SlotNumber()/8)*128;
                 if (DEBUG) std::cout << "[gemTreeReader]: Beam profile x : " << m_i << " Beam profile y : " << m_j <<  std::endl;
                 m_hiBeamProfile->Fill(m_i,m_j);
               }

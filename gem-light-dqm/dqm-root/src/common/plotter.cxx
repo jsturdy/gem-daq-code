@@ -349,7 +349,7 @@ void printHistograms(TDirectory* dir, TString type, TString prefix="")
       if (!cl->InheritsFrom("TH1")) continue;
       TH1 *h = (TH1*)key->ReadObj();
       TCanvas *c = newCanvas();
-      h->Draw();
+      h->Draw("colz");
       TString name =  h->GetTitle();
       if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
       c->Print(prefix+name+"."+type,type);
