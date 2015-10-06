@@ -201,18 +201,18 @@ void gem::supervisor::GEMGLIBSupervisorWeb::webDefault(xgi::Input * in, xgi::Out
 
   if (is_configured_) {
     //counting "1" Internal triggers, one link enough 
-    L1ACount_[0] = optohybridDevice_->GetL1ACount(0); //external
-    L1ACount_[1] = optohybridDevice_->GetL1ACount(1); //internal
-    L1ACount_[2] = optohybridDevice_->GetL1ACount(2); //delayed
-    L1ACount_[3] = optohybridDevice_->GetL1ACount(3); //total
+    L1ACount_[0] = optohybridDevice_->getL1ACount(0); //external
+    L1ACount_[1] = optohybridDevice_->getL1ACount(1); //internal
+    L1ACount_[2] = optohybridDevice_->getL1ACount(2); //delayed
+    L1ACount_[3] = optohybridDevice_->getL1ACount(3); //total
     
-    CalPulseCount_[0] = optohybridDevice_->GetCalPulseCount(0); //internal
-    CalPulseCount_[1] = optohybridDevice_->GetCalPulseCount(1); //delayed
-    CalPulseCount_[2] = optohybridDevice_->GetCalPulseCount(2); //total
+    CalPulseCount_[0] = optohybridDevice_->getCalPulseCount(0); //internal
+    CalPulseCount_[1] = optohybridDevice_->getCalPulseCount(1); //delayed
+    CalPulseCount_[2] = optohybridDevice_->getCalPulseCount(2); //total
     
-    ResyncCount_ = optohybridDevice_->GetResyncCount();
+    ResyncCount_ = optohybridDevice_->getResyncCount();
     
-    BC0Count_ = optohybridDevice_->GetBC0Count();
+    BC0Count_ = optohybridDevice_->getBC0Count();
   }
   // If we are in "Running" state, check if GLIB has any data available
   if (is_running_) wl_->submit(run_signature_);
@@ -411,12 +411,12 @@ void gem::supervisor::GEMGLIBSupervisorWeb::webTrigger(xgi::Input * in, xgi::Out
   hw_semaphore_.take();
 
   INFO(" webTrigger: sending L1A");
-  optohybridDevice_->SendL1A(1);
+  optohybridDevice_->sendL1A(1);
 
-  L1ACount_[0] = optohybridDevice_->GetL1ACount(0); //external
-  L1ACount_[1] = optohybridDevice_->GetL1ACount(1); //internal
-  L1ACount_[2] = optohybridDevice_->GetL1ACount(2); //delayed
-  L1ACount_[3] = optohybridDevice_->GetL1ACount(3); //total
+  L1ACount_[0] = optohybridDevice_->getL1ACount(0); //external
+  L1ACount_[1] = optohybridDevice_->getL1ACount(1); //internal
+  L1ACount_[2] = optohybridDevice_->getL1ACount(2); //delayed
+  L1ACount_[3] = optohybridDevice_->getL1ACount(3); //total
 
   hw_semaphore_.give();
 
@@ -430,17 +430,17 @@ void gem::supervisor::GEMGLIBSupervisorWeb::webL1ACalPulse(xgi::Input * in, xgi:
   //INFO("webCalPulse: sending 1 CalPulse with 25 clock delayed L1A");
   for (int offset = -12; offset < 13; ++offset) {
     INFO("webCalPulse: sending 10 CalPulses with L1As delayed by " << (int)latency_ + offset <<  " clocks");
-    optohybridDevice_->SendL1ACal(2, latency_ + offset);
+    optohybridDevice_->sendL1ACal(2, latency_ + offset);
     INFO("Sleeping for 0.5 seconds...");
     sleep(0.5);
     INFO("back!");
   }
-  //optohybridDevice_->SendL1ACal(1, latency_);
+  //optohybridDevice_->sendL1ACal(1, latency_);
   //sleep(0.1);
   //need some sleep here?
-  CalPulseCount_[0] = optohybridDevice_->GetCalPulseCount(0); //internal
-  CalPulseCount_[1] = optohybridDevice_->GetCalPulseCount(1); //delayed
-  CalPulseCount_[2] = optohybridDevice_->GetCalPulseCount(2); //total
+  CalPulseCount_[0] = optohybridDevice_->getCalPulseCount(0); //internal
+  CalPulseCount_[1] = optohybridDevice_->getCalPulseCount(1); //delayed
+  CalPulseCount_[2] = optohybridDevice_->getCalPulseCount(2); //total
   
   hw_semaphore_.give();
 
@@ -453,8 +453,8 @@ void gem::supervisor::GEMGLIBSupervisorWeb::webResync(xgi::Input * in, xgi::Outp
   hw_semaphore_.take();
 
   INFO("webResync: sending Resync");
-  optohybridDevice_->SendResync();
-  ResyncCount_ = optohybridDevice_->GetResyncCount();
+  optohybridDevice_->sendResync();
+  ResyncCount_ = optohybridDevice_->getResyncCount();
 
   hw_semaphore_.give();
 
@@ -467,8 +467,8 @@ void gem::supervisor::GEMGLIBSupervisorWeb::webBC0(xgi::Input * in, xgi::Output 
   hw_semaphore_.take();
 
   INFO("webBC0: sending BC0");
-  optohybridDevice_->SendBC0();
-  BC0Count_ = optohybridDevice_->GetBC0Count();
+  optohybridDevice_->sendBC0();
+  BC0Count_ = optohybridDevice_->getBC0Count();
 
   hw_semaphore_.give();
 
@@ -489,9 +489,9 @@ bool gem::supervisor::GEMGLIBSupervisorWeb::configureAction(toolbox::task::WorkL
   // fire "Configure" event to FSM
   fireEvent("Configure");
 
-  optohybridDevice_->SendResync();
+  optohybridDevice_->sendResync();
   // resetting BX counter
-  // optohybridDevice_->ResetBXCount();
+  // optohybridDevice_->resetBXCount();
   //   ERROR - No branch found with ID-path "OptoHybrid.OptoHybrid_LINKS.LINK0.COUNTERS.RESETS.BXCount"
 
   return false;
@@ -791,26 +791,26 @@ void gem::supervisor::GEMGLIBSupervisorWeb::startAction(toolbox::Event::Referenc
 
   //send resync
   INFO("Sending a resync");
-  optohybridDevice_->SendResync();
+  optohybridDevice_->sendResync();
 
   //reset counters
   INFO("Resetting counters");
-  optohybridDevice_->ResetL1ACount(0x4);
-  L1ACount_[0] = optohybridDevice_->GetL1ACount(0); //external
-  L1ACount_[1] = optohybridDevice_->GetL1ACount(1); //internal
-  L1ACount_[2] = optohybridDevice_->GetL1ACount(2); //delayed
-  L1ACount_[3] = optohybridDevice_->GetL1ACount(3); //total
+  optohybridDevice_->resetL1ACount(0x4);
+  L1ACount_[0] = optohybridDevice_->getL1ACount(0); //external
+  L1ACount_[1] = optohybridDevice_->getL1ACount(1); //internal
+  L1ACount_[2] = optohybridDevice_->getL1ACount(2); //delayed
+  L1ACount_[3] = optohybridDevice_->getL1ACount(3); //total
 
-  optohybridDevice_->ResetResyncCount();
-  ResyncCount_ = optohybridDevice_->GetResyncCount();
+  optohybridDevice_->resetResyncCount();
+  ResyncCount_ = optohybridDevice_->getResyncCount();
 
-  optohybridDevice_->ResetBC0Count();
-  BC0Count_ = optohybridDevice_->GetBC0Count();
+  optohybridDevice_->resetBC0Count();
+  BC0Count_ = optohybridDevice_->getBC0Count();
 
-  optohybridDevice_->ResetCalPulseCount(0x3);
-  CalPulseCount_[0] = optohybridDevice_->GetCalPulseCount(0); //internal
-  CalPulseCount_[1] = optohybridDevice_->GetCalPulseCount(1); //delayed
-  CalPulseCount_[2] = optohybridDevice_->GetCalPulseCount(2); //total
+  optohybridDevice_->resetCalPulseCount(0x3);
+  CalPulseCount_[0] = optohybridDevice_->getCalPulseCount(0); //internal
+  CalPulseCount_[1] = optohybridDevice_->getCalPulseCount(1); //delayed
+  CalPulseCount_[2] = optohybridDevice_->getCalPulseCount(2); //total
 
   hw_semaphore_.give();
   is_working_ = false;
