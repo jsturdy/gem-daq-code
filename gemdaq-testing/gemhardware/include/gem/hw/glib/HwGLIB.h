@@ -2,6 +2,11 @@
 #define gem_hw_glib_HwGLIB_h
 
 #include "gem/hw/GEMHwDevice.h"
+#include "toolbox/SyncQueue.h"
+#include "i2o/i2o.h"
+#include "toolbox/Task.h"
+#include "toolbox/mem/Reference.h"
+#include "toolbox/mem/Pool.h"
 
 #include "gem/hw/glib/exception/Exception.h"
 //#include "gem/hw/glib/GLIBMonitor.h"
@@ -15,6 +20,44 @@ namespace gem {
       class HwGLIB: public gem::hw::GEMHwDevice
         {
         public:
+          
+          static const unsigned N_GTX = 2; /**maximum number of GTX links on the GLIB*/
+
+          /** @struct GLIBIPBusCounters
+           *  @brief This structure stores retrieved counters related to the GLIB IPBus transactions
+           *  @var GLIBIPBusCounters::OptoHybridStrobe
+           *  OptoHybridStrobe is a counter for the number of errors on the tracking data link
+           *  @var GLIBIPBusCounters::OptoHybridAck
+           *  OptoHybridAck is a counter for the number of errors on the trigger data link
+           *  @var GLIBIPBusCounters::TrackingStrobe
+           *  TrackingStrobe is a counter for the number of errors on the tracking data link
+           *  @var GLIBIPBusCounters::TrackingAck
+           *  TrackingAck is a counter for the number of errors on the trigger data link
+           *  @var GLIBIPBusCounters::CounterStrobe
+           *  CounterStrobe is a counter for the number of errors on the tracking data link
+           *  @var GLIBIPBusCounters::CounterAck
+           *  CounterAck is a counter for the number of errors on the trigger data link
+           */
+          typedef struct GLIBIPBusCounters {
+            uint32_t OptoHybridStrobe; 
+            uint32_t OptoHybridAck   ;
+            uint32_t TrackingStrobe  ;
+            uint32_t TrackingAck     ;
+            uint32_t CounterStrobe   ;
+            uint32_t CounterAck      ;
+            
+          GLIBIPBusCounters() : 
+            OptoHybridStrobe(0),OptoHybridAck(0),
+              TrackingStrobe(0),TrackingAck(0),
+              CounterStrobe(0),CounterAck(0) {};
+            void reset() {
+              OptoHybridStrobe=0; OptoHybridAck=0;
+              TrackingStrobe=0;   TrackingAck=0;
+              CounterStrobe=0;    CounterAck=0;
+              return; };
+          } GLIBIPBusCounters;
+          
+          
           HwGLIB();
           HwGLIB(std::string const& glibDevice, std::string const& connectionFile);
           HwGLIB(std::string const& glibDevice, std::string const& connectionURI, std::string const& addressTable);
@@ -314,55 +357,60 @@ namespace gem {
           std::string getUserFirmwareDate();
 
         private:
-          /** Read the user firmware register for a given link
+          /** Read the user firmware register for a given gtx
            * @returns a hex number corresponding to the build date
            * is private to ensure that it is only used internally
-           * link agnostic versions should be used outside of HwGLIB
+           * gtx agnostic versions should be used outside of HwGLIB
            * OBSOLETE in V2 firmware
            **/
-          uint32_t getUserFirmware(uint8_t const& link);
+          uint32_t getUserFirmware(uint8_t const& gtx);
 	  
-          /** Read the user firmware register for a given link
+          /** Read the user firmware register for a given gtx
            * @returns a string corresponding to the build date
            * is private to ensure that it is only used internally
-           * link agnostic versions should be used outside of HwGLIB
+           * gtx agnostic versions should be used outside of HwGLIB
            * OBSOLETE in V2 firmware
            **/
-          std::string getUserFirmwareDate(uint8_t const& link);
+          std::string getUserFirmwareDate(uint8_t const& gtx);
 	  
-        public:
-          /** Read the link status registers, store the information in a struct
-           * @param uint8_t link is the number of the link to query
-           * @retval _status a struct containing the status bits of the optical link
-           * @throws gem::hw::glib::exception::InvalidLink if the link number is outside of 0-2
+          /** Check if the gtx requested is known to be operational
+           * @param uint8_t gtx GTX gtx to be queried
+           * @param std::string opMsg Operation message to append to the log message
+           * @returns true if the gtx is in range and active, false otherwise
            **/
-          GEMHwDevice::OpticalLinkStatus LinkStatus(uint8_t const& link);
-	  
-          /** Reset the link status registers
-           * @param uint8_t link is the number of the link to query
-           * @param uint8_t resets control which bits to reset
-           * 0x00
-           * bit 1 - ErrCnt      0x01
-           * bit 2 - VFATI2CRec  0x02
-           * bit 3 - VFATI2CSnt  0x04
-           * bit 4 - RegisterRec 0x08
-           * bit 5 - RegisterSnt 0x10
-           * @throws gem::hw::glib::exception::InvalidLink if the link number is outside of 0-2
-           **/
-          void LinkReset(uint8_t const& link, uint8_t const& resets);
+          bool linkCheck(uint8_t const& gtx, std::string const& opMsg);
 
-          /** Reset the all link status registers
+        public:
+          /** Read the gtx status registers, store the information in a struct
+           * @param uint8_t gtx is the number of the gtx to query
+           * @retval _status a struct containing the status bits of the optical link
+           * @throws gem::hw::glib::exception::InvalidLink if the gtx number is outside of 0-1
+           **/
+          GEMHwDevice::OpticalLinkStatus LinkStatus(uint8_t const& gtx);
+	  
+          /** Reset the gtx status registers
+           * @param uint8_t gtx is the number of the gtx to query
+           * @param uint8_t resets control which bits to reset
+           * bit 1 - TRK_ErrCnt         0x1
+           * bit 2 - TRG_ErrCnt         0x2
+           * bit 3 - Data_Rec           0x4
+           * @throws gem::hw::glib::exception::InvalidLink if the gtx number is outside of 0-1
+           **/
+          void LinkReset(uint8_t const& gtx, uint8_t const& resets);
+
+          /** Reset the all gtx status registers
            * @param uint8_t resets control which bits to reset
            **/
           void ResetLinks(uint8_t const& resets) {
-            for (auto link = v_activeLinks.begin(); link != v_activeLinks.end(); ++link)
-              LinkReset(link->first,resets);
+            for (auto gtx = v_activeLinks.begin(); gtx != v_activeLinks.end(); ++gtx)
+              LinkReset(gtx->first,resets);
           };
 	  
           /** Set the Trigger source
            * @param uint8_t mode 0 from software, 1 from TTC decoder (AMC13), 2 from both
+           * OBSOLETE in V2 firmware, taken care of in the OptoHybrid
            **/
-          void setTrigSource(uint8_t const& mode, uint8_t const& link=0x0) {
+          void setTrigSource(uint8_t const& mode, uint8_t const& gtx=0x0) {
             std::stringstream regName;
             regName << "GLIB_LINKS.LINK" << (int)m_controlLink;
             switch (mode) {
@@ -383,8 +431,9 @@ namespace gem {
 
           /** Read the Trigger source
            * @retval uint8_t 0 from GLIB, 1 from AMC13, 2 from both
+           * OBSOLETE in V2 firmware, taken care of in the OptoHybrid
            **/
-          uint8_t getTrigSource(uint8_t const& link=0x0) { 
+          uint8_t getTrigSource(uint8_t const& gtx=0x0) { 
             std::stringstream regName;
             regName << "GLIB_LINKS.LINK" << (int)m_controlLink;
             return readReg(getDeviceBaseNode(),regName.str()+".TRIGGER.SOURCE"); };
@@ -393,7 +442,7 @@ namespace gem {
           /** Set the S-bit source
            * @param uint8_t chip
            **/
-          void setSBitSource(uint8_t const& mode, uint8_t const& link=0x0) {
+          void setSBitSource(uint8_t const& mode, uint8_t const& gtx=0x0) {
             std::stringstream regName;
             regName << "GLIB_LINKS.LINK" << (int)m_controlLink;
             writeReg(getDeviceBaseNode(),regName.str()+".TRIGGER.TDC_SBits",mode); };
@@ -401,57 +450,129 @@ namespace gem {
           /** Read the S-bit source
            * @retval uint8_t which VFAT chip is sending the S-bits
            **/
-          uint8_t getSBitSource(uint8_t const& link=0x0) {
+          uint8_t getSBitSource(uint8_t const& gtx=0x0) {
             std::stringstream regName;
             regName << "GLIB_LINKS.LINK" << (int)m_controlLink;
             return readReg(getDeviceBaseNode(),regName.str()+".TRIGGER.TDC_SBits"); };
 
+          ///Counters
+          /** Get the recorded number of IPBus signals sent/received by the GLIB
+           * @param uint8_t gtx which GTX
+           * @param uint8_t mode which counter
+           * bit 1 OptoHybridStrobe
+           * bit 2 OptoHybridAck
+           * bit 3 TrackingStrobe
+           * bit 4 TrackingAck
+           * bit 5 CounterStrobe
+           * bit 6 CounterAck
+           * @returns GLIBIPBusCounters struct, with updated values for the ones specified in the mask
+           **/
+          GLIBIPBusCounters getIPBusCounters(uint8_t const& gtx, uint8_t const& mode);
+	  
+          /** Get the recorded number of L1A signals received from the TTC decoder
+           **/
+          uint32_t getL1ACount() {
+            return readReg(getDeviceBaseNode(),"COUNTERS.T1.L1A"); };
+	  
+          /** Get the recorded number of CalPulse signals received from the TTC decoder
+           **/
+          uint32_t getCalPulseCount() {
+            return readReg(getDeviceBaseNode(),"COUNTERS.T1.CalPulse"); };
+	  
+          /** Get the recorded number of Resync signals received from the TTC decoder
+           **/
+          uint32_t getResyncCount() {
+            return readReg(getDeviceBaseNode(),"COUNTERS.T1.Resync"); };
+          
+          /** Get the recorded number of BC0 signals
+           **/
+          uint32_t getBC0Count() {
+            return readReg(getDeviceBaseNode(),"COUNTERS.T1.BC0"); };
+          
+          ///Counter resets
+          /** Get the recorded number of IPBus signals sent/received by the GLIB
+           * @param uint8_t gtx which GTX
+           * @param uint8_t mode which counter
+           * bit 1 OptoHybridStrobe
+           * bit 2 OptoHybridAck
+           * bit 3 TrackingStrobe
+           * bit 4 TrackingAck
+           * bit 5 CounterStrobe
+           * bit 6 CounterAck
+           **/
+          void resetIPBusCounters(uint8_t const& gtx, uint8_t const& mode);
+	  
+          /** Reset the recorded number of L1A signals received from the TTC decoder
+           **/
+          void resetL1ACount() {
+            return writeReg(getDeviceBaseNode(),"COUNTERS.T1.L1A.Reset", 0x1); };
+	  
+          /** Reset the recorded number of CalPulse signals received from the TTC decoder
+           **/
+          void resetCalPulseCount() {
+            return writeReg(getDeviceBaseNode(),"COUNTERS.T1.CalPulse.Reset", 0x1); };
+	  
+          /** Reset the recorded number of Resync signals received from the TTC decoder
+           **/
+          void resetResyncCount() {
+            return writeReg(getDeviceBaseNode(),"COUNTERS.T1.Resync.Reset", 0x1); };
+          
+          /** Reset the recorded number of BC0 signals
+           **/
+          void resetBC0Count() {
+            return writeReg(getDeviceBaseNode(),"COUNTERS.T1.BC0.Reset", 0x1); };
+          
           /** Read the trigger data
            * @retval uint32_t returns 32 bits 6 bits for s-bits and 26 for bunch countrr
            **/
-          uint32_t readTriggerFIFO(uint8_t const& link);
+          uint32_t readTriggerFIFO(uint8_t const& gtx);
 
           /** Empty the trigger data FIFO
            * 
            **/
-          void flushTriggerFIFO(uint8_t const& link);
+          void flushTriggerFIFO(uint8_t const& gtx);
 
           /** Read the tracking data FIFO occupancy
-           * @param uint8_t link is the number of the link to query
+           * @param uint8_t gtx is the number of the gtx to query
            * @retval uint32_t returns the number of events in the tracking data FIFO
            **/
-          uint32_t getFIFOOccupancy(uint8_t const& link);
+          uint32_t getFIFOOccupancy(uint8_t const& gtx);
 
           /** see if there is tracking data available
-           * @param uint8_t link is the number of the column of the tracking data to read
+           * @param uint8_t gtx is the number of the column of the tracking data to read
            * @retval bool returns true if there is tracking data in the FIFO
            TRK_DATA.COLX.DATA_RDY
           */
-          bool hasTrackingData(uint8_t const& link);
+          bool hasTrackingData(uint8_t const& gtx);
 
-          /** get the tracking data, have to do this intelligently, as each column will be independent (for now)
+          /** get the tracking data, have to do this intelligently, as IPBus transactions are expensive
               and need to pack all events together
-              OR we put the column data in it's own block, and figure it out later...
-              * @param uint8_t link is the number of the column of the tracking data to read
+              * @param uint8_t gtx is the number of the GTX tracking data to read
               * @retval std::vector<uint32_t> returns the 7 data words in the buffer, for a single chip
               * maybe better to return a block of memory...
               TRK_DATA.COLX.DATA_RDY
               TRK_DATA.COLX.DATA.[0-6]
           */
-          std::vector<uint32_t> getTrackingData(uint8_t const& link);
-
+          std::vector<uint32_t> getTrackingData(uint8_t const& gtx, size_t const& nBlocks=1);
+          //which of these will be better and do what we want
+          uint32_t getTrackingData(uint8_t const& gtx, uint64_t* data, size_t const& nBlocks=1);
+          //which of these will be better and do what we want
+          uint32_t getTrackingData(uint8_t const& gtx, std::vector<toolbox::mem::Reference*>& data,
+                                   size_t const& nBlocks=1);
           /** Empty the tracking data FIFO
-           * @param uint8_t link is the number of the link to query
+           * @param uint8_t gtx is the number of the gtx to query
            * 
            **/
-          void flushFIFO(uint8_t const& link);
+          void flushFIFO(uint8_t const& gtx);
 
-
+          
+          std::vector<GLIBIPBusCounters> m_ipBusCounters; /** for each gtx, IPBus counters */
+          
         protected:
           //GLIBMonitor *monGLIB_;
 	
-          bool b_links[3];
-	    
+          bool b_links[N_GTX];
+          
           std::vector<linkStatus> v_activeLinks;
 
         private:
