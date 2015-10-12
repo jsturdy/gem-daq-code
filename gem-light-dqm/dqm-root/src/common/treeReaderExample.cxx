@@ -86,17 +86,17 @@ int main(int argc, char** argv)
     // create the output file
     TFile *ofile = new TFile(ofilename, "RECREATE");
     //book histograms
-    TH1F* hiVFAT    = new TH1F("VFAT", "Number_VFAT_blocks_per_event", 24,  0., 24. );
-    TH1F* hiVFATsn  = new TH1F("VFATsn", "VFAT_slot_number", 24,  0., 24. );
-    TH1C* hiChip    = new TH1C("ChipID", "ChipID",         4096, 0x0, 0xfff );
-    TH1C* hi1010    = new TH1C("1010", "Control_Bits_1010", 16, 0x0, 0xf );
-    TH1C* hi1100    = new TH1C("1100", "Control_Bits_1100", 16, 0x0, 0xf );
-    TH1C* hi1110    = new TH1C("1110", "Control_Bits_1110", 16, 0x0, 0xf );
-    TH1C* hiFlag    = new TH1C("Flag"  , "Flag",            16, 0x0, 0xf );
-    TH1C* hiCRC     = new TH1C("CRC",     "CRC",             100, 0x0, 0xffff );
-    TH1C* hiDiffCRC = new TH1C("DiffCRC", "CRC_Diff",    100, 0xffff, 0xffff );
-    TH1C* hiFake    = new TH1C("iFake", "Fake_Events",      100, 0., 100. );
-    TH1F* hiCh128   = new TH1F("Ch128", "Strips",          128, 0., 128. );
+    TH1F* hiVFAT    = new TH1F("VFAT", "Number_VFAT_blocks_per_event",   24,  0., 24. );
+    TH1F* hiVFATsn  = new TH1F("VFATsn", "VFAT_slot_number", 24,  0.,    24. );
+    TH1C* hiChip    = new TH1C("ChipID", "ChipID",         4096, 0x0,    0xfff );
+    TH1C* hi1010    = new TH1C("1010", "Control_Bits_1010",  16, 0x0,    0xf );
+    TH1C* hi1100    = new TH1C("1100", "Control_Bits_1100",  16, 0x0,    0xf );
+    TH1C* hi1110    = new TH1C("1110", "Control_Bits_1110",  16, 0x0,    0xf );
+    TH1C* hiFlag    = new TH1C("Flag"  , "Flag",             16, 0x0,    0xf );
+    TH1C* hiCRC     = new TH1C("CRC",     "CRC",            100, 0x0,    0xffff );
+    TH1C* hiDiffCRC = new TH1C("DiffCRC", "CRC_Diff",       100, 0xffff, 0xffff );
+    TH1C* hiFake    = new TH1C("iFake", "Fake_Events",      100, 0.,     100. );
+    TH1F* hiCh128   = new TH1F("Ch128", "Strips",           128, 0.,     128. );
     TH2C* hi2DCRC   = new TH2C("CRC1_vs_CRC2", "CRC1_vs_CRC2", 100, 0x0000, 0xffff, 100, 0x0000, 0xffff);
     //hiVFAT->SetFillColor(48);
     //
