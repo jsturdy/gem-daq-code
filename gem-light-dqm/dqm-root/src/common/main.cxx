@@ -15,6 +15,7 @@ int main(int argc, char** argv)
   m_gemTreeWriter->makeTree(m_dat_filename);
   string m_raw_filename;
   m_raw_filename = m_gemTreeWriter->getOutputFileName();
+  std::cout << "[MAIN]: ROOT TTree is finished" << std::endl;
   gemTreeReader *m_gemTreeReader = new gemTreeReader(m_raw_filename);
   m_gemTreeReader->createHistograms();
 
