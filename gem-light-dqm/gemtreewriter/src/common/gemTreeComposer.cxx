@@ -191,6 +191,7 @@ int main(int argc, char** argv)
 
     for(int ievent=0; ievent<ieventMax; ievent++)
     {
+      bool eventStatus = true;
         OKpri = OKprint(ievent,ieventPrint);
         if(inpf.eof()) break;
         if(!inpf.good()) break;
@@ -222,7 +223,7 @@ int main(int argc, char** argv)
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
         uint32_t sumVFAT = (0x000000000fffffff & geb.header);
-        uint16_t  BX     = 0;
+        uint32_t BX      = 0;
 
         if (InpType == "Hex") {
           if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
@@ -257,12 +258,7 @@ int main(int argc, char** argv)
 
             BX     = vfat.BXfrOH;  
 
-            if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) ){
-              cout << "VFAT headers do not match expectation" << endl;
-              //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
-              ifake++;
-            }//end if 1010,1100,1110
-      
+     
             // CRC check
             dataVFAT[11] = vfat.BC;
             dataVFAT[10] = vfat.EC;
@@ -282,8 +278,16 @@ int main(int argc, char** argv)
             for (int ibin = 0; ibin < 24; ibin++){
               if ( (ChipID == gem::readout::GEMslotContents::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
             }//end for
-      
-            VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
+            bool blockStatus = true;
+            if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) || (islot < 0) || (islot > 23)){
+              cout << "VFAT headers do not match expectation" << endl;
+              blockStatus = false;
+              eventStatus = false;
+              //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
+              ifake++;
+            }//end if 1010,1100,1110
+  
+            VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC, checkedCRC, islot, blockStatus);
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 
@@ -321,7 +325,7 @@ int main(int argc, char** argv)
           if(!gem::readout::GEMDataAMCformat::readGEMtr1Binary(inpf, gem)) break;
         }
         
-        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0, eventStatus);
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
         ev->Clear();
