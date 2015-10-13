@@ -27,6 +27,7 @@
 //        uint32_t ZSFlag;                // ZeroSuppresion flags, 24 bits
 //        uint16_t ChamID;                // Chamber ID, 12 bits
 //        uint32_t sumVFAT;               // Rest part of the header, reserved for the moment
+//        uint64_t fRunHeader;            // RunType:4 VT1:8 VT2:8 minTH:8 maxTH:8 Step:8 - Threshold Scan Header
 //        std::vector<VFATdata> vfats;
 //        uint16_t OHcrc;                 // OH Check Sum, 16 bits
 //        uint16_t OHwCount;              // OH Counter, 16 bits
@@ -80,20 +81,12 @@
 
 #include "Event.h"
 
-
-//ClassImp(Track)
 ClassImp(EventHeader)
 ClassImp(Event)
-//ClassImp(HistogramManager)
-
-//TH1F *Event::fgHist = 0;
 
 Event::Event()
 {
    // Create an Event object.
-   // When the constructor is invoked for the first time, the class static
-   // variable fgTracks is 0 and the TClonesArray fgTracks is created.
-
    Clear();
 }
 
@@ -107,7 +100,7 @@ Event::~Event()
 void Event::Build(const uint8_t &AmcNo_, 
     const uint8_t &b0000_,
     const uint32_t &LV1ID_, 
-    const uint16_t &BXID_, 
+    const uint32_t &BXID_, 
     const uint32_t &DataLgth_, 
     const uint16_t &OrN_, 
     const uint16_t &BoardID_, 
@@ -121,7 +114,8 @@ void Event::Build(const uint8_t &AmcNo_,
     const uint32_t &crc_, 
     const uint8_t &LV1IDT_, 
     const uint8_t &b0000T_, 
-    const uint32_t &DataLgthT_)
+    const uint32_t &DataLgthT_,
+    bool isEventGood_)
 {
     //Save current Object count
     Int_t ObjectNumber = TProcessID::GetObjectCount();
@@ -144,6 +138,7 @@ void Event::Build(const uint8_t &AmcNo_,
     fLV1IDT = LV1IDT_;
     fb0000T = b0000T_;
     fDataLgthT = DataLgthT_;
+    fisEventGood = isEventGood_;
 
     //Restore Object count 
     //To save space in the table keeping track of all referenced objects
@@ -180,4 +175,5 @@ void Event::Clear()
     fLV1IDT = 0;
     fb0000T = 0;
     fDataLgthT = 0;
+    fisEventGood = false;
 }

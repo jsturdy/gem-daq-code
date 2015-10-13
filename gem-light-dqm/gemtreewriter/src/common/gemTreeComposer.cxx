@@ -1,3 +1,5 @@
+#include "gem/readout/GEMDataAMCformat.h"
+
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -25,8 +27,6 @@
 #else
     #include "Event.h"
 #endif
-
-#include "gem/readout/GEMDataAMCformat.h"
 
 /**
 * GEM Tree Composer (gtc) application provides translation of the GEM output HEX file to ROOT-based TTree with GEM Events
@@ -57,7 +57,7 @@
   ./bin/gtc GEMDQMRawData.dat outputROOTtree.root
 
   You can download sample HEX-ASCII data file:
-  wget https://baranov.web.cern.ch/baranov/xdaq/DataParker/GEM_DAQ_Tue_Jul_14_10-13-10_2015.dat
+  wget https://baranov.web.cern.ch/baranov/xdaq/Testing/CERN.904/OHv2/24.Aug.2015/GEM_DAQ_Mon_Aug_24_12-59-28_2015.dat
 
   After producing the outputROOTtree.root you can run the tree reader example, which should serve as basis for future analyzers:
   ./bin/reader outputROOTtree.root outputAnalyzer.root
@@ -71,6 +71,17 @@
 */
 
 using namespace std;
+
+uint16_t gem::readout::GEMslotContents::slot[24] = {
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+};
+bool gem::readout::GEMslotContents::isFileRead = false;
+
+typedef gem::readout::GEMDataAMCformat::GEMData  AMCGEMData;
+typedef gem::readout::GEMDataAMCformat::GEBData  AMCGEBData;
+typedef gem::readout::GEMDataAMCformat::VFATData AMCVFATData;
 
  /*
   *  CRC ******************************************************************
@@ -146,9 +157,17 @@ int main(int argc, char** argv)
         cout << "Usage: <path>/gtc inputFile.dat outputFile.root" << endl;
         return 0;
     }
-    string ifile=argv[1];
+    std::string ifile   = argv[1];
+    std::string InpType = "Binary";
     const TString ofile = argv[2];
-    ifstream inpf(ifile.c_str());
+
+    std::ifstream inpf(ifile.c_str(), std::ios::in|std::ios::binary);
+    char c = inpf.get();
+    inpf.close();
+    if ( c != 1 ) InpType = "Hex";
+    cout << " Input File has type " << c << " " << "  " << InpType << endl;
+  
+    inpf.open(ifile.c_str());
     if(!inpf.is_open()) {
       cout << "\nThe file: " << ifile.c_str() << " is missing.\n" << endl;
       return 0;
@@ -159,35 +178,73 @@ int main(int argc, char** argv)
     Event *ev = new Event(); 
     GEMtree.Branch("GEMEvents", &ev);
 
-    gem::readout::GEBData   geb;
-    gem::readout::VFATData vfat;
+    AMCGEMData  gem;
+    AMCGEBData  geb;
+    AMCVFATData vfat;
 
     const Int_t ieventPrint = 3;
     const Int_t ieventMax   = 9000000;
     const Int_t kUPDATE     = 10;
     bool OKpri = false;
 
+    gem::readout::GEMslotContents::getSlotCfg();
+
     for(int ievent=0; ievent<ieventMax; ievent++)
     {
+      bool eventStatus = true;
         OKpri = OKprint(ievent,ieventPrint);
         if(inpf.eof()) break;
         if(!inpf.good()) break;
 
         cout << "Processing event " << ievent << endl;
 
-        // read Event Chamber Header 
-        gem::readout::readGEBheader(inpf, geb);
-        if(OKpri) gem::readout::printGEBheader(ievent,geb);
-
+       /*
+        *  GEM Headers Data level
+        */
+        if (InpType == "Hex") {
+          if(!gem::readout::GEMDataAMCformat::readGEMhd1(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd2(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd3(inpf, gem)) break;
+        } else {
+          if(!gem::readout::GEMDataAMCformat::readGEMhd1Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd2Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMhd3Binary(inpf, gem)) break;
+        }
+    
+       /*
+        *  GEB Headers Data level
+        */
+        if (InpType == "Hex") {
+          if(!gem::readout::GEMDataAMCformat::readGEBheader(inpf, geb)) break;
+        } else {
+          if(!gem::readout::GEMDataAMCformat::readGEBheaderBinary(inpf, geb)) break;
+        } //if(OKpri) gem::readout::GEMDataAMCformat::printGEBheader(ievent,geb);
+    
         uint32_t ZSFlag  = (0xffffff0000000000 & geb.header) >> 40; 
         uint16_t ChamID  = (0x000000fff0000000 & geb.header) >> 28; 
         uint32_t sumVFAT = (0x000000000fffffff & geb.header);
+        uint32_t BX      = 0;
 
+        if (InpType == "Hex") {
+          if(!gem::readout::GEMDataAMCformat::readGEBrunhed(inpf, geb)) break;
+        } else {
+          if(!gem::readout::GEMDataAMCformat::readGEBrunhedBinary(inpf, geb)) break;
+        }
+    
+       /*
+        *  GEB PayLoad Data
+        */
         GEBdata *GEBdata_ = new GEBdata(ZSFlag, ChamID, sumVFAT);
 
+        int ifake = 0;
         for(int ivfat=0; ivfat<sumVFAT; ivfat++){
-            gem::readout::readVFATdata(inpf, ievent, vfat);
 
+            if (InpType == "Hex") {
+              if(!gem::readout::GEMDataAMCformat::readVFATdata(inpf, ivfat, vfat)) break;
+            } else {
+              if(!gem::readout::GEMDataAMCformat::readVFATdataBinary(inpf, ivfat, vfat)) break;
+            }
+      
             uint8_t   b1010  = (0xf000 & vfat.BC) >> 12;
             uint16_t  BC     = (0x0fff & vfat.BC);
             uint8_t   b1100  = (0xf000 & vfat.EC) >> 12;
@@ -196,9 +253,12 @@ int main(int argc, char** argv)
             uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
             uint16_t  ChipID = (0x0fff & vfat.ChipID);
             uint16_t  CRC    = vfat.crc;
-            uint64_t lsData = vfat.lsData;
-            uint64_t msData = vfat.msData;
+            uint64_t  lsData = vfat.lsData;
+            uint64_t  msData = vfat.msData;
 
+            BX     = vfat.BXfrOH;  
+
+     
             // CRC check
             dataVFAT[11] = vfat.BC;
             dataVFAT[10] = vfat.EC;
@@ -211,25 +271,42 @@ int main(int argc, char** argv)
             dataVFAT[3]  = (0x0000ffff00000000 & vfat.lsData) >> 32;
             dataVFAT[2]  = (0x00000000ffff0000 & vfat.lsData) >> 16;
             dataVFAT[1]  = (0x000000000000ffff & vfat.lsData);
-    
             uint16_t checkedCRC = checkCRC(OKpri);
-            if(OKpri){
-               cout << " vfat.crc " << std::setfill('0') << std::setw(4) << hex << CRC 
-                    << "     crc " << std::setfill('0') << std::setw(4) << checkedCRC << dec << "\n" << endl;
-            }
     
-            VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC);
+            uint32_t ZSFlag24 = ZSFlag;
+            int islot = -1;
+            for (int ibin = 0; ibin < 24; ibin++){
+              if ( (ChipID == gem::readout::GEMslotContents::slot[ibin]) && ((ZSFlag >> (23-ibin)) & 0x1) ) islot = ibin;
+            }//end for
+            bool blockStatus = true;
+            if( (b1010 != 0xa) || (b1100 != 0xc) || (b1110 != 0xe) || (islot < 0) || (islot > 23)){
+              cout << "VFAT headers do not match expectation" << endl;
+              blockStatus = false;
+              eventStatus = false;
+              //gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
+              ifake++;
+            }//end if 1010,1100,1110
+  
+            VFATdata *VFATdata_ = new VFATdata(b1010, BC, b1100, EC, Flag, b1110, ChipID, lsData, msData, CRC, checkedCRC, islot, blockStatus);
             GEBdata_->addVFATData(*VFATdata_);
             delete VFATdata_;
 
             if(OKpri){
-              gem::readout::printVFATdataBits(ievent, vfat);
+              gem::readout::GEMDataAMCformat::printVFATdataBits(ievent, vfat);
+              cout << " islot " << islot << endl;
             }
-        }
 
-        // read Event Chamber Header 
-        gem::readout::readGEBtrailer(inpf, geb);
+        }//end of GEB PayLoad Data
 
+       /*
+        *  GEB Trailers Data level
+        */
+        if (InpType == "Hex") {
+          if(!gem::readout::GEMDataAMCformat::readGEBtrailer(inpf, geb)) break;
+        } else {
+          if(!gem::readout::GEMDataAMCformat::readGEBtrailerBinary(inpf, geb)) break;
+        }//if(OKpri) gem::readout::GEMDataAMCformat::printGEBtrailer(ievent, geb);
+    
         uint16_t OHcrc      = (0xffff000000000000 & geb.trailer) >> 48; 
         uint16_t OHwCount   = (0x0000ffff00000000 & geb.trailer) >> 32; 
         uint16_t ChamStatus = (0x00000000ffff0000 & geb.trailer) >> 16;
@@ -237,7 +314,18 @@ int main(int argc, char** argv)
 
         GEBdata_->setTrailer(OHcrc, OHwCount, ChamStatus, GEBres);
 
-        ev->Build(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+       /*
+        *  GEM Trailers Data level
+        */
+        if (InpType == "Hex") {
+          if(!gem::readout::GEMDataAMCformat::readGEMtr2(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr1(inpf, gem)) break;
+        } else {
+          if(!gem::readout::GEMDataAMCformat::readGEMtr2Binary(inpf, gem)) break;
+          if(!gem::readout::GEMDataAMCformat::readGEMtr1Binary(inpf, gem)) break;
+        }
+        
+        ev->Build(0,0,0,BX,0,0,0,0,0,0,0,0,0,0,0,0,0,0, eventStatus);
         ev->addGEBdata(*GEBdata_);
         GEMtree.Fill();
         ev->Clear();
@@ -252,5 +340,5 @@ int main(int argc, char** argv)
     inpf.close();
     hfile->Write();// Save file with tree
     cout<<"=== hfile->Write()"<<endl;
-	return 0;
+    return 0;
 }

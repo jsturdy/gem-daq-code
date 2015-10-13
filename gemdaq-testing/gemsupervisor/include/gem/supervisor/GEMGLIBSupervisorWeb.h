@@ -57,6 +57,8 @@ namespace gem {
   }
 
   typedef std::shared_ptr<hw::vfat::HwVFAT2 > vfat_shared_ptr;
+  typedef std::shared_ptr<hw::glib::HwGLIB >  glib_shared_ptr;
+  typedef std::shared_ptr<hw::optohybrid::HwOptoHybrid > optohybrid_shared_ptr;
 
   namespace supervisor {
 
@@ -148,6 +150,10 @@ namespace gem {
          *    Dump to disk all data available in GLIB data buffer
          */
         bool readAction(toolbox::task::WorkLoop *wl);
+        /**
+         *    Select all data available in GLIB data buffer
+         */
+        bool selectAction(toolbox::task::WorkLoop *wl);
 
         // State transitions
         /**
@@ -199,7 +205,7 @@ namespace gem {
 
       private:
 
-        log4cplus::Logger gemLogger_;
+        log4cplus::Logger m_gemLogger;
 	
         toolbox::task::WorkLoop *wl_;
 
@@ -212,6 +218,7 @@ namespace gem {
         toolbox::task::ActionSignature *start_signature_;
         toolbox::task::ActionSignature *run_signature_;
         toolbox::task::ActionSignature *read_signature_;
+        toolbox::task::ActionSignature *select_signature_;
 
         toolbox::fsm::FiniteStateMachine fsm_;
 
@@ -220,19 +227,22 @@ namespace gem {
 
         FILE* outputFile;
         uint64_t latency_;
-        bool is_working_, is_initialized_, is_configured_, is_running_;
+        uint64_t deviceVT1_;
+        bool is_working_, is_initialized_,  is_configured_, is_running_;
 
         //supervisor application should not have any hw devices, should only send commands to manager applications
         //temporary fix just to get things working stably, should be using the manager
-        gem::hw::glib::HwGLIB* glibDevice_;
-        gem::hw::optohybrid::HwOptoHybrid* optohybridDevice_;
+        glib_shared_ptr glibDevice_;
+        //gem::hw::glib::HwGLIB* glibDevice_;
+        optohybrid_shared_ptr optohybridDevice_;
+        //gem::hw::optohybrid::HwOptoHybrid* optohybridDevice_;
         //std::vector< gem::hw::vfat::HwVFAT2* > vfatDevice_;
         std::vector<vfat_shared_ptr> vfatDevice_;
         //readout application should be running elsewhere, not tied to supervisor
-        gem::readout::GEMDataParker* gemDataParker;
+        std::shared_ptr<gem::readout::GEMDataParker> gemDataParker;
 
         // Counter
-        int counter_[3];
+        uint32_t counter_[5];
 
         // VFAT Blocks Counter
         int vfat_;

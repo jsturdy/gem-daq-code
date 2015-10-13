@@ -34,7 +34,8 @@
 #include <TTree.h>
 #include <TBranch.h>
 
-#include "dataChecker.cc"
+#include "gem/datachecker/GEMDataChecker.h"
+#include "gem/readout/GEMDataAMCformat.h"
 #include "plotter.cxx"
 
 /**
@@ -46,6 +47,19 @@
 */
 
 using namespace std;
+
+uint16_t gem::readout::GEMslotContents::slot[24] = {
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+  0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,0xfff,
+};
+bool gem::readout::GEMslotContents::isFileRead = false;
+
+//namespace gem {
+//  namespace datachecker{
+//    class GEMDataChecker;
+//  }
+//}
 int main(int argc, char** argv)
 {
     if (argc<3) 
@@ -54,6 +68,8 @@ int main(int argc, char** argv)
         cout << "Usage: <path>/reader inputFile.root outputFile.root" << endl;
         return 0;
     }
+    gem::readout::GEMslotContents::getSlotCfg();
+
     TString ifilename = argv[1];
     TString ofilename = argv[2];
     // read the tree generated with gtc
@@ -70,16 +86,17 @@ int main(int argc, char** argv)
     // create the output file
     TFile *ofile = new TFile(ofilename, "RECREATE");
     //book histograms
-    TH1F* hiVFAT    = new TH1F("VFAT", "Number_VFAT_blocks_per_event", 24,  0., 24. );
-    TH1C* hiChip    = new TH1C("ChipID", "ChipID",         4096, 0x0, 0xfff );
-    TH1C* hi1010    = new TH1C("1010", "Control_Bits_1010", 16, 0x0, 0xf );
-    TH1C* hi1100    = new TH1C("1100", "Control_Bits_1100", 16, 0x0, 0xf );
-    TH1C* hi1110    = new TH1C("1110", "Control_Bits_1110", 16, 0x0, 0xf );
-    TH1C* hiFlag    = new TH1C("Flag"  , "Flag",            16, 0x0, 0xf );
-    TH1C* hiCRC     = new TH1C("CRC",     "CRC",             100, 0x0, 0xffff );
-    TH1C* hiDiffCRC = new TH1C("DiffCRC", "CRC_Diff",    100, 0xffff, 0xffff );
-    TH1C* hiFake    = new TH1C("iFake", "Fake_Events",      100, 0., 100. );
-    TH1F* hiCh128   = new TH1F("Ch128", "Strips",          128, 0., 128. );
+    TH1F* hiVFAT    = new TH1F("VFAT", "Number_VFAT_blocks_per_event",   24,  0., 24. );
+    TH1F* hiVFATsn  = new TH1F("VFATsn", "VFAT_slot_number", 24,  0.,    24. );
+    TH1C* hiChip    = new TH1C("ChipID", "ChipID",         4096, 0x0,    0xfff );
+    TH1C* hi1010    = new TH1C("1010", "Control_Bits_1010",  16, 0x0,    0xf );
+    TH1C* hi1100    = new TH1C("1100", "Control_Bits_1100",  16, 0x0,    0xf );
+    TH1C* hi1110    = new TH1C("1110", "Control_Bits_1110",  16, 0x0,    0xf );
+    TH1C* hiFlag    = new TH1C("Flag"  , "Flag",             16, 0x0,    0xf );
+    TH1C* hiCRC     = new TH1C("CRC",     "CRC",            100, 0x0,    0xffff );
+    TH1C* hiDiffCRC = new TH1C("DiffCRC", "CRC_Diff",       100, 0xffff, 0xffff );
+    TH1C* hiFake    = new TH1C("iFake", "Fake_Events",      100, 0.,     100. );
+    TH1F* hiCh128   = new TH1F("Ch128", "Strips",           128, 0.,     128. );
     TH2C* hi2DCRC   = new TH2C("CRC1_vs_CRC2", "CRC1_vs_CRC2", 100, 0x0000, 0xffff, 100, 0x0000, 0xffff);
     //hiVFAT->SetFillColor(48);
     //
@@ -107,8 +124,8 @@ int main(int argc, char** argv)
             // loop over vfats
             for (Int_t k = 0; k < v_vfat.size(); k++)
             {
-                if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) )
-                    {
+                //if ( (v_vfat.at(k).b1010() == 0xa) && (v_vfat.at(k).b1100() == 0xc) && (v_vfat.at(k).b1110() == 0xe) )
+                //    {
                         // fill the control bits histograms
                         hi1010->Fill(v_vfat.at(k).b1010());
                         hi1100->Fill(v_vfat.at(k).b1100());
@@ -116,6 +133,10 @@ int main(int argc, char** argv)
                         // fill Flag and chip id histograms
                         hiFlag->Fill(v_vfat.at(k).Flag());
                         hiChip->Fill(v_vfat.at(k).ChipID());
+                        // calculate and fill VFAT slot number
+                        uint32_t t_chipID = static_cast<uint32_t>(v_vfat.at(k).ChipID());
+                        int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
+                        hiVFATsn->Fill(sn);
                         // calculate and fill the crc and crc_diff
                         hiCRC->Fill(v_vfat.at(k).crc());
                         uint16_t dataVFAT[11];
@@ -136,7 +157,9 @@ int main(int argc, char** argv)
                         dataVFAT[3]  = (0x0000ffff00000000 & v_vfat.at(k).lsData()) >> 32;
                         dataVFAT[2]  = (0x00000000ffff0000 & v_vfat.at(k).lsData()) >> 16;
                         dataVFAT[1]  = (0x000000000000ffff & v_vfat.at(k).lsData());
-                        dataChecker *dc = new dataChecker();
+                        //GEMDataChecker *dc = new GEMDataChecker();
+                        gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker::GEMDataChecker();
+                        //uint16_t checkedCRC = dc->gem::datachecker::GEMDataChecker::checkCRC(dataVFAT, 0);
                         uint16_t checkedCRC = dc->checkCRC(dataVFAT, 0);
                         std::cout << "read  crc            " << std::hex << v_vfat.at(k).crc() << std::endl;
                         std::cout << "check crc            " << std::hex << checkedCRC << std::endl;
@@ -158,9 +181,9 @@ int main(int argc, char** argv)
                           if(!chan0xf) hiCh128->Fill(chan);
                           }
                         }
-                    } else {
-                        ifake++;
-                    }
+                    //} else {
+                    //    ifake++;
+                    //}
             }
         }
         hiVFAT->Fill(nVFAT);

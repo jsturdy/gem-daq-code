@@ -16,3 +16,5 @@ lib
 *.csh
 src/linux
 *.dat
+*.txt
+work
