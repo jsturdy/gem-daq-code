@@ -25,13 +25,21 @@ namespace gem {
                             std::string const& outFileName, 
                             std::string const& errFileName, 
                             std::string const& outputType
-                           );
+                            );
       ~GEMDataParker() {};
 
-      uint64_t* dumpData   ( uint8_t const& mask );
-      void dumpDataToDisk  ( uint8_t const& link );
-      int  getGLIBData     ( uint8_t const& link );
-
+      uint32_t* dumpData   ( uint8_t const& mask );
+      uint32_t* selectData ( uint32_t Counter[5]
+                           );
+      uint32_t* getGLIBData( uint8_t const& link,
+                             uint32_t Counter[5]
+                           );
+      uint32_t* GEMEventMaker( uint32_t Counter[5]
+                             );
+      void GEMevSelector   ( const  uint32_t& ES,
+                             int MaxEvent = 0,
+                             int MaxErr   = 0
+                           );
       void GEMfillHeaders  ( uint32_t const& BC,
                              uint32_t const& BX,
                              gem::readout::GEMDataAMCformat::GEMData& gem,
@@ -70,7 +78,7 @@ namespace gem {
        *   [1] Events Counter
        *   [2] VFATs counter per last event
        */
-      uint64_t counter_[3];
+      uint32_t counter_[5];
 
       // VFAT's Blocks Counter     
       uint64_t vfat_;

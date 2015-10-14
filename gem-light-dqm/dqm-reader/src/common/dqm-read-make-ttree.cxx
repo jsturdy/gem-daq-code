@@ -158,7 +158,7 @@ TFile* thldread(Int_t get=0)
       uint8_t   b1110  = (0xf000 & vfat.ChipID) >> 12;
       uint16_t  ChipID = (0x0fff & vfat.ChipID);
       uint16_t  CRC    = vfat.crc;
-      uint16_t  BX     = vfat.BXfrOH;  
+      uint32_t  BX     = vfat.BXfrOH;  
 
       uint16_t  BC     = (0x0fff & vfat.BC);
       uint8_t   EC     = (0x0fff & vfat.EC) >> 4;
