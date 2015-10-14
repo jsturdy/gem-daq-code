@@ -196,7 +196,7 @@ TFile* thldread(Int_t get=0)
   TFile* hfile = NULL;
   hfile = new TFile(filename,"RECREATE","Threshold Scan ROOT file with histograms");
 
-  TH1F* hiVFAT = new TH1F("VFAT", "Number VFAT blocks per event", 100,  0., 100. );
+  TH1F* hiVFAT = new TH1F("VFAT", "Number VFAT blocks per event", 24, 0, 24 );
   hiVFAT->SetFillColor(48);
   hiVFAT->SetStats();
   hiVFAT->GetXaxis()->SetTitle("Number of VFAT Blocks");
