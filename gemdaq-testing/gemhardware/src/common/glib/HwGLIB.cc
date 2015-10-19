@@ -580,7 +580,7 @@ uint32_t gem::hw::glib::HwGLIB::getFIFOOccupancy(uint8_t const& gtx)
 uint32_t gem::hw::glib::HwGLIB::getFIFOVFATBlockOccupancy(uint8_t const& gtx)
 {
   //what to return when the occupancy is not a full VFAT block?
-  return getFIFOOccupancy(link)/7;
+  return getFIFOOccupancy(gtx)/7;
 }
 
 bool gem::hw::glib::HwGLIB::hasTrackingData(uint8_t const& gtx)

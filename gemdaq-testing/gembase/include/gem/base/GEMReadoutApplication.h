@@ -11,9 +11,10 @@ namespace gem {
       {
       public:
         //XDAQ_INSTANTIATOR();
+        const int I2O_READOUT_NOTIFY=0x84;
+        const int I2O_READOUT_CONFIRM=0x85;
 	
-        GEMReadoutApplication(xdaq::ApplicationStub *stub)
-          throw (xdaq::exception::Exception);
+        GEMReadoutApplication(xdaq::ApplicationStub *stub);
 	
       protected:
 
@@ -23,7 +24,7 @@ namespace gem {
 
         virtual void init();
 
-        log4cplus::Logger gemReadoutLogger_;
+        log4cplus::Logger m_gemLogger;
 
         virtual void Default(xgi::Input *in, xgi::Output *out)
           throw (xgi::exception::Exception);
