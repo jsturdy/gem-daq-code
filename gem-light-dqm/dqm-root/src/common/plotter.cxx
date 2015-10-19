@@ -15,6 +15,7 @@
 #include "TLine.h"
 #include "TCanvas.h"
 #include "TPostScript.h"
+#include "THStack.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
@@ -348,11 +349,54 @@ void printHistograms(TDirectory* dir, TString type, TString prefix="")
       if (!cl->InheritsFrom("TH1")) continue;
       TH1 *h = (TH1*)key->ReadObj();
       TCanvas *c = newCanvas();
-      h->Draw();
+      h->Draw("colz");
       TString name =  h->GetTitle();
       if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
       c->Print(prefix+name+"."+type,type);
       delete c;
+  }
+}
+void retrieveHistograms(TDirectory* dir, vector<TH1*>& v)
+{
+  dir->cd();
+  TIter next(gDirectory->GetListOfKeys());
+  TKey *key;
+  while ((key = (TKey*)next())) 
+  {
+      TClass *cl = gROOT->GetClass(key->GetClassName());
+      if (!cl->InheritsFrom("TH1")) continue;
+      TH1 *h = (TH1*)key->ReadObj();
+      h->AddDirectory(kFALSE);
+      v.push_back(h);
+  }
+  //cout << "[retrieveHistograms]: Size of v : " << v.size() << endl;
+}
+
+void drawStack(TDirectory* dir1, TDirectory* dir2, int cl1, int cl2, TString type, TString prefix="")
+{
+  vector<TH1*> v1;
+  vector<TH1*> v2;
+  retrieveHistograms(dir1, v1);
+  //cout << "Size of v1 : " << v1.size() << endl;
+  retrieveHistograms(dir2, v2);
+  //cout << "Size of v2 : " << v2.size() << endl;
+  for (int i = 0; i < v1.size(); i++){
+    TH1* h_1 = v1.at(i);
+    h_1->SetLineColor(cl1);
+    h_1->SetFillColor(cl1);
+    TH1* h_2 = v2.at(i);
+    h_2->SetLineColor(cl2);
+    h_2->SetFillColor(cl2);
+    TString name = h_1->GetTitle();
+    THStack* hs = new THStack("hs", name);
+    hs->Add(h_1);
+    hs->Add(h_2);
+    if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
+    TCanvas *c = newCanvas();
+    hs->Draw();
+    c->Print(prefix+name+"."+type,type);
+    delete c;
+    delete hs;
   }
 }
 
