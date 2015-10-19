@@ -1,5 +1,5 @@
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 #define NVFAT 24
 #include <iomanip> 
