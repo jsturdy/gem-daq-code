@@ -25,6 +25,7 @@ parser.add_option("-e", "--enable", type="string", dest="enabledChips",
 		  help="list of chips to enable, comma separated", metavar="enabledChips", default=[])
 (options, args) = parser.parse_args()
 
+chips = []
 if options.enabledChips:
 	chips = [int(n) for n in options.enabledChips.split(",")] 
 	print "chips", chips
@@ -117,8 +118,12 @@ if options.sleepAll:
 for chip in chips:
         print "enabling chip %d"%(chip)
         setRunMode(optohybrid, chip, True)
-
  
+controlRegs = {}
+for control in range(4):
+        controls.append(readAllVFATs(glib, 0xf0000000, "ContReg%d"%(control), options.debug))
+        controlRegs["ctrl%d"%control] = dict(map(lambda chip: (chip, controls[control][chip]&0xff), range(0,24)))
+
 print "%6s  %6s  %02s  %02s  %02s  %02s"%("chip", "ID", "ctrl0", "ctrl1", "ctrl2", "ctrl3")
 for chip in chipids.keys():
 	if (int(chip)%8==0):
