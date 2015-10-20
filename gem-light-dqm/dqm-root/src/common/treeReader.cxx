@@ -301,10 +301,10 @@ class gemTreeReader {
       }
       ofile->Write();
       //drawStack(dir[1], dir[2], 4, 2, "png", "hist/stacks/");
-      TString prefix[3] = {"hist/all_events/", "hist/good_events/", "hist/bad_events/"};
-      for (int id = 0; id < 3; id++){
-        printHistograms(dir[id],"png",prefix[id]);
-      }
+      //TString prefix[3] = {"hist/all_events/", "hist/good_events/", "hist/bad_events/"};
+      //for (int id = 0; id < 3; id++){
+      //  printHistograms(dir[id],"png",prefix[id]);
+      //}
     }
 
     void fillVFATHistograms(VFATdata *m_vfat, TH1F* m_hiVFATsn, TH1F* m_hiCh128, TH1F* m_hiCh_notfired, TH1I* m_hiChip, TH1I* m_hi1010, TH1I* m_hi1100, TH1I* m_hi1110, TH1I* m_hiFlag, TH1I* m_hiCRC, TH1I* m_hiDiffCRC, TH2I* m_hi2DCRC, TH2I* m_hi2DCRCperVFAT[], TH1F* m_hiCh128chipFired[], TH2I* m_hiBeamProfile, int & firedchannels, int & notfiredchannels)
