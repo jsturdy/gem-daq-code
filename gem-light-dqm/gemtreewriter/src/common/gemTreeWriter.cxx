@@ -122,6 +122,7 @@ class gemTreeWriter {
           std::cout << "[gemTreeWriter]: File " << ifile << " is bad" << std::endl;
           break;
         }
+        //if ((DEBUG) && (ievent > 10)) break;
         if (DEBUG) std::cout << "[gemTreeWriter]: Processing event " << ievent << std::endl;
         eventStatus = true;
         /*
