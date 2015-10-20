@@ -37,18 +37,18 @@ class logger{
       myfile << "Number of bad VFAT blocks      : " << nBadVFATBlocks_ << "\n" ;
       myfile << "Average N blocks per event     : " << averageBlockPerEvent_ << "\n" ;
       myfile << "Average N bad blocks per event : " << averageBadBlockPerBadEvent_ << "\n" ;
-      //std::string tmp = "{ ";
-      //for (int it = 0; it < (badEventsList_.size() - 1); it++){
-      //  std::stringstream ss;
-      //  ss << badEventsList_.at(it);
-      //  tmp += ss.str();
-      //  tmp += ", ";
-      //}
-      //std::stringstream ss;
-      //ss << badEventsList_.back();
-      //tmp += ss.str();
-      //tmp += " }";
-      //myfile << "List of the bad events : \n" << tmp << "\n" ;
+      std::string tmp = "{ ";
+      for (int it = 0; it < (badEventsList_.size() - 1); it++){
+        std::stringstream ss;
+        ss << badEventsList_.at(it);
+        tmp += ss.str();
+        tmp += ", ";
+      }
+      std::stringstream ss;
+      if (!badEventsList_.empty()) {ss << badEventsList_.back();}
+      tmp += ss.str();
+      tmp += " }";
+      myfile << "List of the bad events : \n" << tmp << "\n" ;
       myfile.close();
     }
     ~logger(){}
