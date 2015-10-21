@@ -5,7 +5,7 @@
  */
 
 #include "GEMClusterContainer.h"
-#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
+//#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"      // need to substitute digi with our container
 
 class GEMCluster;
 class GEMClusterizer{

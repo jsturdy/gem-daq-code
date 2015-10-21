@@ -8,9 +8,9 @@
  *  \author M. Maggi -- INFN Bari 
  */
 
-#include "DataFormats/TrackingRecHit/interface/RecHit2DLocalPos.h"
-#include "DataFormats/MuonDetId/interface/GEMDetId.h"
-
+//#include "DataFormats/TrackingRecHit/interface/RecHit2DLocalPos.h"
+//#include "DataFormats/MuonDetId/interface/GEMDetId.h"
+// should simplify the code for the light DQM
 
 class GEMRecHit : public RecHit2DLocalPos {
  public:

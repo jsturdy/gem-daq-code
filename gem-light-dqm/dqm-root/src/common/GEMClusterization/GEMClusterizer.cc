@@ -1,6 +1,6 @@
-#include "GEMClusterizer.h"
-#include "GEMCluster.h"
-#include "GEMClusterContainer.h"
+#include "GEMClusterization/GEMClusterizer.h"
+#include "GEMClusterization/GEMCluster.h"
+#include "GEMClusterization/GEMClusterContainer.h"
 
 
 GEMClusterizer::GEMClusterizer()

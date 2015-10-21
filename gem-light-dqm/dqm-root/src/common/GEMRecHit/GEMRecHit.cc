@@ -5,7 +5,7 @@
  */
 
 
-#include "DataFormats/GEMRecHit/interface/GEMRecHit.h"
+#include "GEMRecHit/GEMRecHit.h"
 
 
 GEMRecHit::GEMRecHit(const GEMDetId& gemId, int bx) :  RecHit2DLocalPos(gemId),
