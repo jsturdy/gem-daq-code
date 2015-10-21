@@ -193,6 +193,8 @@ namespace gem {
           xdata::String          outFileName;
           xdata::String          outputType;
 
+          xdata::Integer         ohGTXLink;
+
           xdata::Vector<xdata::String>  deviceName;
           xdata::Vector<xdata::Integer> deviceNum;
 
@@ -239,7 +241,7 @@ namespace gem {
         std::shared_ptr<gem::readout::GEMDataParker> gemDataParker;
 
         // Counter
-        uint32_t counter_[5];
+        uint32_t m_counter[6];
 
         // VFAT Blocks Counter
         int vfat_;
