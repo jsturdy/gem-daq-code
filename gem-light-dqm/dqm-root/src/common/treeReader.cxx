@@ -79,9 +79,20 @@ class gemTreeReader {
     void createHistograms()
     {
       std::string path = std::getenv("BUILD_HOME");
-      path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips0-1.csv";
-      if (DEBUG) std::cout << "[gemTreeReader]: path to maps : " << path << std::endl; 
-      for (int im = 0; im < NVFAT; im++){maps[im] = path;}
+      for (int im = 0; im < NVFAT; im++){
+        if (im < 2) {
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips0-1.csv";
+        } else if (im < 16) {
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips2-15.csv";
+        } else if (im < 18) {
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips16-17.csv";
+        } else {
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips18-23.csv";
+        }
+        if (DEBUG) std::cout << "[gemTreeReader]: path to maps : " << path << std::endl; 
+        maps[im] = path;
+        path = std::getenv("BUILD_HOME");
+      }
       for (int ivm = 0; ivm < NVFAT; ivm++) this->readMap(ivm);
       //this->printMaps();
       this->fillHistograms();
