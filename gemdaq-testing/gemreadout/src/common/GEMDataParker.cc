@@ -237,7 +237,7 @@ uint32_t* gem::readout::GEMDataParker::getGLIBData(uint8_t const& link, uint32_t
 }
 
 
-uint32_t* gem::readout::GEMDataParker::selectData(uint32_t Counter[5])
+uint32_t* gem::readout::GEMDataParker::selectData(uint32_t Counter[6])
 {
   uint32_t *point = &Counter[0]; 
 
@@ -253,7 +253,7 @@ uint32_t* gem::readout::GEMDataParker::selectData(uint32_t Counter[5])
 }
 
 
-uint32_t* gem::readout::GEMDataParker::GEMEventMaker(uint32_t Counter[5])
+uint32_t* gem::readout::GEMDataParker::GEMEventMaker(uint32_t Counter[6])
 {
   uint32_t *point = &Counter[0];
 
@@ -288,7 +288,7 @@ uint32_t* gem::readout::GEMDataParker::GEMEventMaker(uint32_t Counter[5])
   for (int iQue = 0; iQue < 7; iQue++){
     datafront = dataque.front();
     DEBUG(" ::GEMEventMaker iQue " << iQue << " 0x"
-         << std::setfill('0') << std::setw(8) << std::hex << datafront << std::dec );
+          << std::setfill('0') << std::setw(8) << std::hex << datafront << std::dec );
     //this never seems to get reset? maybe iQue%7 to read the words after the first block?
     if ((iQue%7) == 5 ) {
       dat41   = ((0xffff0000 & datafront) >> 16 );
@@ -380,37 +380,37 @@ uint32_t* gem::readout::GEMDataParker::GEMEventMaker(uint32_t Counter[5])
           " isFirst " << isFirst << " event " << event_);
   } else { 
     isFirst = true;
-
+    
     if ( vfats.size() != 0 || erros.size() != 0 ) {
       numES.erase(ES);
       numES.insert(std::pair<uint32_t, uint32_t>(ES,vfats.size()));
       errES.erase(ES);
       errES.insert(std::pair<uint32_t, uint32_t>(ES,erros.size()));
-
+      
       DEBUG(" ::GEMEventMaker isFirst vftas.size " << vfats.size() << " erros.size " << erros.size() <<
             " numES " << numES.find(ES)->second << " errES " << errES.find(ES)->second << " isFirst " << isFirst << " event " << event_);
-
+      
       DEBUG(" ::GEMEventMaker isFirst GEMevSelector ");
       gem::readout::GEMDataParker::GEMevSelector(ES, MaxEvent, MaxErr);
     } 
-
+    
     event_++;
-
+    
     // VFATS dimensions have limits
     vfats.reserve(MaxVFATS);
     erros.reserve(MaxERRS);
-
+    
     ESexp = ES;
-
+    
     counterVFATs = 0;
     counterVFAT.erase(ES);
     counterVFAT.insert(std::pair<uint32_t, int>(ES,0));
-
+    
     numES.erase(ES);
     numES.insert(std::pair<uint32_t, uint32_t>(ES,0));
     errES.erase(ES);
     errES.insert(std::pair<uint32_t, uint32_t>(ES,0));
-
+    
     ZSFlag = 0;
   }
 
@@ -418,11 +418,11 @@ uint32_t* gem::readout::GEMDataParker::GEMEventMaker(uint32_t Counter[5])
   counterVFATs++;
   counterVFAT.erase(ES);
   counterVFAT.insert(std::pair<uint32_t, int>(ES,counterVFATs));
-
+  
   std::map<uint32_t, uint32_t>::iterator it;// pay load events 
   std::map<uint32_t, uint32_t>::iterator ir;// errors events
   if (islot < 0 || islot > 23) {
-    ir=errES.find(ES);
+    ir = errES.find(ES);
     if (ir != errES.end()) {
       // local event calculator inside one buffer, ES based 
       MaxErr = errES.find(ES)->second;
@@ -433,7 +433,8 @@ uint32_t* gem::readout::GEMDataParker::GEMEventMaker(uint32_t Counter[5])
             " rvent_ " << rvent_ );
     }
     // islot out of [0-23]
-    if ( int(erros.size()) <MaxERRS ) erros.push_back(vfat);
+    if ( int(erros.size()) < MaxERRS )
+      erros.push_back(vfat);
     DEBUG(" ::GEMEventMaker warning !!! islot is undefined " << islot << " erros.size " << int(erros.size()) );
   } else {
     it = numES.find(ES);
@@ -449,23 +450,23 @@ uint32_t* gem::readout::GEMDataParker::GEMEventMaker(uint32_t Counter[5])
     /*
      * VFATs Pay Load
      */
-    if ( int(vfats.size()) <= MaxVFATS ) vfats.push_back(vfat);
+    if ( int(vfats.size()) <= MaxVFATS )
+      vfats.push_back(vfat);
     DEBUG(" ::GEMEventMaker event_ " << event_ << " vfats.size " << vfats.size() << std::hex << " ES 0x" << ES << std::dec );
-
   }//end of event selection 
-
+  
   if (event_%kUPDATE == 0 &&  event_ != 0) {
     DEBUG(" ::GEMEventMaker END numES " << numES.find(ES)->second << " errES " << errES.find(ES)->second << 
-  	 " vfats.size " << vfats.size() << " erros.size " << erros.size() << " event_ " << event_ );
+          " vfats.size " << vfats.size() << " erros.size " << erros.size() << " event_ " << event_ );
   }
-
+  
   Counter[0] = vfat_;
   Counter[1] = event_;
   Counter[2] = numES.find(ES)->second + errES.find(ES)->second;
   Counter[3] = numES.find(ES)->second;
   Counter[4] = errES.find(ES)->second;
 
-  return point;
+return point;
 }
 
 void gem::readout::GEMDataParker::GEMevSelector(const  uint32_t& ES, int MaxEvent, int MaxErr)
