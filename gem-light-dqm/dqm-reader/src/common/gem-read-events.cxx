@@ -232,28 +232,28 @@ TFile* thldread(Int_t get=0)
   hiEC->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hiEC->GetYaxis()->CenterTitle();
  
-  TH1F* hi1010 = new TH1F("1010", "Control Bits 1010", 16, 0x0, 0xf );
+  TH1F* hi1010 = new TH1F("1010", "Control Bits 1010", 15, 0x0, 0xf );
   hi1010->SetFillColor(48);
   hi1010->GetXaxis()->SetTitle("1010 marker, max 0xf");
   hi1010->GetXaxis()->CenterTitle();
   hi1010->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1010->GetYaxis()->CenterTitle();
 
-  TH1F* hi1100 = new TH1F("1100", "Control Bits 1100", 16, 0x0, 0xf );
+  TH1F* hi1100 = new TH1F("1100", "Control Bits 1100", 15, 0x0, 0xf );
   hi1100->SetFillColor(48);
   hi1100->GetXaxis()->SetTitle("1100 marker value, max 0xf");
   hi1100->GetXaxis()->CenterTitle();
   hi1100->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1100->GetYaxis()->CenterTitle();
 
-  TH1F* hi1110 = new TH1F("1110", "Control Bits 1110", 16, 0x0, 0xf );
+  TH1F* hi1110 = new TH1F("1110", "Control Bits 1110", 15, 0x0, 0xf );
   hi1110->SetFillColor(48);
   hi1110->GetXaxis()->SetTitle("1110 marker value, max 0xf");
   hi1110->GetXaxis()->CenterTitle();
   hi1110->GetYaxis()->SetTitle("Number of VFAT Blocks");
   hi1110->GetYaxis()->CenterTitle();
 
-  TH1F* hiFlag = new TH1F("Flag"  , "Flag",            16, 0x0, 0xf );
+  TH1F* hiFlag = new TH1F("Flag"  , "Flag",            15, 0x0, 0xf );
   hiFlag->SetFillColor(48);
   hiFlag->GetXaxis()->SetTitle("Flag marker value, max 0xf");
   hiFlag->GetXaxis()->CenterTitle();

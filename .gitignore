@@ -18,6 +18,7 @@
 *.sh
 *.csh
 *.dat
+*.root
 *.err
 *.pyc
 *.txt
