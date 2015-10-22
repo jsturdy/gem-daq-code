@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdint>
 #include <bitset>
+#include <memory>
 
 #include <TFile.h>
 #include <TNtuple.h>
@@ -78,7 +79,7 @@ class gemTreeWriter {
   public:
     gemTreeWriter(){}
     ~gemTreeWriter(){}
-    void makeTree(std::string ifile)
+    void makeTree(std::string ifile, std::string slot_file_)
     {
       std::string tmp;
       tmp = ifile.substr(ifile.size()-4, ifile.size());
@@ -91,9 +92,10 @@ class gemTreeWriter {
       ofilename = tmp;
       if (DEBUG) std::cout << "[gemTreeWriter]: File names resolved" << std::endl;
       
-      this->makeTree(ifile, tmp);
+      slot_file = slot_file_;
+      this->makeTree(ifile, tmp, slot_file);
     }
-    void makeTree(std::string ifile, std::string ofile)
+    void makeTree(std::string ifile, std::string ofile, std::string slot_file_)
     {
       if (DEBUG) std::cout << "[gemTreeWriter]: Entering makeTree(str,str)" << std::endl;
       TFile *hfile = new TFile(ofile.c_str(),"RECREATE","Threshold Scan ROOT file with histograms");
@@ -191,8 +193,9 @@ class gemTreeWriter {
           uint16_t CRC_calc = dc->checkCRC(vfatBlockWords, 0);
           delete dc;
           uint32_t t_chipID = static_cast<uint32_t>(ChipID);
-          gem::readout::GEMslotContents::initSlots();
-          int sn = gem::readout::GEMslotContents::GEBslotIndex(t_chipID);
+    	  std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents(slot_file));
+          //gem::readout::GEMslotContents::initSlots();
+          int sn = slotInfo_->GEBslotIndex(t_chipID);
           bool blockStatus = checkBlock(b1010, b1100, b1110, sn, CRC, CRC_calc);
           if (DEBUG) std::cout << "[gemTreeWriter]: Control bit b1010 " << std::bitset<8>(b1010) <<  std::endl;
           if (DEBUG) std::cout << "[gemTreeWriter]: BC                " << std::bitset<16>(BC) <<  std::endl;
@@ -263,6 +266,7 @@ class gemTreeWriter {
     std::string getOutputFileName(){return ofilename;}
   private:
     std::string ofilename;
+    std::string slot_file;
     int ievent;
     std::string InpType;
     gem::readout::GEMDataAMCformat::GEMData   gem;
