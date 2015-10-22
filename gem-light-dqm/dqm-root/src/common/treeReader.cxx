@@ -42,6 +42,10 @@
 
 #include "gem/datachecker/GEMDataChecker.h"
 #include "gem/readout/GEMslotContents.h"
+#include "GEMClusterization/GEMStrip.h"
+#include "GEMClusterization/GEMStripCollection.h"
+#include "GEMClusterization/GEMClusterContainer.h"
+#include "GEMClusterization/GEMClusterizer.h"
 #include "plotter.cxx"
 #include "logger.cxx"
 
@@ -102,9 +106,10 @@ class gemTreeReader {
     TFile *ofile;
     std::string ofilename;
 
-    //std::vector<std::pair<int,int>> strip_maps[NVFAT];
+  //std::vector<std::pair<int,int>> strip_maps[NVFAT];
     std::map<int,int> strip_maps[NVFAT];
     std::string maps[NVFAT];
+    std::map<int, GEMStripCollection> allstrips;
 
     TH1F* hiVFAT                     [3]; // Number of VFATs in event
     TH1F* hiVFATsn                   [3]; // VFAT slot number distribution
@@ -127,6 +132,7 @@ class gemTreeReader {
     TH1F* hiVFATfired_perevent[3][NVFAT];
     TH1F* hiCh128chipFired    [3][NVFAT];
     TH2I* hi2DCRCperVFAT      [3][NVFAT];
+    TH1I* hiClusterMult              [3];
     TH1I* hiClusterSize              [3];
     TH2I* hiBeamProfile              [3];
 
@@ -167,6 +173,7 @@ class gemTreeReader {
         hiCh_notfired  [i] = new TH1F((dirname[i]+"_Ch_notfired").c_str(), "Strips",          128, 0., 128. );
         hiCh128        [i] = new TH1F((dirname[i]+"_Ch128").c_str(), "Strips",          128, 0., 128. );
         hi2DCRC        [i] = new TH2I((dirname[i]+"_CRC1_vs_CRC2").c_str(), "CRC1 vs CRC2", 100, 0x0000, 0xffff, 100, 0x0000, 0xffff);
+        hiClusterMult  [i] = new TH1I((dirname[i]+"_ClusterMult").c_str(), "Cluster multiplicity", 384,  0, 384 );
         hiClusterSize  [i] = new TH1I((dirname[i]+"_ClusterSize").c_str(), "Cluster size", 384,  0, 384 );
         hiBeamProfile  [i] = new TH2I((dirname[i]+"_BeamProfile").c_str(), "Beam Profile", 8, 0, 8, 384, 0, 384);
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Main histograms ["<<i<<"] created" << std::endl;   
@@ -205,10 +212,12 @@ class gemTreeReader {
       //std::string run_ = tmp_.substr(16, tmp_.size()-4);
       logger* logger_ = new logger(tmp_,run_);
       // loop over tree entries
-      for (Int_t i = 0; i < nentries; i++)
+      for (Int_t i = 0; i < 30000; i++)
+      //for (Int_t i = 0; i < nentries; i++)
       {
         //if ((DEBUG) && (i>10)) break;
         if (DEBUG) std::cout << "[gemTreeReader]: Processing event " << i << std::endl;
+	std::cout << "[gemTreeReader]: Processing event " << i << std::endl;
         // clear number of VFATs
         int nVFAT[3] = {0,0,0};
         int nBadVFAT[3] = {0,0,0};
@@ -283,13 +292,13 @@ class gemTreeReader {
           }// end of loop over VFATs
         }// end of loop over GEBs
         dir[0]->cd();
-        this->fillEventHistograms(BX, BC, nVFAT[0], nBadVFAT[0], nGoodVFAT[0], firedchannels[0], notfiredchannels[0], hiDiffBXandBC[0], hiRatioBXandBC[0], hiVFAT[0], hiFake[0], hiSignal[0], hichfired[0], hichnotfired[0], hiVFATfired_perevent[0], vfatId[0]);
+        this->fillEventHistograms(BX, BC, nVFAT[0], nBadVFAT[0], nGoodVFAT[0], firedchannels[0], notfiredchannels[0], hiDiffBXandBC[0], hiRatioBXandBC[0], hiVFAT[0], hiFake[0], hiSignal[0], hichfired[0], hichnotfired[0], hiVFATfired_perevent[0], vfatId[0], hiClusterMult[0], hiClusterSize[0]);
         if (eventIsOK){
           dir[1]->cd();
-          this->fillEventHistograms(BX, BC, nVFAT[1], nBadVFAT[1], nGoodVFAT[1], firedchannels[1], notfiredchannels[1], hiDiffBXandBC[1], hiRatioBXandBC[1], hiVFAT[1], hiFake[1], hiSignal[1], hichfired[1], hichnotfired[1], hiVFATfired_perevent[1], vfatId[1]);
+          this->fillEventHistograms(BX, BC, nVFAT[1], nBadVFAT[1], nGoodVFAT[1], firedchannels[1], notfiredchannels[1], hiDiffBXandBC[1], hiRatioBXandBC[1], hiVFAT[1], hiFake[1], hiSignal[1], hichfired[1], hichnotfired[1], hiVFATfired_perevent[1], vfatId[1], hiClusterMult[1], hiClusterSize[1]);
         } else {
           dir[2]->cd();
-          this->fillEventHistograms(BX, BC, nVFAT[2], nBadVFAT[2], nGoodVFAT[2], firedchannels[2], notfiredchannels[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiVFAT[2], hiFake[2], hiSignal[2], hichfired[2], hichnotfired[2], hiVFATfired_perevent[2], vfatId[2]);
+          this->fillEventHistograms(BX, BC, nVFAT[2], nBadVFAT[2], nGoodVFAT[2], firedchannels[2], notfiredchannels[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiVFAT[2], hiFake[2], hiSignal[2], hichfired[2], hichnotfired[2], hiVFATfired_perevent[2], vfatId[2], hiClusterMult[2], hiClusterSize[2]);
         }
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Event histograms filled for event  " << i << std::endl;   
         logger_->addEvent(i,eventIsOK,nVFAT[0],nGoodVFAT[0],nBadVFAT[0]);
@@ -318,7 +327,10 @@ class gemTreeReader {
       //}
     }
 
-    void fillVFATHistograms(VFATdata *m_vfat, TH1F* m_hiVFATsn, TH1F* m_hiCh128, TH1F* m_hiCh_notfired, TH1I* m_hiChip, TH1I* m_hi1010, TH1I* m_hi1100, TH1I* m_hi1110, TH1I* m_hiFlag, TH1I* m_hiCRC, TH1I* m_hiDiffCRC, TH2I* m_hi2DCRC, TH2I* m_hi2DCRCperVFAT[], TH1F* m_hiCh128chipFired[], TH2I* m_hiBeamProfile, int & firedchannels, int & notfiredchannels)
+  void fillVFATHistograms(VFATdata *m_vfat, TH1F* m_hiVFATsn, TH1F* m_hiCh128, TH1F* m_hiCh_notfired, TH1I* m_hiChip, TH1I* m_hi1010, TH1I* m_hi1100, 
+			  TH1I* m_hi1110, TH1I* m_hiFlag, TH1I* m_hiCRC, TH1I* m_hiDiffCRC, TH2I* m_hi2DCRC, TH2I* m_hi2DCRCperVFAT[], 
+	                  TH1F* m_hiCh128chipFired[], TH2I* m_hiBeamProfile, int & firedchannels, 
+			  int & notfiredchannels)
     {
       // fill the control bits histograms
       m_hi1010->Fill(m_vfat->b1010());
@@ -366,6 +378,7 @@ class gemTreeReader {
           }
         }
       }// end of loop over channels 
+      // strip container mapped for eta partitions...
 
       for(int m=0; m < NVFAT; m++){
         if(sn_ == m){
@@ -381,6 +394,14 @@ class gemTreeReader {
                 m_hiCh128chipFired[m]->Fill(chan);
                 int m_i = (int) m_vfat->SlotNumber()%8;
                 int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + ((int) m_vfat->SlotNumber()/8)*128;
+		            if (allstrips.find(m_i) == allstrips.end()){
+                  std::cout << "allstrips.find(m_i) == allstrips.end() 64" << std::endl;
+		              GEMStripCollection strips;
+		              allstrips[m_i]=strips;
+		            }
+		            // bx set to 0...
+		            GEMStrip s(m_j,0);
+		            allstrips[m_i].insert(s);
                 if (DEBUG) std::cout << "[gemTreeReader]: Beam profile x : " << m_i << " Beam profile y : " << m_j <<  std::endl;
                 m_hiBeamProfile->Fill(m_i,m_j);
               }
@@ -390,15 +411,24 @@ class gemTreeReader {
                 m_hiCh128chipFired[m]->Fill(chan);
                 int m_i = (int) m_vfat->SlotNumber()%8;
                 int m_j = strip_maps[m_vfat->SlotNumber()].find((chan-1))->second + ((int) m_vfat->SlotNumber()/8)*128;
+		            if (allstrips.find(m_i) == allstrips.end()){
+                  std::cout << "allstrips.find(m_i) == allstrips.end() 128" << std::endl;
+		              GEMStripCollection strips;
+		              allstrips[m_i]=strips;
+		            }
+		            // bx set to 0...
+		            GEMStrip s(m_j,0);
+		            allstrips[m_i].insert(s);
                 if (DEBUG) std::cout << "[gemTreeReader]: Beam profile x : " << m_i << " Beam profile y : " << m_j <<  std::endl;
+                std::cout << "[gemTreeReader]: Beam profile x : " << m_i << " Beam profile y : " << m_j <<  std::endl;
                 m_hiBeamProfile->Fill(m_i,m_j);
               }
             }
           }
         } 
-      }
+      } // end of VFAT loop
     }
-    void fillEventHistograms(const int& m_BX, const int& m_BC, const int & m_nVFAT, const int & m_nBadVFAT, const int & m_nGoodVFAT, const int & m_firedchannels, const int& m_notfiredchannels, TH1I* m_hiDiffBXandBC, TH1I* m_hiRatioBXandBC, TH1F* m_hiVFAT, TH1I* m_hiFake, TH1I* m_hiSignal, TH1I* m_hichfired, TH1I* m_hichnotfired, TH1F* m_hiVFATfired_perevent[], int vfatId[])
+  void fillEventHistograms(const int& m_BX, const int& m_BC, const int & m_nVFAT, const int & m_nBadVFAT, const int & m_nGoodVFAT, const int & m_firedchannels, const int& m_notfiredchannels, TH1I* m_hiDiffBXandBC, TH1I* m_hiRatioBXandBC, TH1F* m_hiVFAT, TH1I* m_hiFake, TH1I* m_hiSignal, TH1I* m_hichfired, TH1I* m_hichnotfired, TH1F* m_hiVFATfired_perevent[], int vfatId[], TH1I* m_hiClusterMult, TH1I* m_hiClusterSize )
     {
       int diffBXandBC =  fabs(m_BX - m_BC);  
       double ratioBXandBC = (double) m_BX / m_BC;
@@ -413,6 +443,17 @@ class gemTreeReader {
       }
       m_hichfired->Fill(m_firedchannels);
       m_hichnotfired->Fill(m_notfiredchannels);
+      int ncl=0;
+      for (std::map<int, GEMStripCollection>::iterator ieta=allstrips.begin(); ieta!= allstrips.end(); ieta++){
+        GEMClusterizer clizer;
+        GEMClusterContainer cls = clizer.doAction(ieta->second);
+        ncl+=cls.size();
+        for (GEMClusterContainer::iterator icl=cls.begin();icl!=cls.end();icl++){
+          m_hiClusterSize->Fill(icl->clusterSize());	  
+        }
+      }
+      m_hiClusterMult->Fill(ncl);	  
+      allstrips.clear();
     }
     void readMap(int slot)
     {

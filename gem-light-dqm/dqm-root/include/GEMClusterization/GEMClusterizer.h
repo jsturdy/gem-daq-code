@@ -5,14 +5,13 @@
  */
 
 #include "GEMClusterContainer.h"
-//#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"      // need to substitute digi with our container
-
-class GEMCluster;
+#include "GEMStripCollection.h"  
+#include "GEMCluster.h"
 class GEMClusterizer{
  public:
   GEMClusterizer();
   ~GEMClusterizer();
-  GEMClusterContainer doAction(const GEMDigiCollection::Range& digiRange);
+  GEMClusterContainer doAction(const GEMStripCollection& strips);
 
  private:
   GEMClusterContainer doActualAction(GEMClusterContainer& initialclusters);

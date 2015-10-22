@@ -1,7 +1,7 @@
 #include "GEMClusterization/GEMClusterizer.h"
 #include "GEMClusterization/GEMCluster.h"
 #include "GEMClusterization/GEMClusterContainer.h"
-
+#include "GEMClusterization/GEMStripCollection.h"
 
 GEMClusterizer::GEMClusterizer()
 {
@@ -12,12 +12,12 @@ GEMClusterizer::~GEMClusterizer()
 }
  
 GEMClusterContainer
-GEMClusterizer::doAction(const GEMDigiCollection::Range& digiRange){
+GEMClusterizer::doAction(const GEMStripCollection& strips){
   GEMClusterContainer cls;
-  for (GEMDigiCollection::const_iterator digi = digiRange.first;
-       digi != digiRange.second;
-       digi++) {
-    GEMCluster cl(digi->strip(),digi->strip(),digi->bx());
+  for (GEMStripCollection::const_iterator strip = strips.begin();
+       strip != strips.end();
+       strip++) {
+    GEMCluster cl(strip->strip(),strip->strip(),strip->bx());
     cls.insert(cl);
   }
   GEMClusterContainer clsNew =this->doActualAction(cls);
