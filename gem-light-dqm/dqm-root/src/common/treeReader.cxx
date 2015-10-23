@@ -100,7 +100,7 @@ class gemTreeReader {
         path = std::getenv("BUILD_HOME");
       }
       for (int ivm = 0; ivm < NVFAT; ivm++) this->readMap(ivm);
-      this->printMaps();
+      //this->printMaps();
       this->fillHistograms();
     }
   private:
