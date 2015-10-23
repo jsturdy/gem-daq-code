@@ -14,14 +14,24 @@ int main(int argc, char** argv)
   }
   string m_dat_filename = argv[1];
   string m_slot_file = argv[2];
+  bool print_hist = false;
+  if (argc > 3){
+    string option = argv[3];
+    if ((option == "--with-print") || (option == "-p")) {
+      print_hist = true;
+      std::cout << "[MAIN]: will print histograms" << std::endl;
+    }
+  }
+  std::cout << "[MAIN]: Slot table : " << m_slot_file << std::endl;
   gemTreeWriter *m_gemTreeWriter = new gemTreeWriter();
   m_gemTreeWriter->makeTree(m_dat_filename, m_slot_file);
   string m_raw_filename;
   m_raw_filename = m_gemTreeWriter->getOutputFileName();
   std::cout << "[MAIN]: ROOT TTree is finished" << std::endl;
   //string m_raw_filename=argv[1];
-  gemTreeReader *m_gemTreeReader = new gemTreeReader(m_raw_filename);
+  gemTreeReader *m_gemTreeReader = new gemTreeReader(m_raw_filename, print_hist);
   m_gemTreeReader->createHistograms();
+  std::cout << "[MAIN]: DQM analysis done" << std::endl;
 
   return 0;
 }

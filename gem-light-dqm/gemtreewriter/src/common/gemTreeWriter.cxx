@@ -110,7 +110,7 @@ class gemTreeWriter {
     
       inpf.open(ifile.c_str());
       if(!inpf.is_open()) {
-        std::cout << "\nThe file: " << ifile.c_str() << " is missing.\n" << std::endl;
+        std::cout << "[gemTreeWriter]: The file: " << ifile.c_str() << " is missing.\n" << std::endl;
         return;
       };
       if (DEBUG) std::cout << "[gemTreeWriter]: File " << ifile << " is opened "<< std::endl;
@@ -193,7 +193,7 @@ class gemTreeWriter {
           uint16_t CRC_calc = dc->checkCRC(vfatBlockWords, 0);
           delete dc;
           uint32_t t_chipID = static_cast<uint32_t>(ChipID);
-    	  std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents(slot_file));
+    	    std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents(slot_file));
           //gem::readout::GEMslotContents::initSlots();
           int sn = slotInfo_->GEBslotIndex(t_chipID);
           bool blockStatus = checkBlock(b1010, b1100, b1110, sn, CRC, CRC_calc);
