@@ -100,7 +100,7 @@ class gemTreeReader {
         path = std::getenv("BUILD_HOME");
       }
       for (int ivm = 0; ivm < NVFAT; ivm++) this->readMap(ivm);
-      //this->printMaps();
+      this->printMaps();
       this->fillHistograms();
     }
   private:
@@ -400,9 +400,9 @@ class gemTreeReader {
               chan0xfFiredchip = ((m_vfat->lsData() >> chan) & 0x1);
               if(chan0xfFiredchip) {
                 m_hiCh128chipFired[m]->Fill(chan);
-                m_hiStripsFired[m]->Fill(strip_maps[m_vfat->SlotNumber()].find(chan+1)->second);
+                m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
                 int m_i = (int) m_vfat->SlotNumber()%8;
-                int m_j = strip_maps[m_vfat->SlotNumber()].find(chan+1)->second + ((int) m_vfat->SlotNumber()/8)*128;
+                int m_j = strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
 		              allstrips[m_i]=strips;
@@ -417,9 +417,9 @@ class gemTreeReader {
               chan0xfFiredchip = ((m_vfat->msData() >> (chan-64)) & 0x1);
               if(chan0xfFiredchip) {
                 m_hiCh128chipFired[m]->Fill(chan);
-                m_hiStripsFired[m]->Fill(strip_maps[m_vfat->SlotNumber()].find(chan+1)->second);
+                m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
                 int m_i = (int) m_vfat->SlotNumber()%8;
-                int m_j = strip_maps[m_vfat->SlotNumber()].find(chan+1)->second + ((int) m_vfat->SlotNumber()/8)*128;
+                int m_j = strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
 		              allstrips[m_i]=strips;
@@ -471,16 +471,11 @@ class gemTreeReader {
         std::cout << "\nThe file: " << icsvfile_ << " is missing.\n" << std::endl;
         return;
       }  
-      while(true){
-        if(icsvfile_.eof()) {
-          std::cout << "[gemTreeWriter]: End of " << ifpath_ << " file." << std::endl;
-          break;
-        }
+     for (int il = 0; il < 128; il++) {
         std::string line;
         std::getline(icsvfile_, line);
         if (DEBUG) std::cout << "[gemTreeReader]: Read line : " << line << std::endl; 
         std::istringstream iss(line);
-        if ( !icsvfile_.good() ) break;
         std::pair<int,int> map_;
         std::string val;
         std::getline(iss,val,',');
@@ -502,6 +497,7 @@ class gemTreeReader {
     {
       std::map<int,int>::iterator it;
       for (int ism = 0; ism < NVFAT; ism++){
+        std::cout << "Map for chip " << ism << std::endl;
         for (it = strip_maps[ism].begin(); it != strip_maps[ism].end(); ++it){
           std::cout << "Channel : " << it->first << " Strip : " << it->second << std::endl;
         }
