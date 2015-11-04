@@ -85,8 +85,7 @@ gem::supervisor::tbutils::ADCScan::ADCScan(xdaq::ApplicationStub * s)
   is_working_     (false),
   is_initialized_ (false),
   is_configured_  (false),
-  is_running_     (false),
-  vfatDevice_(0)
+  is_running_     (false)
 {
 
   curDACRegValue = 0;
@@ -304,9 +303,9 @@ bool gem::supervisor::tbutils::ADCScan::run(toolbox::task::WorkLoop* wl)
     hw_semaphore_.take();
     vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.VFAT_ADC");
     LOG4CPLUS_DEBUG(getApplicationLogger(), "trying to read the "
-		   << dacMap[confParams_.bag.dacToScan.toString()].first
-		   << " ADC for "
-		   << confParams_.bag.dacToScan.toString());
+                    << dacMap[confParams_.bag.dacToScan.toString()].first
+                    << " ADC for "
+                    << confParams_.bag.dacToScan.toString());
     curDACValue = vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),dacMap[confParams_.bag.dacToScan.toString()].first);
     
     ++samplesTaken_;
@@ -326,8 +325,8 @@ bool gem::supervisor::tbutils::ADCScan::run(toolbox::task::WorkLoop* wl)
     std::string imgName = ss.str();
     //do a fit here to project the height of the image at the end
     TF1* imgFit = new TF1("pol1","pol1",
-			  confParams_.bag.minDACValue-0.5,
-			  confParams_.bag.maxDACValue+0.5);
+                          confParams_.bag.minDACValue-0.5,
+                          confParams_.bag.maxDACValue+0.5);
     outputCanvas->cd();
     histo->Draw("colz");
     histo->Fit(imgFit,"QN");
@@ -350,9 +349,9 @@ bool gem::supervisor::tbutils::ADCScan::run(toolbox::task::WorkLoop* wl)
       hw_semaphore_.take();
       vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.VFATS."+confParams_.bag.deviceName.toString());
       if ((curDACRegValue + confParams_.bag.stepSize) < 0xFF) 
-	vfatDevice_->writeReg(vfatDevice_->getDeviceBaseNode(),confParams_.bag.dacToScan.toString(),curDACRegValue + confParams_.bag.stepSize);
+        vfatDevice_->writeReg(vfatDevice_->getDeviceBaseNode(),confParams_.bag.dacToScan.toString(),curDACRegValue + confParams_.bag.stepSize);
       else  
-	vfatDevice_->writeReg(vfatDevice_->getDeviceBaseNode(),confParams_.bag.dacToScan.toString(),0xFF);
+        vfatDevice_->writeReg(vfatDevice_->getDeviceBaseNode(),confParams_.bag.dacToScan.toString(),0xFF);
       curDACRegValue = vfatDevice_->readVFATReg(confParams_.bag.dacToScan.toString());
       //vfatDevice_->setRunMode(0);
       hw_semaphore_.give();
@@ -439,50 +438,50 @@ void gem::supervisor::tbutils::ADCScan::selectVFAT(xgi::Output *out)
     
     LOG4CPLUS_DEBUG(getApplicationLogger(),"selected device is: "<<confParams_.bag.deviceName.toString());
     *out << cgicc::span() << std::endl
-	 << "<table>"     << std::endl
-	 << "<tr>"   << std::endl
-	 << "<td>" << "Selected VFAT:" << "</td>" << std::endl
-	 << "<td>" << "ChipID:"        << "</td>" << std::endl
-	 << "</tr>"     << std::endl
+         << "<table>"     << std::endl
+         << "<tr>"   << std::endl
+         << "<td>" << "Selected VFAT:" << "</td>" << std::endl
+         << "<td>" << "ChipID:"        << "</td>" << std::endl
+         << "</tr>"     << std::endl
 
-	 << "<tr>" << std::endl
-	 << "<td>" << std::endl
-	 << cgicc::select().set("id","VFATDevice").set("name","VFATDevice")     << std::endl
-	 << ((confParams_.bag.deviceName.toString().compare("VFAT8")) == 0 ?
-	     (cgicc::option("VFAT8").set(isDisabled).set("value","VFAT8").set("selected")) :
-	     (cgicc::option("VFAT8").set(isDisabled).set("value","VFAT8"))) << std::endl
+         << "<tr>" << std::endl
+         << "<td>" << std::endl
+         << cgicc::select().set("id","VFATDevice").set("name","VFATDevice")     << std::endl
+         << ((confParams_.bag.deviceName.toString().compare("VFAT8")) == 0 ?
+             (cgicc::option("VFAT8").set(isDisabled).set("value","VFAT8").set("selected")) :
+             (cgicc::option("VFAT8").set(isDisabled).set("value","VFAT8"))) << std::endl
 
-	 << ((confParams_.bag.deviceName.toString().compare("VFAT9")) == 0 ?
-	     (cgicc::option("VFAT9").set(isDisabled).set("value","VFAT9").set("selected")) :
-	     (cgicc::option("VFAT9").set(isDisabled).set("value","VFAT9"))) << std::endl
+         << ((confParams_.bag.deviceName.toString().compare("VFAT9")) == 0 ?
+             (cgicc::option("VFAT9").set(isDisabled).set("value","VFAT9").set("selected")) :
+             (cgicc::option("VFAT9").set(isDisabled).set("value","VFAT9"))) << std::endl
 
-	 << ((confParams_.bag.deviceName.toString().compare("VFAT10")) == 0 ?
-	     (cgicc::option("VFAT10").set(isDisabled).set("value","VFAT10").set("selected")) :
-	     (cgicc::option("VFAT10").set(isDisabled).set("value","VFAT10"))) << std::endl
+         << ((confParams_.bag.deviceName.toString().compare("VFAT10")) == 0 ?
+             (cgicc::option("VFAT10").set(isDisabled).set("value","VFAT10").set("selected")) :
+             (cgicc::option("VFAT10").set(isDisabled).set("value","VFAT10"))) << std::endl
 
-	 << ((confParams_.bag.deviceName.toString().compare("VFAT11")) == 0 ?
-	     (cgicc::option("VFAT11").set(isDisabled).set("value","VFAT11").set("selected")) :
-	     (cgicc::option("VFAT11").set(isDisabled).set("value","VFAT11"))) << std::endl
+         << ((confParams_.bag.deviceName.toString().compare("VFAT11")) == 0 ?
+             (cgicc::option("VFAT11").set(isDisabled).set("value","VFAT11").set("selected")) :
+             (cgicc::option("VFAT11").set(isDisabled).set("value","VFAT11"))) << std::endl
 
-	 << ((confParams_.bag.deviceName.toString().compare("VFAT12")) == 0 ?
-	     (cgicc::option("VFAT12").set(isDisabled).set("value","VFAT12").set("selected")) :
-	     (cgicc::option("VFAT12").set(isDisabled).set("value","VFAT12"))) << std::endl
+         << ((confParams_.bag.deviceName.toString().compare("VFAT12")) == 0 ?
+             (cgicc::option("VFAT12").set(isDisabled).set("value","VFAT12").set("selected")) :
+             (cgicc::option("VFAT12").set(isDisabled).set("value","VFAT12"))) << std::endl
 
-	 << ((confParams_.bag.deviceName.toString().compare("VFAT13")) == 0 ?
-	     (cgicc::option("VFAT13").set(isDisabled).set("value","VFAT13").set("selected")) :
-	     (cgicc::option("VFAT13").set(isDisabled).set("value","VFAT13"))) << std::endl
-	 << cgicc::select()<< std::endl
-	 << "</td>" << std::endl
+         << ((confParams_.bag.deviceName.toString().compare("VFAT13")) == 0 ?
+             (cgicc::option("VFAT13").set(isDisabled).set("value","VFAT13").set("selected")) :
+             (cgicc::option("VFAT13").set(isDisabled).set("value","VFAT13"))) << std::endl
+         << cgicc::select()<< std::endl
+         << "</td>" << std::endl
       
-	 << "<td>" << std::endl
-	 << cgicc::input().set("type","text").set("id","ChipID")
-                          .set("name","ChipID").set("readonly")
-                          .set("value",boost::str(boost::format("0x%04x")%(confParams_.bag.deviceChipID)))
-	 << std::endl
-	 << "</td>"    << std::endl
-	 << "</tr>"    << std::endl
-	 << "</table>" << std::endl
-	 << cgicc::span()  << std::endl;
+         << "<td>" << std::endl
+         << cgicc::input().set("type","text").set("id","ChipID")
+      .set("name","ChipID").set("readonly")
+      .set("value",boost::str(boost::format("0x%04x")%(confParams_.bag.deviceChipID)))
+         << std::endl
+         << "</td>"    << std::endl
+         << "</tr>"    << std::endl
+         << "</table>" << std::endl
+         << cgicc::span()  << std::endl;
   }
   catch (const xgi::exception::Exception& e) {
     LOG4CPLUS_INFO(this->getApplicationLogger(),"Something went wrong displaying VFATS(xgi): " << e.what());
@@ -507,85 +506,85 @@ void gem::supervisor::tbutils::ADCScan::scanParameters(xgi::Output *out)
     }
 
     *out << cgicc::span()   << std::endl
-	 << cgicc::label("DAC to Scan").set("for","DACToScan") << std::endl
-	 << cgicc::select().set("id","DACToScan").set("name","DACToScan")
-	 << ((confParams_.bag.dacToScan.toString().compare("IPreampIn")) == 0 ?
-	     (cgicc::option("IPreampIn").set(isDisabled).set("value","IPreampIn").set("selected")) :
-	     (cgicc::option("IPreampIn").set(isDisabled).set("value","IPreampIn"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("IPreampFeed")) == 0 ?
-	     (cgicc::option("IPreampFeed").set(isDisabled).set("value","IPreampFeed").set("selected")) :
-	     (cgicc::option("IPreampFeed").set(isDisabled).set("value","IPreampFeed"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("IPreampOut")) == 0 ?
-	     (cgicc::option("IPreampOut").set(isDisabled).set("value","IPreampOut").set("selected")) :
-	     (cgicc::option("IPreampOut").set(isDisabled).set("value","IPreampOut"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("IShaper")) == 0 ?
-	     (cgicc::option("IShaper").set(isDisabled).set("value","IShaper").set("selected")) :
-	     (cgicc::option("IShaper").set(isDisabled).set("value","IShaper"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("IShaperFeed")) == 0 ?
-	     (cgicc::option("IShaperFeed").set(isDisabled).set("value","IShaperFeed").set("selected")) :
-	     (cgicc::option("IShaperFeed").set(isDisabled).set("value","IShaperFeed"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("IComp")) == 0 ?
-	     (cgicc::option("IComp").set(isDisabled).set("value","IComp").set("selected")) :
-	     (cgicc::option("IComp").set(isDisabled).set("value","IComp"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("VThreshold1")) == 0 ?
-	     (cgicc::option("VThreshold1").set(isDisabled).set("value","VThreshold1").set("selected")) :
-	     (cgicc::option("VThreshold1").set(isDisabled).set("value","VThreshold1"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("VThreshold2")) == 0 ?
-	     (cgicc::option("VThreshold2").set(isDisabled).set("value","VThreshold2").set("selected")) :
-	     (cgicc::option("VThreshold2").set(isDisabled).set("value","VThreshold2"))) << std::endl
-	 << ((confParams_.bag.dacToScan.toString().compare("VCal")) == 0 ?
-	     (cgicc::option("VCal").set(isDisabled).set("value","VCal").set("selected")) :
-	     (cgicc::option("VCal").set(isDisabled).set("value","VCal"))) << std::endl
-	 << cgicc::select() << std::endl
+         << cgicc::label("DAC to Scan").set("for","DACToScan") << std::endl
+         << cgicc::select().set("id","DACToScan").set("name","DACToScan")
+         << ((confParams_.bag.dacToScan.toString().compare("IPreampIn")) == 0 ?
+             (cgicc::option("IPreampIn").set(isDisabled).set("value","IPreampIn").set("selected")) :
+             (cgicc::option("IPreampIn").set(isDisabled).set("value","IPreampIn"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("IPreampFeed")) == 0 ?
+             (cgicc::option("IPreampFeed").set(isDisabled).set("value","IPreampFeed").set("selected")) :
+             (cgicc::option("IPreampFeed").set(isDisabled).set("value","IPreampFeed"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("IPreampOut")) == 0 ?
+             (cgicc::option("IPreampOut").set(isDisabled).set("value","IPreampOut").set("selected")) :
+             (cgicc::option("IPreampOut").set(isDisabled).set("value","IPreampOut"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("IShaper")) == 0 ?
+             (cgicc::option("IShaper").set(isDisabled).set("value","IShaper").set("selected")) :
+             (cgicc::option("IShaper").set(isDisabled).set("value","IShaper"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("IShaperFeed")) == 0 ?
+             (cgicc::option("IShaperFeed").set(isDisabled).set("value","IShaperFeed").set("selected")) :
+             (cgicc::option("IShaperFeed").set(isDisabled).set("value","IShaperFeed"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("IComp")) == 0 ?
+             (cgicc::option("IComp").set(isDisabled).set("value","IComp").set("selected")) :
+             (cgicc::option("IComp").set(isDisabled).set("value","IComp"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("VThreshold1")) == 0 ?
+             (cgicc::option("VThreshold1").set(isDisabled).set("value","VThreshold1").set("selected")) :
+             (cgicc::option("VThreshold1").set(isDisabled).set("value","VThreshold1"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("VThreshold2")) == 0 ?
+             (cgicc::option("VThreshold2").set(isDisabled).set("value","VThreshold2").set("selected")) :
+             (cgicc::option("VThreshold2").set(isDisabled).set("value","VThreshold2"))) << std::endl
+         << ((confParams_.bag.dacToScan.toString().compare("VCal")) == 0 ?
+             (cgicc::option("VCal").set(isDisabled).set("value","VCal").set("selected")) :
+             (cgicc::option("VCal").set(isDisabled).set("value","VCal"))) << std::endl
+         << cgicc::select() << std::endl
 
-	 << std::endl
-	 << cgicc::br() << std::endl
+         << std::endl
+         << cgicc::br() << std::endl
 
-	 << cgicc::label("MinDACValue").set("for","MinDACValue") << std::endl
-	 << cgicc::input().set("id","MinDACValue").set("name","MinDACValue")
-                          .set("type","number").set("min","0").set("max","255")
-                          .set("value",boost::str(boost::format("%d")%(confParams_.bag.minDACValue)))
-	 << std::endl
+         << cgicc::label("MinDACValue").set("for","MinDACValue") << std::endl
+         << cgicc::input().set("id","MinDACValue").set("name","MinDACValue")
+      .set("type","number").set("min","0").set("max","255")
+      .set("value",boost::str(boost::format("%d")%(confParams_.bag.minDACValue)))
+         << std::endl
 
-	 << cgicc::label("MaxDACValue").set("for","MaxDACValue") << std::endl
-	 << cgicc::input().set("id","MaxDACValue").set("name","MaxDACValue")
-                          .set("type","number").set("min","0").set("max","255")
-                          .set("value",boost::str(boost::format("%d")%(confParams_.bag.maxDACValue)))
-	 << std::endl
-	 << cgicc::br() << std::endl
+         << cgicc::label("MaxDACValue").set("for","MaxDACValue") << std::endl
+         << cgicc::input().set("id","MaxDACValue").set("name","MaxDACValue")
+      .set("type","number").set("min","0").set("max","255")
+      .set("value",boost::str(boost::format("%d")%(confParams_.bag.maxDACValue)))
+         << std::endl
+         << cgicc::br() << std::endl
       
-	 << cgicc::label("ReadDACReg").set("for","ReadDACReg") << std::endl
-	 << cgicc::input().set("id","ReadDACReg").set("name","ReadDACReg")
-                          .set("type","text").set("readonly")
-                          .set("value",boost::str(boost::format("%d")%((unsigned)curDACRegValue)))
-	 << std::endl
+         << cgicc::label("ReadDACReg").set("for","ReadDACReg") << std::endl
+         << cgicc::input().set("id","ReadDACReg").set("name","ReadDACReg")
+      .set("type","text").set("readonly")
+      .set("value",boost::str(boost::format("%d")%((unsigned)curDACRegValue)))
+         << std::endl
 
-	 << cgicc::label("ADCOutValue").set("for","ADCOutValue") << std::endl
-	 << cgicc::input().set("id","ADCOutValue").set("name","ADCOutValue")
-                          .set("type","text").set("readonly")
-                          .set("value",boost::str(boost::format("%d")%(curDACValue)))
-	 << std::endl
-	 << cgicc::br() << std::endl
+         << cgicc::label("ADCOutValue").set("for","ADCOutValue") << std::endl
+         << cgicc::input().set("id","ADCOutValue").set("name","ADCOutValue")
+      .set("type","text").set("readonly")
+      .set("value",boost::str(boost::format("%d")%(curDACValue)))
+         << std::endl
+         << cgicc::br() << std::endl
 
-	 << cgicc::label("DACStep").set("for","DACStep") << std::endl
-	 << cgicc::input().set("id","DACStep").set("name","DACStep")
-                          .set("type","number").set("min","1").set("max","255")
-                          .set("value",boost::str(boost::format("%d")%(confParams_.bag.stepSize)))
-	 << std::endl
-	 << cgicc::br() << std::endl
+         << cgicc::label("DACStep").set("for","DACStep") << std::endl
+         << cgicc::input().set("id","DACStep").set("name","DACStep")
+      .set("type","number").set("min","1").set("max","255")
+      .set("value",boost::str(boost::format("%d")%(confParams_.bag.stepSize)))
+         << std::endl
+         << cgicc::br() << std::endl
 
-	 << cgicc::label("Samples to take").set("for","SamplesToTake") << std::endl
-	 << cgicc::input().set("id","SamplesToTake").set("name","SamplesToTake")
-                          .set("type","number").set("min","0")
-                          .set("value",boost::str(boost::format("%d")%(confParams_.bag.nSamples)))
-	 << cgicc::br() << std::endl
-	 << cgicc::label("Samples taken").set("for","SamplesTaken") << std::endl
-	 << cgicc::input().set("id","SamplesTaken").set("name","SamplesTaken")
-                          .set("type","number").set("min","0").set("readonly")
-                          .set("value",boost::str(boost::format("%d")%(samplesTaken_)))
-	 << cgicc::br() << std::endl
+         << cgicc::label("Samples to take").set("for","SamplesToTake") << std::endl
+         << cgicc::input().set("id","SamplesToTake").set("name","SamplesToTake")
+      .set("type","number").set("min","0")
+      .set("value",boost::str(boost::format("%d")%(confParams_.bag.nSamples)))
+         << cgicc::br() << std::endl
+         << cgicc::label("Samples taken").set("for","SamplesTaken") << std::endl
+         << cgicc::input().set("id","SamplesTaken").set("name","SamplesTaken")
+      .set("type","number").set("min","0").set("readonly")
+      .set("value",boost::str(boost::format("%d")%(samplesTaken_)))
+         << cgicc::br() << std::endl
 
-	 << cgicc::span()   << std::endl;
+         << cgicc::span()   << std::endl;
   }
   catch (const xgi::exception::Exception& e) {
     LOG4CPLUS_INFO(this->getApplicationLogger(),"Something went wrong displaying VFATS(xgi): " << e.what());
@@ -603,12 +602,12 @@ void gem::supervisor::tbutils::ADCScan::displayHistograms(xgi::Output *out)
 {
   try {
     *out << cgicc::img().set("src","/gemdaq/gemsupervisor/html/images/tbutils/dacscan/"+
-			     confParams_.bag.deviceName.toString()+"_"+
-			     confParams_.bag.dacToScan.toString()+"_scan.png")
-                        .set("name",confParams_.bag.deviceName.toString()+"_"+
-			     confParams_.bag.dacToScan.toString()+"_scan.png")
-                        .set("id","vfatChannelHisto")
-	 << cgicc::br()  << std::endl;
+                             confParams_.bag.deviceName.toString()+"_"+
+                             confParams_.bag.dacToScan.toString()+"_scan.png")
+      .set("name",confParams_.bag.deviceName.toString()+"_"+
+           confParams_.bag.dacToScan.toString()+"_scan.png")
+      .set("id","vfatChannelHisto")
+         << cgicc::br()  << std::endl;
   }
   catch (const xgi::exception::Exception& e) {
     LOG4CPLUS_INFO(this->getApplicationLogger(),"Something went wrong displaying displayHistograms(xgi): " << e.what());
@@ -651,16 +650,16 @@ void gem::supervisor::tbutils::ADCScan::webDefault(xgi::Input *in, xgi::Output *
     *out << "<div class=\"xdaq-tab\" title=\"Control\">"  << std::endl;
 
     *out << "<table class=\"xdaq-table\">" << std::endl
-	 << cgicc::thead() << std::endl
-	 << cgicc::tr()    << std::endl //open
-	 << cgicc::th()    << "Control" << cgicc::th() << std::endl
-	 << cgicc::th()    << "Buffer"  << cgicc::th() << std::endl
-	 << cgicc::tr()    << std::endl //close
-	 << cgicc::thead() << std::endl 
+         << cgicc::thead() << std::endl
+         << cgicc::tr()    << std::endl //open
+         << cgicc::th()    << "Control" << cgicc::th() << std::endl
+         << cgicc::th()    << "Buffer"  << cgicc::th() << std::endl
+         << cgicc::tr()    << std::endl //close
+         << cgicc::thead() << std::endl 
       
-	 << "<tbody>" << std::endl
-	 << "<tr>"    << std::endl
-	 << "<td>"    << std::endl;
+         << "<tbody>" << std::endl
+         << "<tr>"    << std::endl
+         << "<td>"    << std::endl;
     
     if (!is_initialized_) {
       //have a menu for selecting the VFAT
@@ -670,8 +669,8 @@ void gem::supervisor::tbutils::ADCScan::webDefault(xgi::Input *in, xgi::Output *
       scanParameters(out);
       
       *out << cgicc::input().set("type", "submit")
-	.set("name", "command").set("title", "Initialize hardware acces.")
-	.set("value", "Initialize") << std::endl;
+        .set("name", "command").set("title", "Initialize hardware acces.")
+        .set("value", "Initialize") << std::endl;
 
       *out << cgicc::form() << std::endl;
     }
@@ -689,15 +688,15 @@ void gem::supervisor::tbutils::ADCScan::webDefault(xgi::Input *in, xgi::Output *
       //*out << cgicc::form().set("method","POST").set("action",setConfFile) << std::endl ;
       
       *out << cgicc::input().set("type","text").set("name","xmlFilename").set("size","80")
- 	                    .set("ENCTYPE","multipart/form-data").set("readonly")
-                            .set("value",confParams_.bag.settingsFile.toString()) << std::endl;
+        .set("ENCTYPE","multipart/form-data").set("readonly")
+        .set("value",confParams_.bag.settingsFile.toString()) << std::endl;
       //*out << cgicc::input().set("type","submit").set("value","Set configuration file") << std::endl ;
       //*out << cgicc::form() << std::endl ;
       
       *out << cgicc::br() << std::endl;
       *out << cgicc::input().set("type", "submit")
-	.set("name", "command").set("title", "Configure scan.")
-	.set("value", "Configure") << std::endl;
+        .set("name", "command").set("title", "Configure scan.")
+        .set("value", "Configure") << std::endl;
       *out << cgicc::form()        << std::endl;
     }
     
@@ -709,8 +708,8 @@ void gem::supervisor::tbutils::ADCScan::webDefault(xgi::Input *in, xgi::Output *
       scanParameters(out);
       
       *out << cgicc::input().set("type", "submit")
-	.set("name", "command").set("title", "Start scan.")
-	.set("value", "Start") << std::endl;
+        .set("name", "command").set("title", "Start scan.")
+        .set("value", "Start") << std::endl;
       *out << cgicc::form()    << std::endl;
     }
     
@@ -721,16 +720,16 @@ void gem::supervisor::tbutils::ADCScan::webDefault(xgi::Input *in, xgi::Output *
       scanParameters(out);
       
       *out << cgicc::input().set("type", "submit")
-	.set("name", "command").set("title", "Stop scan.")
-	.set("value", "Stop") << std::endl;
+        .set("name", "command").set("title", "Stop scan.")
+        .set("value", "Stop") << std::endl;
       *out << cgicc::form()   << std::endl;
     }
     
     *out << cgicc::comment() << "end the main commands, now putting the halt/reset commands" << cgicc::comment() << cgicc::br() << std::endl;
     *out << cgicc::span()  << std::endl
-	 << "<table>" << std::endl
-	 << "<tr>"    << std::endl
-	 << "<td>"    << std::endl;
+         << "<table>" << std::endl
+         << "<tr>"    << std::endl
+         << "<td>"    << std::endl;
       
     //always should have a halt command
     *out << cgicc::form().set("method","POST").set("action", "/" + getApplicationDescriptor()->getURN() + "/Halt") << std::endl;
@@ -739,30 +738,30 @@ void gem::supervisor::tbutils::ADCScan::webDefault(xgi::Input *in, xgi::Output *
       .set("name", "command").set("title", "Halt scan.")
       .set("value", "Halt") << std::endl;
     *out << cgicc::form() << std::endl
-	 << "</td>" << std::endl;
+         << "</td>" << std::endl;
     
     *out << "<td>"  << std::endl;
     if (!is_running_) {
       //comand that will take the system to initial and allow to change the hw device
       *out << cgicc::form().set("method","POST").set("action", "/" + getApplicationDescriptor()->getURN() + "/Reset") << std::endl;
       *out << cgicc::input().set("type", "submit")
-	.set("name", "command").set("title", "Reset device.")
-	.set("value", "Reset") << std::endl;
+        .set("name", "command").set("title", "Reset device.")
+        .set("value", "Reset") << std::endl;
       *out << cgicc::form() << std::endl;
     }
     *out << "</td>"    << std::endl
-	 << "</tr>"    << std::endl
-	 << "</table>" << std::endl
-	 << cgicc::br() << std::endl
-	 << cgicc::span()  << std::endl;
+         << "</tr>"    << std::endl
+         << "</table>" << std::endl
+         << cgicc::br() << std::endl
+         << cgicc::span()  << std::endl;
 
     *out << "</td>" << std::endl;
     *out << "<td>" << std::endl;
 
     *out << "</td>"    << std::endl
-	 << "</tr>"    << std::endl
-	 << "</tbody>" << std::endl
-	 << "</table>" << cgicc::br() << std::endl;
+         << "</tr>"    << std::endl
+         << "</tbody>" << std::endl
+         << "</table>" << cgicc::br() << std::endl;
     
     *out << "</div>" << std::endl;
     
@@ -783,108 +782,108 @@ void gem::supervisor::tbutils::ADCScan::webDefault(xgi::Input *in, xgi::Output *
     //*out << "<div class=\"xdaq-tab\" title=\"Status\">"  << std::endl
     //*out << cgicc::div().set("class","xdaq-tab").set("title","Status")   << std::endl
     *out << "<table class=\"xdaq-table\">" << std::endl
-	 << cgicc::thead() << std::endl
-	 << cgicc::tr()    << std::endl //open
-	 << cgicc::th()    << "Program" << cgicc::th() << std::endl
-	 << cgicc::th()    << "System"  << cgicc::th() << std::endl
-	 << cgicc::tr()    << std::endl //close
-	 << cgicc::thead() << std::endl 
-	 //<< "<tr>"    << std::endl
-	 //<< "<td>" << "Status:"   << "</td>"
-	 //<< "<td>" << "Value:"    << "</td>"
-	 //<< "</tr>" << std::endl
+         << cgicc::thead() << std::endl
+         << cgicc::tr()    << std::endl //open
+         << cgicc::th()    << "Program" << cgicc::th() << std::endl
+         << cgicc::th()    << "System"  << cgicc::th() << std::endl
+         << cgicc::tr()    << std::endl //close
+         << cgicc::thead() << std::endl 
+      //<< "<tr>"    << std::endl
+      //<< "<td>" << "Status:"   << "</td>"
+      //<< "<td>" << "Value:"    << "</td>"
+      //<< "</tr>" << std::endl
       
-	 << "<tbody>" << std::endl
-	 << "<tr>"    << std::endl
-	 << "<td>"    << std::endl;
+         << "<tbody>" << std::endl
+         << "<tr>"    << std::endl
+         << "<td>"    << std::endl;
 
     *out << "<table class=\"xdaq-table\">" << std::endl
-	 << cgicc::thead() << std::endl
-	 << cgicc::tr()    << std::endl //open
-	 << cgicc::th()    << "Status" << cgicc::th() << std::endl
-	 << cgicc::th()    << "Value"  << cgicc::th() << std::endl
-	 << cgicc::tr()    << std::endl //close
-	 << cgicc::thead() << std::endl 
-	 //<< "<tr>"    << std::endl
-	 //<< "<td>" << "Status:"   << "</td>"
-	 //<< "<td>" << "Value:"    << "</td>"
-	 //<< "</tr>" << std::endl
+         << cgicc::thead() << std::endl
+         << cgicc::tr()    << std::endl //open
+         << cgicc::th()    << "Status" << cgicc::th() << std::endl
+         << cgicc::th()    << "Value"  << cgicc::th() << std::endl
+         << cgicc::tr()    << std::endl //close
+         << cgicc::thead() << std::endl 
+      //<< "<tr>"    << std::endl
+      //<< "<td>" << "Status:"   << "</td>"
+      //<< "<td>" << "Value:"    << "</td>"
+      //<< "</tr>" << std::endl
       
-	 << "<tbody>" << std::endl
+         << "<tbody>" << std::endl
 
-	 << "<tr>" << std::endl
-	 << "<td>" << "is_working_" << "</td>"
-	 << "<td>" << is_working_   << "</td>"
-	 << "</tr>"   << std::endl
+         << "<tr>" << std::endl
+         << "<td>" << "is_working_" << "</td>"
+         << "<td>" << is_working_   << "</td>"
+         << "</tr>"   << std::endl
 
-	 << "<tr>" << std::endl
-	 << "<td>" << "is_initialized_" << "</td>"
-	 << "<td>" << is_initialized_   << "</td>"
-	 << "</tr>"       << std::endl
+         << "<tr>" << std::endl
+         << "<td>" << "is_initialized_" << "</td>"
+         << "<td>" << is_initialized_   << "</td>"
+         << "</tr>"       << std::endl
 
-	 << "<tr>" << std::endl
-	 << "<td>" << "is_configured_" << "</td>"
-	 << "<td>" << is_configured_   << "</td>"
-	 << "</tr>"      << std::endl
+         << "<tr>" << std::endl
+         << "<td>" << "is_configured_" << "</td>"
+         << "<td>" << is_configured_   << "</td>"
+         << "</tr>"      << std::endl
 
-	 << "<tr>" << std::endl
-	 << "<td>" << "is_running_" << "</td>"
-	 << "<td>" << is_running_   << "</td>"
-	 << "</tr>"   << std::endl
+         << "<tr>" << std::endl
+         << "<td>" << "is_running_" << "</td>"
+         << "<td>" << is_running_   << "</td>"
+         << "</tr>"   << std::endl
 
-	 << "</tbody>" << std::endl
-	 << "</table>" << cgicc::br() << std::endl
-	 << "</td>"    << std::endl;
+         << "</tbody>" << std::endl
+         << "</table>" << cgicc::br() << std::endl
+         << "</td>"    << std::endl;
     
     *out  << "<td>"     << std::endl
-	  << "<table class=\"xdaq-table\">" << std::endl
-	  << cgicc::thead() << std::endl
-	  << cgicc::tr()    << std::endl //open
-	  << cgicc::th()    << "Device"     << cgicc::th() << std::endl
-	  << cgicc::th()    << "Connected"  << cgicc::th() << std::endl
-	  << cgicc::tr()    << std::endl //close
-	  << cgicc::thead() << std::endl 
-	  << "<tbody>" << std::endl;
+          << "<table class=\"xdaq-table\">" << std::endl
+          << cgicc::thead() << std::endl
+          << cgicc::tr()    << std::endl //open
+          << cgicc::th()    << "Device"     << cgicc::th() << std::endl
+          << cgicc::th()    << "Connected"  << cgicc::th() << std::endl
+          << cgicc::tr()    << std::endl //close
+          << cgicc::thead() << std::endl 
+          << "<tbody>" << std::endl;
     
     if (is_initialized_ && vfatDevice_) {
       hw_semaphore_.take();
       vfatDevice_->setDeviceBaseNode("TEST");
       *out << "<tr>" << std::endl
-	   << "<td>" << "GLIB" << "</td>"
-	   << "<td>" << vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"GLIB") << "</td>"
-	   << "</tr>"   << std::endl
+           << "<td>" << "GLIB" << "</td>"
+           << "<td>" << vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"GLIB") << "</td>"
+           << "</tr>"   << std::endl
 	
-	   << "<tr>" << std::endl
-	   << "<td>" << "OptoHybrid" << "</td>"
-	   << "<td>" << vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"OptoHybrid") << "</td>"
-	   << "</tr>"       << std::endl
+           << "<tr>" << std::endl
+           << "<td>" << "OptoHybrid" << "</td>"
+           << "<td>" << vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"OptoHybrid") << "</td>"
+           << "</tr>"       << std::endl
 	
-	   << "<tr>" << std::endl
-	   << "<td>" << "VFATs" << "</td>"
-	   << "<td>" << vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"VFATs") << "</td>"
-	   << "</tr>"      << std::endl;
+           << "<tr>" << std::endl
+           << "<td>" << "VFATs" << "</td>"
+           << "<td>" << vfatDevice_->readReg(vfatDevice_->getDeviceBaseNode(),"VFATs") << "</td>"
+           << "</tr>"      << std::endl;
       
       vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.VFATS."+confParams_.bag.deviceName.toString());
       hw_semaphore_.give();
     }
     
     *out << "</tbody>" << std::endl
-	 << "</table>" << std::endl
-	 << "</td>"    << std::endl
-	 << "</tr>"    << std::endl
-	 << "</tbody>" << std::endl
-	 << "</table>" << std::endl;
-      //<< "</div>"   << std::endl;
+         << "</table>" << std::endl
+         << "</td>"    << std::endl
+         << "</tr>"    << std::endl
+         << "</tbody>" << std::endl
+         << "</table>" << std::endl;
+    //<< "</div>"   << std::endl;
 
     *out << cgicc::script().set("type","text/javascript")
-                           .set("src","http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js")
-	 << cgicc::script() << std::endl;
+      .set("src","http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js")
+         << cgicc::script() << std::endl;
     *out << cgicc::script().set("type","text/javascript")
-                           .set("src","http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js")
-	 << cgicc::script() << std::endl;
+      .set("src","http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js")
+         << cgicc::script() << std::endl;
     *out << cgicc::script().set("type","text/javascript")
-                           .set("src","/gemdaq/gemsupervisor/html/scripts/tbutils/adcScanImage.js")
-	 << cgicc::script() << std::endl;
+      .set("src","/gemdaq/gemsupervisor/html/scripts/tbutils/adcScanImage.js")
+         << cgicc::script() << std::endl;
   }
   catch (const xgi::exception::Exception& e) {
     LOG4CPLUS_INFO(this->getApplicationLogger(),"Something went wrong displaying ADCScan control panel(xgi): " << e.what());
@@ -1063,7 +1062,7 @@ void gem::supervisor::tbutils::ADCScan::initializeAction(toolbox::Event::Referen
   //here the connection to the device should be made
   setLogLevelTo(uhal::Debug());  // Set uHAL logging level Debug (most) to Error (least)
   hw_semaphore_.take();
-  vfatDevice_ = new gem::hw::vfat::HwVFAT2(confParams_.bag.deviceName.toString());
+  vfatDevice_ = vfat_shared_ptr(new gem::hw::vfat::HwVFAT2(confParams_.bag.deviceName.toString()));
   
   //vfatDevice_->setAddressTableFileName("allregsnonfram.xml");
   //vfatDevice_->setDeviceBaseNode("user_regs.vfats."+confParams_.bag.deviceName.toString());
@@ -1071,7 +1070,7 @@ void gem::supervisor::tbutils::ADCScan::initializeAction(toolbox::Event::Referen
   vfatDevice_->setDeviceIPAddress(confParams_.bag.deviceIP);
   vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.VFATS."+confParams_.bag.deviceName.toString());
   //sleep(1);
-  vfatDevice_->connectDevice();
+  //  vfatDevice_->connectDevice();
   
   //read in default parameters from an xml file?
   //vfatDevice_->setRegisters(xmlFile);
@@ -1101,12 +1100,12 @@ void gem::supervisor::tbutils::ADCScan::configureAction(toolbox::Event::Referenc
   vfatDevice_->setRunMode(0);
 
   /****unimplemented at the moment
-  if ((confParams_.bag.settingsFile.toString()).rfind("xml") != std::string::npos) {
-    LOG4CPLUS_INFO(getApplicationLogger(),"loading settings from XML file");
-    gem::supervisor::tbutils::VFAT2XMLParser::VFAT2XMLParser theParser(confParams_.bag.settingsFile.toString(),
-								       vfatDevice_);
-    theParser.parseXMLFile();
-  }
+       if ((confParams_.bag.settingsFile.toString()).rfind("xml") != std::string::npos) {
+       LOG4CPLUS_INFO(getApplicationLogger(),"loading settings from XML file");
+       gem::supervisor::tbutils::VFAT2XMLParser::VFAT2XMLParser theParser(confParams_.bag.settingsFile.toString(),
+       vfatDevice_);
+       theParser.parseXMLFile();
+       }
   */
   
   //else {
@@ -1144,7 +1143,7 @@ void gem::supervisor::tbutils::ADCScan::configureAction(toolbox::Event::Referenc
   LOG4CPLUS_DEBUG(getApplicationLogger(),"trying to get an enum from ::" << confParams_.bag.dacToScan.toString());
   vfatDevice_->setDACMode(gem::hw::vfat::StringToDACMode.at(boost::to_upper_copy(confParams_.bag.dacToScan.toString())));
   vfatDevice_->writeReg(vfatDevice_->getDeviceBaseNode(),confParams_.bag.dacToScan.toString(),
-			confParams_.bag.minDACValue);
+                        confParams_.bag.minDACValue);
   curDACRegValue = vfatDevice_->readVFATReg(confParams_.bag.dacToScan.toString());
 
   is_configured_ = true;
@@ -1196,7 +1195,7 @@ void gem::supervisor::tbutils::ADCScan::startAction(toolbox::Event::Reference e)
   LOG4CPLUS_INFO(getApplicationLogger(),"Creating file " << confParams_.bag.outFileName.toString());
   //std::fstream scanStream(confParams_.bag.outFileName.c_str(),
   std::fstream scanStream(tmpFileName.c_str(),
-			  std::ios::app | std::ios::binary);
+                          std::ios::app | std::ios::binary);
   if (scanStream.is_open())
     LOG4CPLUS_DEBUG(getApplicationLogger(),"file " << confParams_.bag.outFileName.toString() << "opened");
 
@@ -1208,7 +1207,7 @@ void gem::supervisor::tbutils::ADCScan::startAction(toolbox::Event::Reference e)
   
   vfatDevice_->setDACMode(gem::hw::vfat::StringToDACMode.at(boost::to_upper_copy(confParams_.bag.dacToScan.toString())));
   vfatDevice_->writeReg(vfatDevice_->getDeviceBaseNode(),confParams_.bag.dacToScan.toString(),
-			confParams_.bag.minDACValue);
+                        confParams_.bag.minDACValue);
   curDACRegValue = vfatDevice_->readVFATReg(confParams_.bag.dacToScan.toString());
   
   vfatDevice_->setDeviceBaseNode("OptoHybrid.GEB.VFATS."+confParams_.bag.deviceName.toString());
@@ -1308,13 +1307,9 @@ void gem::supervisor::tbutils::ADCScan::resetAction(toolbox::Event::Reference e)
   //vfatDevice_->setDACMode(gem::hw::vfat::StringToDACMode.at(boost::to_upper_copy(confParams_.bag.dacToScan.toString())));
   vfatDevice_->setRunMode(0);
 
-  if (vfatDevice_->isHwConnected())
+  /*  if (vfatDevice_->isHwConnected())
     vfatDevice_->releaseDevice();
-  
-  if (vfatDevice_)
-    delete vfatDevice_;
-  
-  vfatDevice_ = 0;
+  */
   sleep(2);
   hw_semaphore_.give();
 

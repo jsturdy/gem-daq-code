@@ -9,7 +9,7 @@
 gem::supervisor::GEMTestBeamSupervisor::GEMTestBeamSupervisor(xdaq::ApplicationStub* stub) :
   xdaq::Application(stub),
   webInterface_(0),
-  gemLogger_(Logger::getInstance("gem::supervisor::GEMTestBeamSupervisor")),
+  m_gemLogger(Logger::getInstance("gem::supervisor::GEMTestBeamSupervisor")),
   isInitialized_(false),
   semaphore_(toolbox::BSem::FULL),
   wl_semaphore_(toolbox::BSem::EMPTY)
@@ -52,7 +52,7 @@ gem::supervisor::GEMTestBeamSupervisor::GEMTestBeamSupervisor(xdaq::ApplicationS
       xdata::UnsignedShort* gebSlot = dynamic_cast<xdata::UnsignedShort*>(app->getApplicationInfoSpace()->find("gebSlot"));
       managerApps_.push_back((gem::hw::vfat::VFAT2Manager)(app->getApplicationStub()));
       connectedChips_.push_back(new std::pair(static_cast<uint16_t>(chipID->getValue()),
-					      static_cast<uint8_t>(gebSlot->getValue())));
+                                              static_cast<uint8_t>(gebSlot->getValue())));
     }
     else if (ad->getClassName() == "GEMTestBeamSupervisorWeb") {
       webInterface_ = new GEMTestBeamSupervisorWeb(app->getApplicationStub());
@@ -73,19 +73,19 @@ gem::supervisor::GEMTestBeamSupervisor::~GEMTestBeamSupervisor()
   webInterface_ = 0;
   
   /*
-  if (gemTBfsmP_ != 0)
+    if (gemTBfsmP_ != 0)
     delete gemTBfsmP_;
   */
   gemTBfsmP_ = 0;
   
   /*
-  if (poolFactory_ != 0)
+    if (poolFactory_ != 0)
     delete poolFactory_;
   */
   poolFactory_ = 0;
 
   /*
-  if (i2oAddressMap_ != 0)
+    if (i2oAddressMap_ != 0)
     delete i2oAddressMap_;
   */
   i2oAddressMap_ = 0;

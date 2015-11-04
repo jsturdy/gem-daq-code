@@ -1,6 +1,7 @@
 #ifndef gem_supervisor_tbutils_GEMTBUtil_h
 #define gem_supervisor_tbutils_GEMTBUtil_h
 
+
 #include <map>
 #include <string>
 
@@ -32,9 +33,11 @@
 #include "xdata/UnsignedInteger.h"
 #include "xdata/UnsignedShort.h"
 #include "xdata/Integer.h"
+#include "xdata/Vector.h"
 
 #include "TStopwatch.h"
 
+class TH1D;
 class TH1F;
 class TFile;
 class TCanvas;
@@ -52,16 +55,32 @@ namespace cgicc {
 }
 
 namespace gem {
-  
   namespace hw {
+    class GEMHwDevice;
     namespace vfat {
       class HwVFAT2;
     }
+    namespace optohybrid {
+      class HwOptoHybrid;
+    }
+    namespace glib {
+      class HwGLIB;
+    }
   }
-  
+  namespace readout {
+    struct VFATData;
+  }
+  namespace readout {
+    class GEMDataParker;
+  }
+
+  typedef std::shared_ptr<hw::vfat::HwVFAT2 > vfat_shared_ptr;
+  typedef std::shared_ptr<hw::glib::HwGLIB >  glib_shared_ptr;
+  typedef std::shared_ptr<hw::optohybrid::HwOptoHybrid > optohybrid_shared_ptr;
+
   namespace supervisor {
     namespace tbutils {
-
+      
       class GEMTBUtil : public xdaq::WebApplication, public xdata::ActionListener
 	{
 	  
@@ -137,7 +156,9 @@ namespace gem {
 	    throw (toolbox::fsm::exception::Exception);
 	  
 	  //web display helpers
-	  virtual void selectVFAT(xgi::Output* out)
+	  //	  virtual void selectVFAT(xgi::Output* out)
+	  //  throw (xgi::exception::Exception);
+	  virtual void selectMultipleVFAT(xgi::Output* out)
 	    throw (xgi::exception::Exception);
 	  virtual void scanParameters(xgi::Output* out)
 	    throw (xgi::exception::Exception)=0;
@@ -154,11 +175,17 @@ namespace gem {
 	  //action performed callback
 	  virtual void actionPerformed(xdata::Event& event);
 
+	  //select OH 
+	  virtual void selectOptohybridDevice(xgi::Output* out)
+	    throw (xgi::exception::Exception);
+
 	  class ConfigParams 
 	  {
 	  public:
 	    //void getFromFile(const std::string& fileName);
 	    virtual void registerFields(xdata::Bag<ConfigParams> *bag);
+
+	    xdata::Integer         ohGTXLink;
 	    
 	    xdata::UnsignedInteger readoutDelay;
 
@@ -167,18 +194,23 @@ namespace gem {
 	    xdata::String        outFileName;
 	    xdata::String        settingsFile;
 
-	    xdata::String        deviceName;
+	    xdata::Vector<xdata::String>  deviceName;
+	    xdata::Vector<xdata::Integer> deviceNum;
 	    xdata::String        deviceIP;
-	    xdata::Integer       deviceNum;
 	    xdata::UnsignedShort triggerSource;
 	    xdata::UnsignedShort deviceChipID;
 	    xdata::UnsignedInteger64 triggersSeen;
 	    xdata::Integer       ADCVoltage;
 	    xdata::Integer       ADCurrent;
+
+	    xdata::UnsignedShort deviceVT1;
+	    xdata::UnsignedShort deviceVT2;
 	    
 	  };
 	  
 	protected:
+
+	  log4cplus::Logger m_gemLogger;
 
 	  toolbox::fsm::AsynchronousFiniteStateMachine* fsmP_;
 
@@ -196,6 +228,7 @@ namespace gem {
 	  toolbox::task::ActionSignature* readSig_;
 
 	  //ConfigParams confParams_;
+	  uint8_t readout_mask;
 	  xdata::Bag<ConfigParams> confParams_;
 	  xdata::String ipAddr_;
 	  
@@ -205,13 +238,40 @@ namespace gem {
 
 	  uint64_t nTriggers_;
 	  bool is_working_, is_initialized_, is_configured_, is_running_;
-	  gem::hw::vfat::HwVFAT2* vfatDevice_;
+
+	  //readout application should be running elsewhere, not tied to supervisor                                                                           
+        glib_shared_ptr glibDevice_;
+        optohybrid_shared_ptr optohybridDevice_;
+        std::vector<vfat_shared_ptr> vfatDevice_;
+
+        std::shared_ptr<gem::readout::GEMDataParker> gemDataParker;
+
+	  // Counter
+	  int counter_[3];
 	  
+	  // VFAT Blocks Counter
+	  int vfat_;
+
+	  // Events Counter     
+	  int event_;
+	  
+	  // VFATs counter per event
+	  int sumVFAT_;
+	  
+	  // CalPulse counting
+	  uint32_t CalPulseCount_[3];
+	  
+	  TH1D* histolatency;
 	  TH1F* histo;
 	  TH1F* histos[128];
 	  TCanvas* outputCanvas;
 
           TStopwatch timer;
+
+	  xdata::Bag<ConfigParams> scanParams_;
+	  uint64_t eventsSeen_,channelSeen_;
+	  uint8_t  currentLatency_;
+
 
 	protected:
 

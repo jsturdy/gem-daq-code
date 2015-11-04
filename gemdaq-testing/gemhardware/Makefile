@@ -18,24 +18,17 @@ GEMHARDWARE_VER_MINOR=1
 GEMHARDWARE_VER_PATCH=0
 
 ##make a device specific buildfile as well, defaulting to all
-#<<<<<<< HEAD
-#Sources= GEMHwDevice.cc \
-#	vfat/HwVFAT2.cc  vfat/VFAT2Manager.cc vfat/VFAT2ControlPanelWeb.cc \
-#	amc13/AMC13Manager.cc amc13/AMC13ManagerWeb.cc \
-#optohybrid/HwOptoHybrid.cc \
-#glib/HwGLIB.cc 
-##glib/GLIBManager.cc  glib/GLIBManagerWeb.cc \
-#	GEMController.cc GEMControllerPanelWeb.cc
 ###version.cc
-#=======
 Sources =version.cc
 Sources+=GEMHwDevice.cc
-Sources+=vfat/HwVFAT2.cc vfat/VFAT2Manager.cc vfat/VFAT2ControlPanelWeb.cc 
+Sources+=vfat/HwVFAT2.cc
+Sources+=glib/HwGLIB.cc
+Sources+=optohybrid/HwOptoHybrid.cc
+Sources+=vfat/VFAT2Manager.cc vfat/VFAT2ControlPanelWeb.cc 
 Sources+=amc13/AMC13Manager.cc amc13/AMC13ManagerWeb.cc 
-Sources+=optohybrid/HwOptoHybrid.cc 
-Sources+=glib/HwGLIB.cc glib/GLIBManager.cc  glib/GLIBManagerWeb.cc
-Sources+=GEMController.cc GEMControllerPanelWeb.cc
-#>>>>>>> jsturdy-develop
+Sources+=glib/GLIBManager.cc glib/GLIBManagerWeb.cc
+Sources+=optohybrid/OptoHybridManager.cc optohybrid/OptoHybridManagerWeb.cc
+#Sources+=GEMController.cc GEMControllerPanelWeb.cc
 
 DynamicLibrary=gem_hw
 

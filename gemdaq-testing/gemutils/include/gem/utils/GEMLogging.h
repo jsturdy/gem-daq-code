@@ -6,11 +6,11 @@
 #include "log4cplus/loggingmacros.h"
 
 namespace gem {
-#define DEBUG(MSG) LOG4CPLUS_DEBUG(gemLogger_ , MSG)
-#define INFO( MSG) LOG4CPLUS_INFO( gemLogger_ , MSG)
-#define WARN( MSG) LOG4CPLUS_WARN( gemLogger_ , MSG)
-#define ERROR(MSG) LOG4CPLUS_ERROR(gemLogger_ , MSG)
-#define FATAL(MSG) LOG4CPLUS_FATAL(gemLogger_ , MSG)
+#define DEBUG(MSG) LOG4CPLUS_DEBUG(m_gemLogger , MSG)
+#define INFO( MSG) LOG4CPLUS_INFO( m_gemLogger , MSG)
+#define WARN( MSG) LOG4CPLUS_WARN( m_gemLogger , MSG)
+#define ERROR(MSG) LOG4CPLUS_ERROR(m_gemLogger , MSG)
+#define FATAL(MSG) LOG4CPLUS_FATAL(m_gemLogger , MSG)
   
 #define DEBUG_LOGGER(LOGGER,MSG) LOG4CPLUS_DEBUG(LOGGER, MSG)
 #define INFO_LOGGER( LOGGER,MSG) LOG4CPLUS_INFO( LOGGER, MSG)
@@ -20,9 +20,9 @@ namespace gem {
 
   //generic function to trace hierarchy in the Logger objects from non-xdaq applications
   //copied from HCAL hcalHTR.cc
-//  void setLogger(const log4cplus::Logger& parentLogger) {
-//    m_logger = log4cplus::Logger::getInstance(buildLogName(parentLogger,m_slot));
-//  }
+  //  void setLogger(const log4cplus::Logger& parentLogger) {
+  //    m_logger = log4cplus::Logger::getInstance(buildLogName(parentLogger,m_slot));
+  //  }
 
 }
 
