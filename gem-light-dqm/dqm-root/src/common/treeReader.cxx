@@ -90,20 +90,20 @@ class gemTreeReader {
       std::string path = std::getenv("BUILD_HOME");
       for (int im = 0; im < NVFAT; im++){
         if (im < 2) {
-          path += "/gem-light-dqm/dqm-root/data/v2a_schema_chips0-1.csv";
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips0-1.csv";
         } else if (im < 16) {
-          path += "/gem-light-dqm/dqm-root/data/v2a_schema_chips2-15.csv";
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips2-15.csv";
         } else if (im < 18) {
-          path += "/gem-light-dqm/dqm-root/data/v2a_schema_chips16-17.csv";
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips16-17.csv";
         } else {
-          path += "/gem-light-dqm/dqm-root/data/v2a_schema_chips18-23.csv";
+          path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips18-23.csv";
         }
         if (DEBUG) std::cout << "[gemTreeReader]: path to maps : " << path << std::endl; 
         maps[im] = path;
         path = std::getenv("BUILD_HOME");
       }
       for (int ivm = 0; ivm < NVFAT; ivm++) this->readMap(ivm);
-      this->printMaps();
+      //this->printMaps();
       this->fillHistograms();
     }
   private:
@@ -111,6 +111,8 @@ class gemTreeReader {
     TFile *ofile;
     std::string ofilename;
     bool print_hist;
+
+    //TString occupancy_plots = {"BeamProfile", "", "1100", "1110", "CRC1_vs_CRC2", "DiffCRC", "_VFAT"};
 
   //std::vector<std::pair<int,int>> strip_maps[NVFAT];
     std::vector<int> tmp_strips;
@@ -279,7 +281,6 @@ class gemTreeReader {
             // fill histograms for all events
             dir[0]->cd();
             this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[0], hiCh128[0], hiCh_notfired[0], hiChip[0], hi1010[0], hi1100[0], hi1110[0], hiFlag[0], hiCRC[0], hiDiffCRC[0], hi2DCRC[0], hi2DCRCperVFAT[0], hiCh128chipFired[0], hiStripsFired[0], hiBeamProfile[0], firedchannels[0], notfiredchannels[0]);
-            /*
             if (v_vfat.at(k).isBlockGood()){
               nGoodVFAT[0]++;
             }else {
@@ -303,13 +304,11 @@ class gemTreeReader {
               dir[2]->cd();
               this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[2], hiCh128[2], hiCh_notfired[2], hiChip[2], hi1010[2], hi1100[2], hi1110[2], hiFlag[2], hiCRC[2], hiDiffCRC[2], hi2DCRC[2], hi2DCRCperVFAT[2], hiCh128chipFired[2], hiStripsFired[2], hiBeamProfile[2], firedchannels[2], notfiredchannels[2]);
             }// end if eventIsOK
-            */
             BC = v_vfat.at(k).BC();
           }// end of loop over VFATs
         }// end of loop over GEBs
         dir[0]->cd();
         this->fillEventHistograms(BX, BC, nVFAT[0], nBadVFAT[0], nGoodVFAT[0], firedchannels[0], notfiredchannels[0], hiDiffBXandBC[0], hiRatioBXandBC[0], hiVFAT[0], hiFake[0], hiSignal[0], hichfired[0], hichnotfired[0], hiVFATfired_perevent[0], vfatId[0], hiClusterMult[0], hiClusterSize[0]);
-        /*
         if (eventIsOK){
           dir[1]->cd();
           this->fillEventHistograms(BX, BC, nVFAT[1], nBadVFAT[1], nGoodVFAT[1], firedchannels[1], notfiredchannels[1], hiDiffBXandBC[1], hiRatioBXandBC[1], hiVFAT[1], hiFake[1], hiSignal[1], hichfired[1], hichnotfired[1], hiVFATfired_perevent[1], vfatId[1], hiClusterMult[1], hiClusterSize[1]);
@@ -317,45 +316,10 @@ class gemTreeReader {
           dir[2]->cd();
           this->fillEventHistograms(BX, BC, nVFAT[2], nBadVFAT[2], nGoodVFAT[2], firedchannels[2], notfiredchannels[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiVFAT[2], hiFake[2], hiSignal[2], hichfired[2], hichnotfired[2], hiVFATfired_perevent[2], vfatId[2], hiClusterMult[2], hiClusterSize[2]);
         }
-        */
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Event histograms filled for event  " << i << std::endl;   
         logger_->addEvent(i,eventIsOK,nVFAT[0],nGoodVFAT[0],nBadVFAT[0]);
       }// end of loop over events
 
-          std::map<int, int> t_map;
-          for (int iv = 0; iv <128; iv++){
-              t_map.insert(std::make_pair(tmp_strips[iv], iv));
-          }
-          std::sort(tmp_strips.begin(), tmp_strips.end());
-          //std::sort(t_map.begin(), t_map.end());
-          for (unsigned ia = 0; ia < 128; ia++) {
-            //hiCh128chipFired[0][0]->SetBinContent(ia+1, tmp_strips[ia]);
-
-            for (unsigned ib = 0; ib < tmp_strips[ia]; ib++){
-                hiCh128chipFired[0][0]->Fill(ia);
-            }
-          }
-          std::pair<int,int> t_map_reorder[128];
-          int payload[128];
-          int h = 0;
-          int h1 = 0;
-          int h2 = 0;
-          for (auto itm = t_map.begin(); itm != t_map.end(); itm++){
-            std::cout << "Channel " << itm->second << " Load " << itm->first << std::endl;
-            if (h%2) {
-              t_map_reorder[h1] = std::make_pair(itm->second, h1); 
-              h1++;
-            } else {
-              t_map_reorder[127-h2] = std::make_pair(itm->second, 127-h2); 
-              h2++;
-            }
-              payload[h] = itm->first;
-              h++;
-          }
-
-        for (int ir = 0; ir<128; ir++){
-            std::cout << "Strip, Channel " << std::setw(3) << t_map_reorder[ir].second << " , " << std::setw(3) << t_map_reorder[ir].first+1 << " Payload " << payload[h] << std::endl;
-        }
       logger_->writeLog();
       delete logger_;
       for (int st = 0; st < 3; st++){
@@ -375,11 +339,14 @@ class gemTreeReader {
       ofile->Write();
       if (print_hist){
         gErrorIgnoreLevel = kWarning; // Supress the Info outputs from ROOT
+        gROOT->SetBatch(kTRUE);// don't draw all the canvases
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
         TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
         for (int id = 0; id < 3; id++){
           printHistograms(dir[id],"png",prefix[id]);
         }
+        gROOT->SetBatch(kFALSE);
+        printDQMCanvases();
       }
     }
 
@@ -436,10 +403,8 @@ class gemTreeReader {
       }// end of loop over channels 
       // strip container mapped for eta partitions...
 
-      //for(int m=0; m < NVFAT; m++){
-        //if(sn_ == m){
-        if(sn_ == 11){
-            int m = sn_;
+      for(int m=0; m < NVFAT; m++){
+        if(sn_ == m){
           if (DEBUG) std::cout << "[gemTreeReader]: Starting to fill hiCh128chipFired for slot : " << m << std::dec << std::endl;
           if (DEBUG) std::cout << "[gemTreeReader]: LS data           " << std::bitset<64>(m_vfat->lsData()) <<  std::endl;
           if (DEBUG) std::cout << "[gemTreeReader]: MS data           " << std::bitset<64>(m_vfat->msData()) <<  std::endl;
@@ -451,13 +416,9 @@ class gemTreeReader {
               if(chan0xfFiredchip) {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
-                //m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                m_hiStripsFired[11]->Fill(strip_maps[11].find(chan+1)->second);
-                m_hiStripsFired[1]->Fill(strip_maps[1].find(chan+1)->second);
-                m_hiStripsFired[16]->Fill(strip_maps[16].find(chan+1)->second);
-                m_hiStripsFired[19]->Fill(strip_maps[19].find(chan+1)->second);
+                m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
                 int m_i = (int) m_vfat->SlotNumber()%8;
-                int m_j = strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
+                int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
 		              allstrips[m_i]=strips;
@@ -473,13 +434,9 @@ class gemTreeReader {
               if(chan0xfFiredchip) {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
-                //m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                m_hiStripsFired[11]->Fill(strip_maps[11].find(chan+1)->second);
-                m_hiStripsFired[1]->Fill(strip_maps[1].find(chan+1)->second);
-                m_hiStripsFired[16]->Fill(strip_maps[16].find(chan+1)->second);
-                m_hiStripsFired[19]->Fill(strip_maps[19].find(chan+1)->second);
+                m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
                 int m_i = (int) m_vfat->SlotNumber()%8;
-                int m_j = strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
+                int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
 		              allstrips[m_i]=strips;
@@ -492,13 +449,8 @@ class gemTreeReader {
               }
             }
           }
-          //std::sort(tmp_strips.begin(), tmp_strips.end());
-          //for (unsigned ia = 0; ia < 128; ia++) {
-          //  m_hiCh128chipFired[m]->Fill(tmp_strips[ia]);
-          //}
-          //tmp_strips.clear();
         } 
-      //} // end of VFAT loop
+      } // end of VFAT loop
     }
   void fillEventHistograms(const int& m_BX, const int& m_BC, const int & m_nVFAT, const int & m_nBadVFAT, const int & m_nGoodVFAT, const int & m_firedchannels, const int& m_notfiredchannels, TH1I* m_hiDiffBXandBC, TH1I* m_hiRatioBXandBC, TH1F* m_hiVFAT, TH1I* m_hiFake, TH1I* m_hiSignal, TH1I* m_hichfired, TH1I* m_hichnotfired, TH1F* m_hiVFATfired_perevent[], int vfatId[], TH1I* m_hiClusterMult, TH1I* m_hiClusterSize )
     {
@@ -561,12 +513,12 @@ class gemTreeReader {
     void printMaps()
     {
       std::map<int,int>::iterator it;
-      //for (int ism = 0; ism < NVFAT; ism++){
-        int ism = 11;
+      for (int ism = 0; ism < NVFAT; ism++){
         std::cout << "Map for chip " << ism << std::endl;
         for (it = strip_maps[ism].begin(); it != strip_maps[ism].end(); ++it){
           std::cout << "Channel : " << it->first << " Strip : " << it->second << std::endl;
         }
-      //}
+      }
     }
+    #include "dqmCanvases.cxx"
 };
