@@ -11,3 +11,4 @@ src/obj/
 src/dic/
 work
 data
+!data/*.csv

@@ -194,6 +194,7 @@ class Event : public TObject {
         Event();
         virtual ~Event();
         void SetHeader(Int_t i, Int_t run, Int_t date);
+        int GetEventNumber(){return fEvtHdr.GetEvtNum();}
         void Build(const uint8_t &AmcNo_, 
             const uint8_t &b0000_,
             const uint32_t &LV1ID_, 

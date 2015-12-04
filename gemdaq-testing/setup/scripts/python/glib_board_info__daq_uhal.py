@@ -3,7 +3,8 @@
 import sys, re
 import time, datetime, os
 
-sys.path.append('${GEM_PYTHON_PATH}')
+sys.path.append('/home/mdalchen/gemdev/gem-daq-code/gemdaq-testing/setup/scripts/src')
+#sys.path.append('/opt/gemdaq/firmware/testing/src')
 
 import uhal
 from registers_uhal import *
@@ -37,7 +38,6 @@ parser.add_option("--testbeam", action="store_true", dest="testbeam",
 		  help="fixed IP address for testbeam", metavar="testbeam")
 parser.add_option("--daq_enable", type="int", dest="daq_enable",
 		  help="enable daq output", metavar="daq_enable", default=-1)
-
 (options, args) = parser.parse_args()
 
 uhal.setLogLevelTo( uhal.LogLevel.FATAL )
@@ -64,6 +64,7 @@ print
 
 if not options.userOnly:
 	getSystemInfo(glib)
+	
 print
 print "--=======================================--"
 print "-> DAQ INFORMATION"
@@ -73,8 +74,8 @@ print
 print "-> GLIB L1A ID :0x%08x"%(readRegister(glib,"GLIB.DAQ.L1AID"))
 
 if (options.daq_enable>=0):
-        writeRegister(glib, "GLIB.DAQ.CONTROL", options.daq_enable)
-        print "Reset daq_enable: %i"%(options.daq_enable)
+  writeRegister(glib, "GLIB.DAQ.CONTROL", options.daq_enable)
+  print "Reset daq_enable: %i"%(options.daq_enable)
 
 print "-> GLIB DAQ control reg :0x%08x"%(readRegister(glib,"GLIB.DAQ.CONTROL"))
 print "-> GLIB DAQ status reg :0x%08x"%(readRegister(glib,"GLIB.DAQ.STATUS"))
@@ -93,7 +94,7 @@ print "-> GLIB DAQ debug3 :0x%08x"%(readRegister(glib,"GLIB.DAQ.DEBUG_3"))
 print "-> GLIB DAQ debug4 :0x%08x"%(readRegister(glib,"GLIB.DAQ.DEBUG_4"))
 print "-> GLIB DAQ debug5 :0x%08x"%(readRegister(glib,"GLIB.DAQ.DEBUG_5"))
 print "-> GLIB DAQ debug6 :0x%08x"%(readRegister(glib,"GLIB.DAQ.DEBUG_6"))
-	
+
 print
 print "--=======================================--"
 print "-> BOARD USER INFORMATION"
