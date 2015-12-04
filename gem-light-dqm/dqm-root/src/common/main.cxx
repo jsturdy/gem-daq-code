@@ -3,6 +3,8 @@
 #include "dqm-root/src/common/GEMClusterization/GEMStrip.cc"
 #include "dqm-root/src/common/GEMClusterization/GEMCluster.cc"
 #include "dqm-root/src/common/GEMClusterization/GEMClusterizer.cc"
+
+#include "TApplication.h"
 using namespace std;
 int main(int argc, char** argv)
 {
@@ -22,6 +24,10 @@ int main(int argc, char** argv)
       std::cout << "[MAIN]: will print histograms" << std::endl;
     }
   }
+
+#ifndef __CINT__
+    TApplication App("App", &argc, argv);
+#endif
   std::cout << "[MAIN]: Slot table : " << m_slot_file << std::endl;
   gemTreeWriter *m_gemTreeWriter = new gemTreeWriter();
   m_gemTreeWriter->makeTree(m_dat_filename, m_slot_file);
