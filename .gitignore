@@ -7,8 +7,3 @@
 !*.h
 !*.gitignore
 !*.py
-!setup/etc/addresstables/*.xml
-!setup/paths.sh
-!setup/etc/profile.d/*sh
-!setup/etc/yum.repos.d/*.repo
-!*.rules
