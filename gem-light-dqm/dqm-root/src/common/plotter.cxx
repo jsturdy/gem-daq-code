@@ -327,6 +327,7 @@ void setTitles(TH1 *h, TString xtitle, TString ytitle)
 {
     h->GetXaxis()->SetTitle(xtitle);
     h->GetYaxis()->SetTitle(ytitle);
+    h->GetYaxis()->SetTitleOffset(1.5);
 }
 
 void setTitles(TH1 *h, TString xtitle, TString ytitle, TString ztitle)
