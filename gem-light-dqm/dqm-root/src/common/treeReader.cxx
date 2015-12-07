@@ -329,7 +329,9 @@ class gemTreeReader {
         allstrips.clear();
       }// end of loop over events
 
+      logger_->addResponseEfficiency(hiClusterMult[1]->GetEntries()-hiClusterMult[1]->GetBinContent(1), hiClusterMult[1]->GetBinContent(1));
       logger_->writeLog();
+      logger_->printLog();
       delete logger_;
       for (int st = 0; st < 3; st++){
         dir[st]->cd();

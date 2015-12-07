@@ -58,7 +58,7 @@ void printIntegrityCanvas()
   integrity->Print("integrity.pdf","pdf");
   integrity->Draw();
   integrity->Update();
-  integrity->WaitPrimitive();
+  //integrity->WaitPrimitive();
 }
 THStack *stackH1(TString title, TH1 * h1, TH1 * h2, int cl1, int cl2, bool scale=false)
 {
@@ -137,7 +137,7 @@ void printOccupancyCanvas()
   occupancy->Print("occupancy.pdf","pdf");
   occupancy->Draw();
   occupancy->Update();
-  occupancy->WaitPrimitive();
+  //occupancy->WaitPrimitive();
 }
 
 void printClusterSizeCanvas()
@@ -164,9 +164,11 @@ void printClusterSizeCanvas()
     hiClusterSizeEta[1][NETA-p_i]->Draw();
     gPad->SetLogy();
   }
+  clusterSize->Print("clusterSize.png","png");
+  clusterSize->Print("clusterSize.pdf","pdf");
   clusterSize->Draw();
   clusterSize->Update();
-  clusterSize->WaitPrimitive();
+  //clusterSize->WaitPrimitive();
   gStyle->SetOptStat(0000);
 }
 
@@ -194,6 +196,8 @@ void printClusterMultCanvas()
     hiClusterMultEta[1][NETA-p_i]->Draw();
     gPad->SetLogy();
   }
+  clusterMult->Print("clusterMult.png","png");
+  clusterMult->Print("clusterMult.pdf","pdf");
   clusterMult->Draw();
   clusterMult->Update();
   clusterMult->WaitPrimitive();
