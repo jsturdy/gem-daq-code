@@ -12,6 +12,9 @@
 #include <vector>
 #include <cstdint>
 #include <stdexcept>
+#include <algorithm>
+#include <functional>
+#include <array>
 #include <TFile.h>
 #include <TKey.h>
 #include <TDirectory.h>
@@ -109,7 +112,11 @@ class gemTreeReader {
     std::string ofilename;
     bool print_hist;
 
+    //TString occupancy_plots = {"BeamProfile", "", "1100", "1110", "CRC1_vs_CRC2", "DiffCRC", "_VFAT"};
+
   //std::vector<std::pair<int,int>> strip_maps[NVFAT];
+    std::vector<int> tmp_strips;
+
     std::map<int,int> strip_maps[NVFAT];
     std::string maps[NVFAT];
     std::map<int, GEMStripCollection> allstrips;
@@ -219,6 +226,10 @@ class gemTreeReader {
       //std::string run_ = tmp_.substr(16, tmp_.size()-4);
       logger* logger_ = new logger(tmp_,run_);
       // loop over tree entries
+      //
+          for (unsigned ia = 0; ia < 128; ia++) {
+            tmp_strips.push_back(0);
+          }
       for (Int_t i = 0; i < nentries; i++)
       {
         //if ((DEBUG) && (i>10)) break;
@@ -308,6 +319,7 @@ class gemTreeReader {
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Event histograms filled for event  " << i << std::endl;   
         logger_->addEvent(i,eventIsOK,nVFAT[0],nGoodVFAT[0],nBadVFAT[0]);
       }// end of loop over events
+
       logger_->writeLog();
       delete logger_;
       for (int st = 0; st < 3; st++){
@@ -327,11 +339,14 @@ class gemTreeReader {
       ofile->Write();
       if (print_hist){
         gErrorIgnoreLevel = kWarning; // Supress the Info outputs from ROOT
+        gROOT->SetBatch(kTRUE);// don't draw all the canvases
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
         TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
         for (int id = 0; id < 3; id++){
           printHistograms(dir[id],"png",prefix[id]);
         }
+        gROOT->SetBatch(kFALSE);
+        printDQMCanvases();
       }
     }
 
@@ -399,10 +414,11 @@ class gemTreeReader {
             if (chan < 64){
               chan0xfFiredchip = ((m_vfat->lsData() >> chan) & 0x1);
               if(chan0xfFiredchip) {
+                tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
                 int m_i = (int) m_vfat->SlotNumber()%8;
-                int m_j = strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
+                int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
 		              allstrips[m_i]=strips;
@@ -416,10 +432,11 @@ class gemTreeReader {
             } else {
               chan0xfFiredchip = ((m_vfat->msData() >> (chan-64)) & 0x1);
               if(chan0xfFiredchip) {
+                tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
                 int m_i = (int) m_vfat->SlotNumber()%8;
-                int m_j = strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
+                int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
 		              allstrips[m_i]=strips;
@@ -471,7 +488,7 @@ class gemTreeReader {
         std::cout << "\nThe file: " << icsvfile_ << " is missing.\n" << std::endl;
         return;
       }  
-     for (int il = 0; il < 128; il++) {
+      for (int il = 0; il < 128; il++) {
         std::string line;
         std::getline(icsvfile_, line);
         if (DEBUG) std::cout << "[gemTreeReader]: Read line : " << line << std::endl; 
@@ -503,4 +520,5 @@ class gemTreeReader {
         }
       }
     }
+    #include "dqmCanvases.cxx"
 };

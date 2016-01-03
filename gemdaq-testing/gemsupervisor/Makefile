@@ -26,7 +26,7 @@ Sources =version.cc
 Sources+=tbutils/VFAT2XMLParser.cc
 Sources+=tbutils/GEMTBUtil.cc tbutils/ThresholdScan.cc tbutils/LatencyScan.cc tbutils/ADCScan.cc
 Sources+=GEMGLIBSupervisorWeb.cc
-Sources+=GEMSupervisor.cc GEMSupervisorWeb.cc
+Sources+=GEMSupervisor.cc GEMSupervisorWeb.cc GEMSupervisorMonitor.cc
 
 DynamicLibrary=gem_supervisor
 
@@ -35,8 +35,10 @@ IncludeDirs+=$(BUILD_HOME)/$(Project)/gembase/include
 IncludeDirs+=$(BUILD_HOME)/$(Project)/gemutils/include
 IncludeDirs+=$(BUILD_HOME)/$(Project)/gemhardware/include
 IncludeDirs+=$(BUILD_HOME)/$(Project)/gemreadout/include
+IncludeDirs+=$(BUILD_HOME)/gem-light-dqm/dqm-root/include
 IncludeDirs+=$(XDAQ_ROOT)/include
 IncludeDirs+=$(uHALROOT)/include
+IncludeDirs+=$(ROOTDIR)/include 
 
 #
 DependentLibraryDirs =$(XDAQ_ROOT)/lib
