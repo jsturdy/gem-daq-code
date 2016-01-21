@@ -331,7 +331,7 @@ class gemTreeReader {
 
       logger_->addResponseEfficiency(hiClusterMult[1]->GetEntries()-hiClusterMult[1]->GetBinContent(1), hiClusterMult[1]->GetBinContent(1));
       logger_->writeLog();
-      logger_->printLog();
+      //logger_->printLog();
       delete logger_;
       for (int st = 0; st < 3; st++){
         dir[st]->cd();
@@ -355,7 +355,7 @@ class gemTreeReader {
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
         TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
         for (int id = 0; id < 3; id++){
-          printHistograms(dir[id],"png",prefix[id]);
+          printHistograms(dir[id],"png",prefix[id], true);
         }
         gROOT->SetBatch(kFALSE);
         printDQMCanvases();

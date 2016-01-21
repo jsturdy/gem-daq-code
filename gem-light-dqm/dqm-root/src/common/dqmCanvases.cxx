@@ -1,5 +1,6 @@
 void printDQMCanvases()
 {
+  gROOT->SetBatch(kTRUE);
   printIntegrityCanvas();
   printOccupancyCanvas();
   printClusterSizeCanvas();
@@ -56,8 +57,8 @@ void printIntegrityCanvas()
 
   integrity->Print("integrity.png","png");
   integrity->Print("integrity.pdf","pdf");
-  integrity->Draw();
-  integrity->Update();
+  //integrity->Draw();
+  //integrity->Update();
   //integrity->WaitPrimitive();
 }
 THStack *stackH1(TString title, TH1 * h1, TH1 * h2, int cl1, int cl2, bool scale=false)
@@ -135,8 +136,8 @@ void printOccupancyCanvas()
   }
   occupancy->Print("occupancy.png","png");
   occupancy->Print("occupancy.pdf","pdf");
-  occupancy->Draw();
-  occupancy->Update();
+  //occupancy->Draw();
+  //occupancy->Update();
   //occupancy->WaitPrimitive();
 }
 
@@ -166,8 +167,8 @@ void printClusterSizeCanvas()
   }
   clusterSize->Print("clusterSize.png","png");
   clusterSize->Print("clusterSize.pdf","pdf");
-  clusterSize->Draw();
-  clusterSize->Update();
+  //clusterSize->Draw();
+  //clusterSize->Update();
   //clusterSize->WaitPrimitive();
   gStyle->SetOptStat(0000);
 }
@@ -198,8 +199,8 @@ void printClusterMultCanvas()
   }
   clusterMult->Print("clusterMult.png","png");
   clusterMult->Print("clusterMult.pdf","pdf");
-  clusterMult->Draw();
-  clusterMult->Update();
-  clusterMult->WaitPrimitive();
+  //clusterMult->Draw();
+  //clusterMult->Update();
+  //clusterMult->WaitPrimitive();
   gStyle->SetOptStat(0000);
 }
