@@ -1,11 +1,15 @@
-struct ErrorDetails
+struct dqmerror
+{
+  unsigned int errorCode;
+  std::string amcID;
+  std::string chamberID;
+  std::string chipID;
+  std::string errorMessage;
+}
+struct EventError
 {
   long int eventNumber;
-  unsigned int[] errorCode;
-  std::string[] amcID;
-  std::string[] chamberID;
-  std::string[] chipID;
-  std::string[] errorMessage;
+  std::vector<dqmerror> errors;
 };
 
 class GEMDQMchecker
@@ -18,7 +22,7 @@ class GEMDQMchecker
       m_checkPerformed = false;
     }
     virtual ~GEMDQMchecker(){}
-    bool getEventStatus(Event *e)
+    bool getEventStatus(Event &e)
     {
       if (m_checkPerformed) return m_eventStatus;
       else throw std::logic_error("Event status check should be completed before calling this method");
@@ -28,5 +32,5 @@ class GEMDQMchecker
   private:
     bool m_eventStatus;
     bool m_checkPerformed;
-    ErrorDetails m_error;
+    EventError m_error;
 };

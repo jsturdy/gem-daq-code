@@ -139,6 +139,101 @@ class GEBdata {
 
 };
 
+class AMCdata {
+
+    private:
+        
+        //uint64_t header1;             // AmcNo:4      0000:4     LV1ID:24   BXID:12     DataLgth:20 
+        uint8_t fAmcNo;                     // AMC (GLIB) slot number in the crate
+        uint8_t fb0000;                     // Control bit
+        uint32_t fLV1ID;                    // Trigger ID
+        uint32_t fBXID;                     // Bunch crossing ID 
+        uint32_t fDataLgth;                 // What is this?
+        //uint64_t header2;             // User:32      OrN:16     BoardID:16
+        uint16_t fOrN;                   // Orbit counter
+        uint16_t fBoardID;
+        //uint64_t header3;               // DAVList:24   BufStat:24 DAVCount:5 FormatVer:3 MP7BordStat:8 
+        uint32_t fDAVList;                // Reserved by AMC(GLIB)
+        uint32_t fBufStat;                // AMC(GLIB) buffer status
+        uint8_t fDAVCount;                // Reserved by AMC(GLIB)
+        uint8_t fFormatVer;               // Data Format version flag
+        uint8_t fMP7BordStat;             // AMC board status
+
+        std::vector<GEBdata> fgebs;      // Should we use vector or better have TClonesArray here?
+        //uint64_t trailer2;            // EventStat:32 GEBerrFlag:24  
+        uint32_t fEventStat;
+        uint32_t fGEBerrFlag;
+        //uint64_t trailer1;            // crc:32       LV1IDT:8   0000:4     DataLgth:20 
+        uint32_t fcrc;
+        uint8_t fLV1IDT;
+        uint8_t fb0000T;
+        uint32_t fDataLgthT;
+
+    public:
+        AMCdata(){} 
+        AMCdata(const uint8_t &AmcNo_, 
+            const uint8_t &b0000_,
+            const uint32_t &LV1ID_, 
+            const uint32_t &BXID_, 
+            const uint32_t &DataLgth_, 
+            const uint16_t &OrN_, 
+            const uint16_t &BoardID_, 
+            const uint32_t &DAVList_, 
+            const uint32_t &BufStat_, 
+            const uint8_t &DAVCount_, 
+            const uint8_t &FormatVer_, 
+            const uint8_t &MP7BordStat_, 
+            const uint32_t &EventStat_, 
+            const uint32_t &GEBerrFlag_, 
+            const uint32_t &crc_, 
+            const uint8_t &LV1IDT_, 
+            const uint8_t &b0000T_, 
+            const uint32_t &DataLgthT_
+            ):
+            fAmcNo(AmcNo_),
+            fb0000(b0000_),
+            fLV1ID(LV1ID_),
+            fBXID(BXID_),
+            fDataLgth(DataLgth_),
+            fOrN(OrN_),
+            fBoardID(BoardID_),
+            fDAVList(DAVList_),
+            fBufStat(BufStat_),
+            fDAVCount(DAVCount_),
+            fFormatVer(FormatVer_),
+            fMP7BordStat(MP7BordStat_),
+            fEventStat(EventStat_),
+            fGEBerrFlag(GEBerrFlag_),
+            fcrc(crc_),
+            fLV1IDT(LV1IDT_),
+            fb0000T(b0000T_),
+            fDataLgthT(DataLgthT_){}
+        ~AMCdata(){}
+        void addGEBdata(const GEBdata &geb){fgebs.push_back(geb);}
+
+        uint8_t  AmcNo      (){ return fAmcNo;      }
+        uint8_t  b0000      (){ return fb0000;      }
+        uint32_t LV1ID      (){ return fLV1ID;      }       
+        uint32_t BXID       (){ return fBXID;       }        
+        uint32_t DataLgth   (){ return fDataLgth;   }     
+        uint16_t OrN        (){ return fOrN;        }    
+        uint16_t BoardID    (){ return fBoardID;    }
+        uint32_t DAVList    (){ return fDAVList;    }
+        uint32_t BufStat    (){ return fBufStat;    }
+        uint8_t  DAVCount   (){ return fDAVCount;   }
+        uint8_t  FormatVer  (){ return fFormatVer;  }
+        uint8_t  MP7BordStat(){ return fMP7BordStat;}
+
+        std::vector<GEBdata> gebs(){ return fgebs;}
+
+        uint32_t EventStat  (){ return fEventStat;  }
+        uint32_t GEBerrFlag (){ return fGEBerrFlag; }
+        uint32_t crc        (){ return fcrc;        }
+        uint8_t  LV1IDT     (){ return fLV1IDT;     }
+        uint8_t  b0000T     (){ return fb0000T;     }
+        uint32_t DataLgthT  (){ return fDataLgthT;  }
+};
+
 class EventHeader {
 
     private:
@@ -162,31 +257,7 @@ class Event : public TObject {
     private:
         EventHeader    fEvtHdr;
         
-        //uint64_t header1;             // AmcNo:4      0000:4     LV1ID:24   BXID:12     DataLgth:20 
-        uint8_t fAmcNo;
-        uint8_t fb0000;
-        uint32_t fLV1ID;                    // What is this? Which var format should be used?
-        uint32_t fBXID;                     // Is it Bunch crossing ID? Should it be Int_t?
-        uint32_t fDataLgth;                 // What is this?
-        //uint64_t header2;             // User:32      OrN:16     BoardID:16
-        uint16_t fOrN;                   // What is this?
-        uint16_t fBoardID;
-        //uint64_t header3;               // DAVList:24   BufStat:24 DAVCount:5 FormatVer:3 MP7BordStat:8 
-        uint32_t fDAVList;
-        uint32_t fBufStat;
-        uint8_t fDAVCount;
-        uint8_t fFormatVer;
-        uint8_t fMP7BordStat;
-
-        std::vector<GEBdata> fgebs;      // Should we use vector or better have TClonesArray here?
-        //uint64_t trailer2;            // EventStat:32 GEBerrFlag:24  
-        uint32_t fEventStat;
-        uint32_t fGEBerrFlag;
-        //uint64_t trailer1;            // crc:32       LV1IDT:8   0000:4     DataLgth:20 
-        uint32_t fcrc;
-        uint8_t fLV1IDT;
-        uint8_t fb0000T;
-        uint32_t fDataLgthT;
+        std::vector<AMCdata> famcs;      // 
 
         bool fisEventGood;
 
@@ -195,49 +266,12 @@ class Event : public TObject {
         virtual ~Event();
         void SetHeader(Int_t i, Int_t run, Int_t date);
         int GetEventNumber(){return fEvtHdr.GetEvtNum();}
-        void Build(const uint8_t &AmcNo_, 
-            const uint8_t &b0000_,
-            const uint32_t &LV1ID_, 
-            const uint32_t &BXID_, 
-            const uint32_t &DataLgth_, 
-            const uint16_t &OrN_, 
-            const uint16_t &BoardID_, 
-            const uint32_t &DAVList_, 
-            const uint32_t &BufStat_, 
-            const uint8_t &DAVCount_, 
-            const uint8_t &FormatVer_, 
-            const uint8_t &MP7BordStat_, 
-            const uint32_t &EventStat_, 
-            const uint32_t &GEBerrFlag_, 
-            const uint32_t &crc_, 
-            const uint8_t &LV1IDT_, 
-            const uint8_t &b0000T_, 
-            const uint32_t &DataLgthT_,
-            bool isEventGood_);
-        void addGEBdata(const GEBdata &geb){fgebs.push_back(geb);}
+        void Build(bool isEventGood_);
+        void addAMCdata(const AMCdata &amc){famcs.push_back(amc);}
         void Clear();
 
-        uint8_t  AmcNo      (){ return fAmcNo;      }
-        uint8_t  b0000      (){ return fb0000;      }
-        uint32_t LV1ID      (){ return fLV1ID;      }       
-        uint32_t BXID       (){ return fBXID;       }        
-        uint32_t DataLgth   (){ return fDataLgth;   }     
-        uint16_t OrN        (){ return fOrN;        }    
-        uint16_t BoardID    (){ return fBoardID;    }
-        uint32_t DAVList    (){ return fDAVList;    }
-        uint32_t BufStat    (){ return fBufStat;    }
-        uint8_t  DAVCount   (){ return fDAVCount;   }
-        uint8_t  FormatVer  (){ return fFormatVer;  }
-        uint8_t  MP7BordStat(){ return fMP7BordStat;}
+        std::vector<AMCdata> amcs(){ return famcs;}
 
-        std::vector<GEBdata> gebs(){ return fgebs;}
-
-        uint32_t EventStat  (){ return fEventStat;  }
-        uint32_t GEBerrFlag (){ return fGEBerrFlag; }
-        uint32_t crc        (){ return fcrc;        }
-        uint8_t  LV1IDT     (){ return fLV1IDT;     }
-        uint8_t  b0000T     (){ return fb0000T;     }
-        uint32_t DataLgthT  (){ return fDataLgthT;  }
         bool     isEventGood(){ return fisEventGood;}
 
         ClassDef(Event,1)               //Event structure
