@@ -258,12 +258,13 @@ class gemTreeReader {
         // Retrieve next entry
         branch->GetEntry(i);
         bool eventIsOK = event->isEventGood();
+        vector<AMCdata> v_amc = event->amcs();
         // retrieve bunch crossing from evet
-        uint32_t BX = event->BXID();
+        uint32_t BX = v_amc[0].BXID();
         uint16_t BC;
         // create vector of GEBdata. For data format details look at Event.h
         vector<GEBdata> v_geb;
-        v_geb = event->gebs();
+        v_geb = v_amc[0].gebs();
         // loop over gebs
         for (Int_t j = 0; j < v_geb.size(); j++)
         {
