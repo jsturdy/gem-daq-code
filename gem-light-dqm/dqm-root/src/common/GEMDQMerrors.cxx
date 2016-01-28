@@ -5,17 +5,18 @@ struct dqmerror
 {
   std::string amcID;
   std::string chamberID;
-  std::string chipID;
+  //std::string chipID;
+  uint16_t chipID;
   int slotNumber;
   int errorCode;
-}
+};
 
 class GEMDQMerrors
 {
   public:
     GEMDQMerrors(){}
-    ~GEMDQMchecker(){}
-    void addError(int evN_, std::string & amcID_, std::string & chamberID_, std::string & chipID_, int slotNumber_, int errorCode_)
+    ~GEMDQMerrors(){}
+    void addError(int &evN_, const std::string & amcID_, const std::string & chamberID_, uint16_t chipID_, int slotNumber_, int errorCode_)
     {
       m_error.amcID = amcID_;
       m_error.chamberID = chamberID_;
@@ -33,10 +34,10 @@ class GEMDQMerrors
     }
     void saveErrors()
     {
-      for (auto it=m_errors.begin()l it!=m_errors.end(); ++it){
+      for (auto it=m_errors.begin(); it!=m_errors.end(); ++it){
         std::cout << "Error codes for event # " << it->first << std::endl;
         for (auto jt=it->second.begin(); jt!=it->second.end(); ++jt){
-          std::cout << jt->errorCode << ", ";
+          std::cout << std::hex << "Chip ID " << jt->chipID << " Slot Number " << std::dec << jt->slotNumber << " Error code " << jt->errorCode << std::endl;
         }
       }
     }

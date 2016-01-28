@@ -53,6 +53,8 @@
 #include "GEMClusterization/GEMClusterizer.h"
 #include "plotter.cxx"
 #include "logger.cxx"
+#include "integrity_checker.cxx"
+#include "GEMDQMerrors.cxx"
 
 /**
 * GEM Tree Reader example (reader) application 
@@ -233,12 +235,18 @@ class gemTreeReader {
       std::string run_ = ofilename.substr(16,16);
       //std::string run_ = tmp_.substr(16, tmp_.size()-4);
       logger* logger_ = new logger(tmp_,run_);
+
+      //create errors container
+
+      GEMDQMerrors * errors_ = new GEMDQMerrors();
+
       // loop over tree entries
       //
           for (unsigned ia = 0; ia < 128; ia++) {
             tmp_strips.push_back(0);
           }
-      for (Int_t i = 0; i < nentries; i++)
+      //for (Int_t i = 0; i < nentries; i++)
+      for (int i = 0; i < nentries; i++)
       {
         //if ((DEBUG) && (i>10)) break;
         if (DEBUG) std::cout << "[gemTreeReader]: Processing event " << i << std::endl;
@@ -277,6 +285,9 @@ class gemTreeReader {
           // loop over vfats
           for (Int_t k = 0; k < v_vfat.size(); k++)
           {
+            GEMDQMIntegrityChecker *intCheck = new GEMDQMIntegrityChecker(v_vfat.at(k));
+            if (!intCheck->check()) errors_->addError(i,"AMC0","C0",v_vfat.at(k).ChipID(), v_vfat.at(k).SlotNumber(), intCheck->getErrorCode());
+            delete intCheck;
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT # "  <<  k << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: EC of the vfat inside loop===> "  <<  static_cast<uint32_t>(v_vfat.at(k).EC()) << std::hex << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: BC of the vfat inside loop===> "  <<  v_vfat.at(k).BC() << std::hex << std::endl;   
@@ -329,6 +340,9 @@ class gemTreeReader {
         logger_->addEvent(i,eventIsOK,nVFAT[0],nGoodVFAT[0],nBadVFAT[0]);
         allstrips.clear();
       }// end of loop over events
+
+      errors_->saveErrors();
+      delete errors_;
 
       logger_->addResponseEfficiency(hiClusterMult[1]->GetEntries()-hiClusterMult[1]->GetBinContent(1), hiClusterMult[1]->GetBinContent(1));
       logger_->writeLog();
