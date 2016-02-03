@@ -192,7 +192,7 @@ class AMCdata {
             ):
             fAmcNo(AmcNo_),
             fb0000(b0000_),
-            fLV1ID(LV1ID_),
+            fL1AID(L1AID_),
             fBXID(BXID_),
             fDataLgth(DataLgth_),
             fOrN(OrN_),
@@ -213,7 +213,7 @@ class AMCdata {
 
         uint8_t  AmcNo      (){ return fAmcNo;      }
         uint8_t  b0000      (){ return fb0000;      }
-        uint32_t LV1ID      (){ return fLV1ID;      }       
+        uint32_t L1AID      (){ return fL1AID;      }       
         uint32_t BXID       (){ return fBXID;       }        
         uint32_t DataLgth   (){ return fDataLgth;   }     
         uint16_t OrN        (){ return fOrN;        }    
