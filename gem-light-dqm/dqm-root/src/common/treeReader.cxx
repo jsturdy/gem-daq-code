@@ -148,6 +148,7 @@ class gemTreeReader {
     TH2I* hiBeamProfile              [3];
 
     TDirectory *dir[3];
+    TDirectory *subdir[24];
 
     int counters_[4]; // [0] - total events
                       // [1] - good events
@@ -189,6 +190,12 @@ class gemTreeReader {
         hiBeamProfile  [i] = new TH2I((dirname[i]+"_BeamProfile").c_str(), "Beam Profile", 8, 0, 8, 384, 0, 384);
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Main histograms ["<<i<<"] created" << std::endl;   
         for(int j=0; j < NVFAT; j++){
+	  //`subdir[j] = ofile->Get(dirname[i].c_str());
+	  //subdir[j]->cd();
+	  //subdir[j]->mkdir(dirname[i].c_str() + type[j].c_str());
+	  gDirectory->cd(dirname[i].c_str());
+          gDirectory->mkdir(type[j].c_str());
+          gDirectory->cd(t_string.c_str());
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Start 2d array of histograms ["<<i<<"]["<<j<<"] creation" << std::endl;   
           sprintf (name[0]  , (dirname[i]+"_hiVFATfired_perevent_%s").c_str(), type[j].c_str());
           sprintf (title[0] , "VFAT chip %s fired per event", type[j].c_str());
