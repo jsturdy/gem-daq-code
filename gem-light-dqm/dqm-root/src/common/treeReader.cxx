@@ -158,6 +158,7 @@ class gemTreeReader {
     void bookHistograms()
     {
       std::string dirname[3] = {"AllEvents", "GoodEvents", "BadEvents"};
+      std::string tempname = "OtherData";
       char name[4][128], title[4][500];
       std::string type[NVFAT] = {"Slot0" , "Slot1" , "Slot2" , "Slot3" , "Slot4" , "Slot5" , "Slot6" , "Slot7", 
                               "Slot8" , "Slot9" , "Slot10", "Slot11", "Slot12", "Slot13", "Slot14", "Slot15", 
@@ -167,6 +168,8 @@ class gemTreeReader {
         dir[i] = ofile->mkdir(dirname[i].c_str());
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Directory " << i+1 << " created" << std::endl;   
         dir[i]->cd();
+	gDirectory->mkdir(tempname.c_str());
+	gDirectory->cd(tempname.c_str());
         hiVFAT         [i] = new TH1F((dirname[i]+"_VFAT").c_str(), "Number VFAT blocks per event", 24,  0., 24. );
         hiVFATsn       [i] = new TH1F((dirname[i]+"_VFATsn").c_str(), "VFAT slot number", 24,  0., 24. );
         hiDiffBXandBC  [i] = new TH1I((dirname[i]+"_DiffBXandBC").c_str(), "Difference of BX and BC", 100000, 0x0, 0x1869F );
@@ -190,12 +193,9 @@ class gemTreeReader {
         hiBeamProfile  [i] = new TH2I((dirname[i]+"_BeamProfile").c_str(), "Beam Profile", 8, 0, 8, 384, 0, 384);
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Main histograms ["<<i<<"] created" << std::endl;   
         for(int j=0; j < NVFAT; j++){
-	  //`subdir[j] = ofile->Get(dirname[i].c_str());
-	  //subdir[j]->cd();
-	  //subdir[j]->mkdir(dirname[i].c_str() + type[j].c_str());
-	  gDirectory->cd(dirname[i].c_str());
+	  dir[i]->cd();
           gDirectory->mkdir(type[j].c_str());
-          gDirectory->cd(t_string.c_str());
+          gDirectory->cd(type[j].c_str());
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Start 2d array of histograms ["<<i<<"]["<<j<<"] creation" << std::endl;   
           sprintf (name[0]  , (dirname[i]+"_hiVFATfired_perevent_%s").c_str(), type[j].c_str());
           sprintf (title[0] , "VFAT chip %s fired per event", type[j].c_str());
