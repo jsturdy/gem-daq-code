@@ -1,3 +1,42 @@
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+
+#if !defined(__CINT__) || defined(__MAKECINT__)
+#include "TProfile.h"
+#include "TLegend.h"
+#include "TROOT.h"
+#include "TVirtualPad.h"
+#include "TLine.h"
+#include "TCanvas.h"
+#include "TPostScript.h"
+#include "THStack.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TF1.h"
+#include "TAxis.h"
+#include "TGaxis.h"
+#include "TMath.h"
+#include "TROOT.h"
+#include "TStyle.h"
+#include "TGraph.h"
+#include "TGraphAsymmErrors.h"
+#include "TObject.h"
+#include "TH1.h"
+#include "TH1F.h"
+#include <TFile.h>
+#include "TPaveStats.h"
+#include <math.h>
+#include "TBufferJSON.h"
+
+#include <iostream>
+
+//using namespace std;
+
+#endif
+
+
 void printDQMCanvases()
 {
   gROOT->SetBatch(kTRUE);
@@ -57,6 +96,13 @@ void printIntegrityCanvas()
 
   integrity->Print("integrity.png","png");
   integrity->Print("integrity.pdf","pdf");
+
+  ofstream jsonfile;
+  jsonfile.open("integrity.json");
+  TString json = TBufferJSON::ConvertToJSON(integrity);
+  jsonfile << json;
+  jsonfile.close();
+
   //integrity->Draw();
   //integrity->Update();
   //integrity->WaitPrimitive();
@@ -136,6 +182,13 @@ void printOccupancyCanvas()
   }
   occupancy->Print("occupancy.png","png");
   occupancy->Print("occupancy.pdf","pdf");
+
+  ofstream jsonfile;
+  jsonfile.open("occupancy.json");
+  TString json = TBufferJSON::ConvertToJSON(occupancy);
+  jsonfile << json;
+  jsonfile.close();
+
   //occupancy->Draw();
   //occupancy->Update();
   //occupancy->WaitPrimitive();
@@ -167,6 +220,13 @@ void printClusterSizeCanvas()
   }
   clusterSize->Print("clusterSize.png","png");
   clusterSize->Print("clusterSize.pdf","pdf");
+
+  ofstream jsonfile;
+  jsonfile.open("clusterSize.json");
+  TString json = TBufferJSON::ConvertToJSON(clusterSize);
+  jsonfile << json;
+  jsonfile.close();
+
   //clusterSize->Draw();
   //clusterSize->Update();
   //clusterSize->WaitPrimitive();
@@ -199,6 +259,13 @@ void printClusterMultCanvas()
   }
   clusterMult->Print("clusterMult.png","png");
   clusterMult->Print("clusterMult.pdf","pdf");
+
+  ofstream jsonfile;
+  jsonfile.open("clusterMult.json");
+  TString json = TBufferJSON::ConvertToJSON(clusterMult);
+  jsonfile << json;
+  jsonfile.close();
+
   //clusterMult->Draw();
   //clusterMult->Update();
   //clusterMult->WaitPrimitive();

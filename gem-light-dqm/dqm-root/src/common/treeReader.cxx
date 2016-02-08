@@ -44,6 +44,7 @@
 #include <TTree.h>
 #include <TBranch.h>
 #include <TError.h>
+#include <TBufferJSON.h>
 
 #include "gem/datachecker/GEMDataChecker.h"
 #include "gem/readout/GEMslotContents.h"
