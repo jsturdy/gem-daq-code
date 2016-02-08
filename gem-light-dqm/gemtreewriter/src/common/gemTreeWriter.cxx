@@ -190,7 +190,7 @@ class gemTreeWriter {
           //BX     = vfat.BXfrOH;  
           BX = ((0x000000ff & EC) << 24) | BC;
           setVFATBlockWords(vfat);
-          gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker::GEMDataChecker();
+          gem::datachecker::GEMDataChecker *dc = new gem::datachecker::GEMDataChecker();
           uint16_t CRC_calc = dc->checkCRC(vfatBlockWords, 0);
           delete dc;
           uint32_t t_chipID = static_cast<uint32_t>(ChipID);
