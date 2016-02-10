@@ -352,7 +352,7 @@ void printHistograms(TDirectory* dir, TString type, TString prefix="")
       h->Draw("colz");
       TString name =  h->GetTitle();
       if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
-      c->Print(prefix+name+"."+type,type);
+      c->Print(prefix+"/"+name+"."+type,type);
       delete c;
   }
 }

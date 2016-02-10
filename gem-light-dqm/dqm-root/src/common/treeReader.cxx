@@ -349,17 +349,20 @@ class gemTreeReader {
         gROOT->SetBatch(kTRUE);// don't draw all the canvases
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
         TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
-        //TString prefix[3] = {"AllEvents","GoodEvents","BadEvents"};
-        std::string type[NVFAT] = {"Slot0" , "Slot1" , "Slot2" , "Slot3" , "Slot4" , "Slot5" , "Slot6" , "Slot7",
-                              "Slot8" , "Slot9" , "Slot10", "Slot11", "Slot12", "Slot13", "Slot14", "Slot15",
-                              "Slot16", "Slot17", "Slot18", "Slot19", "Slot20", "Slot21", "Slot22", "Slot23"};
+        std::string tempname = "OtherData";
+	std::string type[NVFAT] = {"0" , "1" , "2" , "3" , "4" , "5" , "6" , "7",
+                              "8" , "9" , "10", "11", "12", "13", "14", "15",
+                              "16", "17", "18", "19", "20", "21", "22", "23"};
 	for (int id = 0; id < 3; id++){
-	  dir[id]->cd();
-	   
-	  for (int j = 0; j < 24; j++){
-		 
-         	printHistograms(gDirectory->GetDirectory(("./"+type[j]).c_str()),"png",prefix[id]+type[j].c_str());
+	  for (int j = 0; j < NVFAT; j++){
+		dir[id]->cd();
+		gDirectory->cd(("Slot"+ type[j]).c_str());
+		printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+type[j]);
 	  }
+	  dir[id]->cd();
+	  gDirectory->cd(tempname.c_str());
+	  printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+tempname);
+
         }
         gROOT->SetBatch(kFALSE);
         printDQMCanvases();
