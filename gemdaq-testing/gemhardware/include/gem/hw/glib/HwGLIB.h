@@ -5,8 +5,6 @@
 #include "toolbox/SyncQueue.h"
 #include "i2o/i2o.h"
 #include "toolbox/Task.h"
-#include "toolbox/mem/Reference.h"
-#include "toolbox/mem/Pool.h"
 
 #include "gem/hw/glib/exception/Exception.h"
 //#include "gem/hw/glib/GLIBMonitor.h"
@@ -59,9 +57,15 @@ namespace gem {
           } GLIBIPBusCounters;
           
           
+          /**
+           * Constructors, the preferred constructor is with a connection file and device name
+           * as the IP address and address table can be managed there, rather than hard coded
+           * Constrution from crateID and slotID uses this constructor as the back end
+           **/
           HwGLIB();
           HwGLIB(std::string const& glibDevice, std::string const& connectionFile);
-          HwGLIB(std::string const& glibDevice, std::string const& connectionURI, std::string const& addressTable);
+          HwGLIB(std::string const& glibDevice, std::string const& connectionURI,
+                 std::string const& addressTable);
           HwGLIB(std::string const& glibDevice, uhal::HwInterface& uhalDevice);
           HwGLIB(int const& crate, int const& slot);
 	
@@ -95,10 +99,22 @@ namespace gem {
           std::string getBoardID()  ;
 
           /**
+           * Read the board ID registers
+           * @returns the GLIB board ID as 32 bit unsigned
+           **/
+          uint32_t getBoardIDRaw()  ;
+
+          /**
            * Read the system information register
            * @returns a string corresponding to the system ID
            **/
           std::string getSystemID();
+
+          /**
+           * Read the system information register
+           * @returns a string corresponding to the system ID as 32 bit unsigned
+           **/
+          uint32_t getSystemIDRaw();
 
           /**
            * Read the IP address register
@@ -107,11 +123,23 @@ namespace gem {
           std::string getIPAddress();
 
           /**
+           * Read the IP address register
+           * @returns the IP address of the board as a 32 bit unsigned
+           **/
+          uint32_t getIPAddressRaw();
+
+          /**
            * Read the MAC address register
            * @returns a string corresponding to the MAC address of the board
            **/
           std::string getMACAddress();
 
+          /**
+           * Read the MAC address register
+           * @returns the MAC address of the board as a 64 bit unsigned
+           **/
+          uint64_t getMACAddressRaw();
+          
           /**
            * Read the system firmware register
            * @returns a string corresponding to firmware version
@@ -120,9 +148,21 @@ namespace gem {
 
           /**
            * Read the system firmware register
+           * @returns the firmware version as a 32 bit unsigned
+           **/
+          uint32_t getFirmwareVerRaw();
+
+          /**
+           * Read the system firmware register
            * @returns a string corresponding to the build date
            **/
           std::string getFirmwareDate();
+	  
+          /**
+           * Read the system firmware register
+           * @returns the build date as a 32 bit unsigned
+           **/
+          uint32_t getFirmwareDateRaw();
 	  
           //external clocking control functions
           /**
@@ -604,11 +644,19 @@ namespace gem {
           void flushTriggerFIFO(uint8_t const& gtx);
 
           /**
-           * Read the tracking data FIFO occupancy
+           * Read the tracking data FIFO occupancy in terms of raw 32bit words
            * @param uint8_t gtx is the number of the gtx to query
-           * @retval uint32_t returns the number of events in the tracking data FIFO
+           * @retval uint32_t returns the number of words in the tracking data FIFO
            **/
           uint32_t getFIFOOccupancy(uint8_t const& gtx);
+
+          /**
+           * Read the tracking data FIFO occupancy in terms of the number of 7x32bit words
+           * composing a single VFAT block
+           * @param uint8_t gtx is the number of the gtx to query
+           * @retval uint32_t returns the number of VFAT blocks in the tracking data FIFO
+           **/
+          uint32_t getFIFOVFATBlockOccupancy(uint8_t const& gtx);
 
           /**
            * see if there is tracking data available
@@ -622,16 +670,16 @@ namespace gem {
            * get the tracking data, have to do this intelligently, as IPBus transactions are expensive
            * and need to pack all events together
            * @param uint8_t gtx is the number of the GTX tracking data to read
-           * @param size_t nBlocks is the number of blocks (7*32bit words) to read
+           * @param size_t nBlocks is the number of VFAT data blocks (7*32bit words) to read
            * @retval std::vector<uint32_t> returns the 7*nBlocks data words in the buffer
           **/
           std::vector<uint32_t> getTrackingData(uint8_t const& gtx, size_t const& nBlocks=1);
           //which of these will be better and do what we want
-          uint32_t getTrackingData(uint8_t const& gtx, uint64_t* data, size_t const& nBlocks=1);
+          uint32_t getTrackingData(uint8_t const& gtx, uint32_t* data, size_t const& nBlocks=1);
           //which of these will be better and do what we want
           uint32_t getTrackingData(uint8_t const& gtx, std::vector<toolbox::mem::Reference*>& data,
                                    size_t const& nBlocks=1);
-
+          
           /**
            * Empty the tracking data FIFO
            * @param uint8_t gtx is the number of the gtx to query
@@ -639,7 +687,19 @@ namespace gem {
            **/
           void flushFIFO(uint8_t const& gtx);
 
-          
+          // DAQ LINK functionality
+          void enableDAQLink();
+          uint32_t getDAQLinkControl();
+          uint32_t getDAQLinkStatus();
+          uint32_t getDAQLinkFlags();
+          uint32_t getDAQLinkCorruptCount();
+          uint32_t getDAQLinkEventsBuilt();
+          uint32_t getDAQLinkEventsSent();
+          uint32_t getDAQLinkL1AID();
+          uint32_t getDAQLinkDebug(uint8_t const& mode);
+          uint32_t getDAQLinkDisperErrors();
+          uint32_t getDAQLinkNonidentifiableErrors();
+
           std::vector<GLIBIPBusCounters> m_ipBusCounters; /** for each gtx, IPBus counters */
           
         protected:
