@@ -56,22 +56,22 @@ void printIntegrityCanvas()
   integrity->cd(1);
   stack = stackH1(integrity_plots[0], hi1010[1], hi1010[2], 4, 2);
   stack->Draw();
-  gPad->SetLogy();
+  //gPad->SetLogy();
 
   integrity->cd(2);
   stack = stackH1(integrity_plots[1], hi1100[1], hi1100[2], 4, 2);
   stack->Draw();
-  gPad->SetLogy();
+  //gPad->SetLogy();
 
   integrity->cd(3);
   stack = stackH1(integrity_plots[2], hi1110[1], hi1110[2], 4, 2);
   stack->Draw();
-  gPad->SetLogy();
+  //gPad->SetLogy();
 
   integrity->cd(4);
   stack = stackH1(integrity_plots[3], hiFlag[1], hiFlag[2], 4, 2);
   stack->Draw();
-  gPad->SetLogy();
+  //gPad->SetLogy();
 
   integrity->cd(5);
   stack = stackH1(integrity_plots[4], hiVFATsn[1], hiVFATsn[2], 4, 2, true);
@@ -80,12 +80,12 @@ void printIntegrityCanvas()
   integrity->cd(6);
   stack = stackH1(integrity_plots[5], hiVFAT[1], hiVFAT[2], 4, 2);
   stack->Draw();
-  gPad->SetLogy();
+  //gPad->SetLogy();
 
   integrity->cd(7);
   stack = stackH1(integrity_plots[6], hiDiffCRC[1], hiDiffCRC[2], 4, 2);
   stack->Draw();
-  gPad->SetLogy();
+  //gPad->SetLogy();
 
   integrity->cd(8);
   hi2DCRC[1]->SetMarkerColor(4);
@@ -144,23 +144,23 @@ void printOccupancyCanvas()
   hiBeamProfile[1]->GetXaxis()->SetTitle("Pseudorapidity partitions");
   hiBeamProfile[1]->Draw("colz");
 
-  TPad *grid = new TPad("grid","",0,0,1,1);
-  grid->Draw();
-  grid->cd();
-  grid->SetGridx();
-  grid->SetFillStyle(4000);
-  grid->SetFrameFillStyle(0);
+  //TPad *grid = new TPad("grid","",0,0,1,1);
+  //grid->Draw();
+  //grid->cd();
+  //grid->SetGridx();
+  //grid->SetFillStyle(4000);
+  //grid->SetFrameFillStyle(0);
 
-  TH2 *hgrid = new TH2C("hgrid","",8,0.,8.,384,0.,384.);   
-  hgrid->Draw("same");
-  hgrid->GetXaxis()->SetNdivisions(8);
-  hgrid->GetYaxis()->SetLabelOffset(999.);
-  hgrid->GetXaxis()->SetLabelOffset(999.); 
+  //TH2 *hgrid = new TH2C("hgrid","",8,0.,8.,384,0.,384.);   
+  //hgrid->Draw("same");
+  //hgrid->GetXaxis()->SetNdivisions(8);
+  //hgrid->GetYaxis()->SetLabelOffset(999.);
+  //hgrid->GetXaxis()->SetLabelOffset(999.); 
   
-  TLine *l1 = new TLine(0, 128, 8, 128);
-  TLine *l2 = new TLine(0, 256, 8, 256);
-  l1->Draw("same");
-  l2->Draw("same");
+  //TLine *l1 = new TLine(0, 128, 8, 128);
+  //TLine *l2 = new TLine(0, 256, 8, 256);
+  //l1->Draw("same");
+  //l2->Draw("same");
 
   TH1D* p_temp;
   for (int p_i = 1; p_i < 9; p_i++)
@@ -175,10 +175,10 @@ void printOccupancyCanvas()
     p_temp->GetYaxis()->SetTitle("Number of events");
     p_temp->Draw();
     gPad->Update();
-    TLine *l3 = new TLine(128, 0, 128, gPad->GetUymax());
-    TLine *l4 = new TLine(256, 0, 256, gPad->GetUymax());
-    l3->Draw("same");
-    l4->Draw("same");
+    //TLine *l3 = new TLine(128, 0, 128, gPad->GetUymax());
+    //TLine *l4 = new TLine(256, 0, 256, gPad->GetUymax());
+    //l3->Draw("same");
+    //l4->Draw("same");
   }
   occupancy->Print("occupancy.png","png");
   occupancy->Print("occupancy.pdf","pdf");
