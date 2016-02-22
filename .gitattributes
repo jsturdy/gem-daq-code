@@ -1,4 +1,6 @@
 * text=auto
+
+# diff mods
 *.py   diff=python
 *.h    diff=cpp
 *.hh   diff=cpp
