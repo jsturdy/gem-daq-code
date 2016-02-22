@@ -154,6 +154,7 @@ class gemTreeReader {
     TH2I* hiBeamProfile              [3];
 
     TDirectory *dir[3];
+    TDirectory *subdir[24];
 
     int counters_[4]; // [0] - total events
                       // [1] - good events
@@ -164,6 +165,7 @@ class gemTreeReader {
     {
       std::string dirname[3] = {"AllEvents", "GoodEvents", "BadEvents"};
       std::string eta_partitions[8] = {"eta_1", "eta_2", "eta_3", "eta_4", "eta_5", "eta_6", "eta_7", "eta_8"};
+      std::string tempname = "OtherData";
       char name[4][128], title[4][500];
       std::string type[NVFAT] = {"Slot0" , "Slot1" , "Slot2" , "Slot3" , "Slot4" , "Slot5" , "Slot6" , "Slot7", 
                               "Slot8" , "Slot9" , "Slot10", "Slot11", "Slot12", "Slot13", "Slot14", "Slot15", 
@@ -173,6 +175,8 @@ class gemTreeReader {
         dir[i] = ofile->mkdir(dirname[i].c_str());
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Directory " << i+1 << " created" << std::endl;   
         dir[i]->cd();
+      	gDirectory->mkdir(tempname.c_str());
+	      gDirectory->cd(tempname.c_str());
         hiVFAT         [i] = new TH1F((dirname[i]+"_VFAT").c_str(), "Number VFAT blocks per event", 24,  0., 24. );
         hiVFATsn       [i] = new TH1F((dirname[i]+"_VFATsn").c_str(), "VFAT slot number", 24,  0., 24. );
         hiDiffBXandBC  [i] = new TH1I((dirname[i]+"_DiffBXandBC").c_str(), "Difference of BX and BC", 100000, 0x0, 0x1869F );
@@ -200,6 +204,9 @@ class gemTreeReader {
           hiClusterSizeEta  [i][ie] = new TH1I((dirname[i]+"_ClusterSize"+eta_partitions[ie]).c_str(), "Cluster size", 384,  0, 384 );
         }
         for(int j=0; j < NVFAT; j++){
+	  dir[i]->cd();
+          gDirectory->mkdir(type[j].c_str());
+          gDirectory->cd(type[j].c_str());
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Start 2d array of histograms ["<<i<<"]["<<j<<"] creation" << std::endl;   
           sprintf (name[0]  , (dirname[i]+"_hiVFATfired_perevent_%s").c_str(), type[j].c_str());
           sprintf (title[0] , "VFAT chip %s fired per event", type[j].c_str());
@@ -370,8 +377,19 @@ class gemTreeReader {
         gROOT->SetBatch(kTRUE);// don't draw all the canvases
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
         TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
-        for (int id = 0; id < 3; id++){
-          printHistograms(dir[id],"png",prefix[id], true);
+        std::string tempname = "OtherData";
+	      std::string type[NVFAT] = {"0" , "1" , "2" , "3" , "4" , "5" , "6" , "7",
+                              "8" , "9" , "10", "11", "12", "13", "14", "15",
+                              "16", "17", "18", "19", "20", "21", "22", "23"};
+	      for (int id = 0; id < 3; id++){
+	        for (int j = 0; j < NVFAT; j++){
+		        dir[id]->cd();
+		        gDirectory->cd(("Slot"+ type[j]).c_str());
+		        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+type[j]);
+	        }
+	        dir[id]->cd();
+	        gDirectory->cd(tempname.c_str());
+	        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+tempname);
         }
         gROOT->SetBatch(kFALSE);
         printDQMCanvases();
