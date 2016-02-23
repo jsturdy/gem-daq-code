@@ -361,6 +361,7 @@ class AMC13Event
     ~AMC13Event(){m_AMC_size.clear(); m_Blk_No.clear(); m_AMC_No.clear(); m_BoardID.clear(); m_amcs.clear();}
 
     int nAMC(){return unsigned(m_nAMC);}
+    int LV1_id(){return unsigned(m_LV1_id);}
 
     //*** Set the CDF header. Not full header implemented yet. Doc:http://ohm.bu.edu/~hazen/CMS/AMC13/AMC13DataFormatDrawingv3.pdf
     void setCDFHeader(uint64_t word)
