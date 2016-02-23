@@ -1,4 +1,4 @@
-#include "gemtreewriter/src/common/gemTreeWriter.cxx"
+//#include "gemtreewriter/src/common/gemTreeWriter.cxx"
 #include "dqm-root/src/common/treeReader.cxx"
 #include "dqm-root/src/common/GEMClusterization/GEMStrip.cc"
 #include "dqm-root/src/common/GEMClusterization/GEMCluster.cc"
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 //  string m_raw_filename;
 //  m_raw_filename = m_gemTreeWriter->getOutputFileName();
   std::cout << "[MAIN]: ROOT TTree is finished" << std::endl;
-  std::cout << "Raw file name" << m_raw_filename << std::endl;
+  std::cout << "Raw file name " << m_raw_filename << std::endl;
   gemTreeReader *m_gemTreeReader = new gemTreeReader(m_raw_filename, true);
   //gemTreeReader *m_gemTreeReader = new gemTreeReader(m_raw_filename, print_hist);
   m_gemTreeReader->createHistograms();

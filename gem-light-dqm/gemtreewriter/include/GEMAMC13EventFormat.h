@@ -167,6 +167,7 @@ class GEBdata
 
 
     void v_add(VFATdata v){vfatd.push_back(v);}
+    std::vector<VFATdata> vfats(){return vfatd;}
 };
 
 class AMCdata
@@ -322,6 +323,7 @@ class AMCdata
     uint32_t DlengthT()    {return m_DlengthT;}
 
     void g_add(GEBdata g){gebd.push_back(g);}
+    std::vector<GEBdata> gebs(){return gebd;}
 };
 
 class AMC13Event
@@ -362,7 +364,7 @@ class AMC13Event
 
     int nAMC(){return unsigned(m_nAMC);}
     int LV1_id(){return unsigned(m_LV1_id);}
-
+    std::vector<AMCdata> amcs(){return m_amcs;}
     //*** Set the CDF header. Not full header implemented yet. Doc:http://ohm.bu.edu/~hazen/CMS/AMC13/AMC13DataFormatDrawingv3.pdf
     void setCDFHeader(uint64_t word)
     {
