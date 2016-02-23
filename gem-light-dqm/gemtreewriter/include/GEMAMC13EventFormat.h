@@ -111,7 +111,7 @@ class GEBdata
           m_Vwt(Vwt_),                             
           m_InFu(InFu_),                                   
           m_Stuckd(Stuckd_){}         
-    ~GEBdata(){}
+    ~GEBdata(){vfatd.clear();}
 
 
     uint32_t ZeroSup()  {return m_ZeroSup;}
@@ -213,7 +213,7 @@ class AMCdata
           m_Tstate(Tstate_),                             
           m_ChamT(ChamT_),                                   
           m_OOSG(OOSG_){}
-    ~AMCdata(){}
+    ~AMCdata(){gebd.clear();}
 
     uint8_t  AMCnum()  {return m_AMCnum;}
     uint32_t L1A()     {return m_L1A;}
@@ -272,16 +272,41 @@ class AMC13Event
   public:
 
     AMC13Event(){}
-    ~AMC13Event(){}
+    ~AMC13Event(){m_AMC_size.clear(); m_Blk_No.clear(); m_AMC_No.clear(); m_BoardID.clear(); m_amcs.clear();}
 
-    void addAMCheader(const uint32_t & AMC_size_, const uint8_t & Blk_No_, const uint8_t & AMC_No_, const uint16_t & BoardID_)
+    //*** Set the CDF header. Not full header implemented yet. Doc:http://ohm.bu.edu/~hazen/CMS/AMC13/AMC13DataFormatDrawingv3.pdf
+    void setCDFHeader(uint64_t word)
     {
-      m_AMC_size.push_back(AMC_size_);
-      m_Blk_No.push_back(Blk_No_);
-      m_AMC_No.push_back(AMC_No_);
-      m_BoardID.push_back(BoardID_);
+      m_cb5 = 0x0f & (word >> 60);
+      m_Evt_ty = 0x0f & (word >> 56);
+      m_LV1_id = 0x00ffffff & (word >> 32);
+      m_BX_id = 0x0fff & (word >> 20);
+      m_Source_id - 0x0fff & (word >> 8);
     }
+    //void addAMCheader(const uint32_t & AMC_size_, const uint8_t & Blk_No_, const uint8_t & AMC_No_, const uint16_t & BoardID_)
+    void addAMCheader(uint64_t word)
+    {
+      m_AMC_size.push_back(0x00ffffff&(word>>32));
+      m_Blk_No.push_back(0xff&(word>>20));
+      m_AMC_No.push_back(0x0f&(word>>16));
+      m_BoardID.push_back(0xffff&word);
+    }
+    //
     void addAMCpayload(AMCdata a){m_amcs.push_back(a);}
+    //
+    void setAMCtrailer(uint64_t word)
+    {
+      m_CRC_amc13 = word >> 32;
+      m_Blk_NoT = 0xff & (word >> 20);
+      m_LV1_idT = 0xff & (word >> 12);
+      m_BX_idT = 0x0fff & word;
+    }
+    void setCDFTrailer(uint64_t word)
+    {
+      m_cbA = 0x0f & (word >> 60);
+      m_EvtLength = 0x00ffffff & (word >> 32);
+      m_CRC_cdf = 0xffff & (word >> 16);
+    }
 
 };
 
