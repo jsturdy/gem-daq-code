@@ -5,7 +5,7 @@ class VFATdata
     uint8_t fb1010;                    // 1010:4 Control bits, shoud be 1010
     uint16_t fBC;                      // Bunch Crossing number, 12 bits
     uint8_t fb1100;                    // 1100:4, Control bits, shoud be 1100
-    uint16_t fEC;                      // Event Counter, 8 bits
+    uint8_t fEC;                      // Event Counter, 8 bits
     uint8_t fFlag;                     // Control Flags: 4 bits, Hamming Error/AFULL/SEUlogic/SUEI2C
     uint8_t fb1110;                    // 1110:4 Control bits, shoud be 1110
     uint16_t fChipID;                  // Chip ID, 12 bits
@@ -45,6 +45,33 @@ class VFATdata
         fSlotNumber(SlotNumber_),
         fisBlockGood(isBlockGood_){}
     ~VFATdata(){}
+
+    // read first word from the block
+    void read_fw(uint64_t word)
+    {
+      fb1010 = 0x0f & (word >> 60);
+      fBC = 0x0fff & (word >> 48);
+      fb1100 = 0x0f & (word >> 44);
+      fEC = word >> 36;
+      fFlag = 0x0f & (word >> 32);
+      fb1110 = 0x0f & (word >> 28);
+      fChipID = 0x0fff & (word >> 16);
+      fmsData = 0xffff000000000000 & (word << 48);
+    }
+    
+    // read second word from the block
+    void read_sw(uint64_t word)
+    {
+      fmsData = fmsData & (word >> 16);
+      flsData = 0xffff000000000000 & (word << 48);
+    }
+    
+    // read third word from the block
+    void read_tw(uint64_t word)
+    {
+      flsData = flsData & (word >> 16);
+      fcrc = word;
+    }
     
     uint8_t   b1010      (){ return fb1010;      }
     uint16_t  BC         (){ return fBC;         }
@@ -113,6 +140,20 @@ class GEBdata
           m_Stuckd(Stuckd_){}         
     ~GEBdata(){vfatd.clear();}
 
+    // need to include all the flags
+    void setChamberHeader(uint64_t word)
+    {
+      m_ZeroSup = 0x00ffffff & (word >> 40);
+      m_InputID = 0b00011111 & (word >> 35);
+      m_Vwh = 0x0fff & (word >> 23);
+    }
+
+    // need to include all the flags
+    void setChamberTrailer(uint64_t word)
+    {
+      m_OHCRC = word >> 48;
+      m_Vwt = 0x0fff & (word >> 36);
+    }
 
     uint32_t ZeroSup()  {return m_ZeroSup;}
     uint8_t  InputID()  {return m_InputID;}
@@ -215,6 +256,46 @@ class AMCdata
           m_OOSG(OOSG_){}
     ~AMCdata(){gebd.clear();}
 
+    void setAMCheader1(uint64_t word)
+    {
+      m_AMCnum = 0x0f & (word >> 56);
+      m_L1A = 0x00ffffff & (word >> 32);
+      m_BX = 0x0fff & (word >> 20);
+      m_Dlength = 0x000fffff & word;
+    }
+
+    void setAMCheader2(uint64_t word)
+    {
+      m_FV = 0x0f & (word >> 60);
+      m_Rtype = 0x0f & (word >> 56);
+      m_Param1 = word >> 48;
+      m_Param2 = word >> 40;
+      m_Param3 = word >> 32;
+      m_Onum = word >> 16;
+      m_BID = word;
+    }
+
+    void setGEMeventHeader(uint64_t word)
+    {
+      m_GEMDAV = 0x00ffffff & (word >> 40);
+      m_Bstatus = 0x00ffffff & (word >> 16);
+      m_GDcount = 0b00011111 & (word >> 11);
+      m_Tstate = 0b00000111 & word;
+    }
+
+    void setGEMeventTrailer(uint64_t word)
+    {
+      m_ChamT = 0x00ffffff & (word >> 40);
+      m_OOSG = 0b00000001 & (word >> 39);
+    }
+
+    void setAMCTrailer(uint64_t word)
+    {
+      m_CRC = word >> 32;
+      m_L1AT = word >> 24;
+      m_DlengthT = 0x000fffff & word;
+    }
+
     uint8_t  AMCnum()  {return m_AMCnum;}
     uint32_t L1A()     {return m_L1A;}
     uint16_t BX()      {return m_BX;}
@@ -230,7 +311,7 @@ class AMCdata
 
     uint32_t GEMDAV ()  {return m_GEMDAV;}
     uint64_t Bstatus()  {return m_Bstatus;}
-    uint8_t  GDcount()  {return m_GDcount;}
+    int  GDcount()  {return unsigned(m_GDcount);}
     uint8_t  Tstate()   {return m_Tstate;}
 
     uint32_t ChamT()    {return m_ChamT;}
@@ -252,6 +333,11 @@ class AMC13Event
     uint32_t m_LV1_id;
     uint16_t m_BX_id;
     uint16_t m_Source_id;
+    // AMC13 header
+    uint8_t m_CalTyp;
+    uint8_t m_nAMC;
+    uint32_t m_OrN;
+    uint8_t m_cb0; // control bit, should be 0b0000
     // AMC headers
     std::vector<uint32_t> m_AMC_size;
     std::vector<uint8_t> m_Blk_No;
@@ -274,6 +360,8 @@ class AMC13Event
     AMC13Event(){}
     ~AMC13Event(){m_AMC_size.clear(); m_Blk_No.clear(); m_AMC_No.clear(); m_BoardID.clear(); m_amcs.clear();}
 
+    int nAMC(){return unsigned(m_nAMC);}
+
     //*** Set the CDF header. Not full header implemented yet. Doc:http://ohm.bu.edu/~hazen/CMS/AMC13/AMC13DataFormatDrawingv3.pdf
     void setCDFHeader(uint64_t word)
     {
@@ -283,7 +371,15 @@ class AMC13Event
       m_BX_id = 0x0fff & (word >> 20);
       m_Source_id - 0x0fff & (word >> 8);
     }
-    //void addAMCheader(const uint32_t & AMC_size_, const uint8_t & Blk_No_, const uint8_t & AMC_No_, const uint16_t & BoardID_)
+    //*** Set the AMC13 header
+    void setAMC13header(uint64_t word)
+    {
+      m_CalTyp = 0x0f & (word >> 56);
+      m_nAMC = 0x0f & (word >> 52);
+      m_OrN = word >> 4;
+      m_cb0 = 0x0f & word;
+    }
+    //
     void addAMCheader(uint64_t word)
     {
       m_AMC_size.push_back(0x00ffffff&(word>>32));
@@ -294,7 +390,7 @@ class AMC13Event
     //
     void addAMCpayload(AMCdata a){m_amcs.push_back(a);}
     //
-    void setAMCtrailer(uint64_t word)
+    void setAMC13trailer(uint64_t word)
     {
       m_CRC_amc13 = word >> 32;
       m_Blk_NoT = 0xff & (word >> 20);
