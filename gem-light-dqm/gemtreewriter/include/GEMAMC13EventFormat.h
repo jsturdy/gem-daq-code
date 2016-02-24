@@ -372,7 +372,7 @@ class AMC13Event
       m_Evt_ty = 0x0f & (word >> 56);
       m_LV1_id = 0x00ffffff & (word >> 32);
       m_BX_id = 0x0fff & (word >> 20);
-      m_Source_id - 0x0fff & (word >> 8);
+      m_Source_id = 0x0fff & (word >> 8);
     }
     //*** Set the AMC13 header
     void setAMC13header(uint64_t word)
