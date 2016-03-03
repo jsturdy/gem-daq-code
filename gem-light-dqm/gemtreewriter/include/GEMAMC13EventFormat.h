@@ -62,14 +62,14 @@ class VFATdata
     // read second word from the block
     void read_sw(uint64_t word)
     {
-      fmsData = fmsData & (word >> 16);
+      fmsData = fmsData | (0x0000ffffffffffff & word >> 16);
       flsData = 0xffff000000000000 & (word << 48);
     }
     
     // read third word from the block
     void read_tw(uint64_t word)
     {
-      flsData = flsData & (word >> 16);
+      flsData = flsData | (0x0000ffffffffffff & word >> 16);
       fcrc = word;
     }
     

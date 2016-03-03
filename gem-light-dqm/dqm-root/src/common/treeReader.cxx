@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <functional>
 #include <array>
+#include <memory>
 #include <TFile.h>
 #include <TKey.h>
 #include <TDirectory.h>
@@ -253,6 +254,7 @@ class gemTreeReader {
           for (unsigned ia = 0; ia < 128; ia++) {
             tmp_strips.push_back(0);
           }
+      
       //for (Int_t i = 0; i < nentries; i++)
       for (int i = 0; i < nentries; i++)
       {
@@ -412,7 +414,11 @@ class gemTreeReader {
       m_hiChip->Fill(m_vfat->ChipID());
       // calculate and fill VFAT slot number
       //int sn_ = m_vfat->SlotNumber();
-      int sn_ = -1;
+      //int sn_ = -1;
+      //read slot
+      std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table_TAMUv2.csv"));
+      int sn_ = slotInfo_->GEBslotIndex(m_vfat->ChipID());
+      std::cout << "slot N " << sn_ << std::endl;
       m_hiVFATsn->Fill(sn_);
       // calculate and fill the crc and crc_diff
       m_hiCRC->Fill(m_vfat->crc());
@@ -466,7 +472,7 @@ class gemTreeReader {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_i = (int) m%8;
                 int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
@@ -484,7 +490,7 @@ class gemTreeReader {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_i = (int) m%8;
                 int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
