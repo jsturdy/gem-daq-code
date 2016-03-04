@@ -380,20 +380,22 @@ class gemTreeReader {
         gErrorIgnoreLevel = kWarning; // Supress the Info outputs from ROOT
         gROOT->SetBatch(kTRUE);// don't draw all the canvases
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
-        TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
+        TString prefix[3] = {"/tmp/dqm_hists/","/tmp/dqm_hists/","/tmp/dqm_hists/"};
+
+        //TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
         std::string tempname = "OtherData";
 	      std::string type[NVFAT] = {"0" , "1" , "2" , "3" , "4" , "5" , "6" , "7",
                               "8" , "9" , "10", "11", "12", "13", "14", "15",
                               "16", "17", "18", "19", "20", "21", "22", "23"};
-	      for (int id = 0; id < 3; id++){
+	      for (int id = 0; id < 1; id++){// temporary print only all_events
 	        for (int j = 0; j < NVFAT; j++){
 		        dir[id]->cd();
 		        gDirectory->cd(("Slot"+ type[j]).c_str());
-		        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+type[j]);
+		        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+type[j]+"/",true);
 	        }
 	        dir[id]->cd();
 	        gDirectory->cd(tempname.c_str());
-	        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+tempname);
+	        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+tempname+"/",true);
         }
         gROOT->SetBatch(kFALSE);
         printDQMCanvases();
