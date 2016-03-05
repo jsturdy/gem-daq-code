@@ -67,53 +67,162 @@ public:
     std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
     if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
     ifile = new TFile(ifilename.c_str(), "READ");
-    
+    ofilename = ifilename.substr(0,ifilename.size()-9);
+    ofilename += ".analyzed.root";
+    ofile = new TFile(ofilename.c_str(), "RECREATE");
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: File for histograms created" << std::endl;   
+
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fetching hardware" << std::endl;   
     this->fetchHardware();
 
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
+    this->bookHistograms();
   }
-
+  ~Hardware_histogram(){}
 
   void fetchHardware()
   {
-      TTree *tree = (TTree*)ifile->Get("GEMtree");
-      Event *event = new Event();
-      TBranch *branch = tree->GetBranch("GEMEvents");
-      branch->SetAddress(&event);
-      Int_t nentries = tree->GetEntries();
-      branch->GetEntry(0);
-      vector<AMC13Event> v_amc13 = event->amc13s();
-      vector<AMCdata> v_amc;
-      vector<GEBdata> v_geb;
-      vector<VFATdata> v_vfat;
-      for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
-	v_amc = a13->amcs();
-	for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
-	  v_geb = a->gebs();
-	  for(auto g=v_geb.begin(); g!=v_geb.end();g++)
-	    v_vfat=g->vfats();
+    TTree *tree = (TTree*)ifile->Get("GEMtree");
+    Event *event = new Event();
+    TBranch *branch = tree->GetBranch("GEMEvents");
+    branch->SetAddress(&event);
+    Int_t nentries = tree->GetEntries();
+    branch->GetEntry(0);
+    v_amc13 = event->amc13s();
+    // vector<AMCdata> v_amc;
+    // vector<GEBdata> v_geb;
+    // vector<VFATdata> v_vfat;
+    for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
+      v_amc = a13->amcs();
+      for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
+	v_geb = a->gebs();
+	for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+	  v_vfat=g->vfats();
 	}
       }
-      //if (DEBUG) std::cout << "[gemTreeReader]: Number of entries in the TTree : " << nentries << std::endl;
-      std::cout << "Number of events: " << nentries << "\n";
-      std::cout << "Number of AMC13s: " << v_amc13.size()<< "\n";
-      std::cout << "Number of AMCs: " << v_amc.size()<< "\n";
-      std::cout << "Number of GEBs: " << v_geb.size()<< "\n";
-      std::cout << "Number of VFATs: " << v_vfat.size()<< "\n";
-
-
-
+    }
+    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of TTree entries: " << nentries << "\n";
+    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMC13s: " << v_amc13.size()<< "\n";
+    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMCs: " << v_amc.size()<< "\n";
+    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of GEBs: " << v_geb.size()<< "\n";
+    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of VFATs: " << v_vfat.size()<< "\n";
   }
 
 
+  vector<AMC13Event> v_amc13;
+  vector<AMCdata> v_amc;
+  vector<GEBdata> v_geb;
+  vector<VFATdata> v_vfat;
+
+
+  void bookHistograms()
+  {
+    int a13_c=0; //counter through AMC13s
+    int a_c=0;   //counter through AMCs
+    int g_c=0;   //counter through GEBs
+    int v_c=0;   //counter through VFATs
+    for(auto a13 = v_amc13.begin(); a13!=v_amc13.end(); a13++){
+      v_amc = a13->amcs();
+      char a13_ch[2];
+      a13_ch[0]='\0';
+      sprintf(a13_ch, "%d", a13_c);
+      char dirname[30];
+      dirname[0]='\0';
+      strcat(dirname,"AMC13-");
+      strcat(dirname,a13_ch);
+      AMC13dir.push_back(ofile->mkdir(dirname));
+      ofile->cd(dirname);
+      if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 Directory " << dirname << " created" << std::endl;
+     //AMC13 HISTOGRAMS HERE
+      a_c=0;
+      for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
+	v_geb = a->gebs();
+	char a_ch[2];
+	a_ch[0]='\0';
+	sprintf(a_ch, "%d", a_c);
+	strcat(dirname,"--AMC");
+	strcat(dirname,a_ch);
+	if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC Directory " << dirname << " created" << std::endl;
+	AMCdir.push_back(gDirectory->mkdir(dirname));
+	gDirectory->cd(dirname);
+	//AMC HISTOGRAMS HERE
+	g_c=0;
+	for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+	  v_vfat=g->vfats();
+	  char g_ch[2];
+	  g_ch[0]='\0';
+	  sprintf(g_ch, "%d", g_c);
+	  strcat(dirname,"--GTX");
+	  strcat(dirname,g_ch);
+	  if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB Directory " << dirname << " created" << std::endl;
+	  GEBdir.push_back(gDirectory->mkdir(dirname));
+	  gDirectory->cd(dirname);
+	  //GEB HISTOGRAMS HERE
+	  v_c=0;
+	  for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
+	    char v_ch[2];
+	    v_ch[0]='\0';
+	    sprintf(v_ch, "%d", v_c);
+	    strcat(dirname,"--VFAT");
+	    if(v_c<10) strcat(dirname,"0");
+	    strcat(dirname,v_ch);
+	    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT Directory " << dirname << " created" << std::endl;
+	    VFATdir.push_back(gDirectory->mkdir(dirname));
+	    gDirectory->cd(dirname);
+	    //VFAT HISTOGRAMS HERE
+	    dirname[strlen(dirname)-8] = '\0';
+	    gDirectory->cd("..");
+
+	    v_c++;
+	  }
+	  dirname[strlen(dirname)-6] = '\0';
+	  gDirectory->cd("..");
+
+	  g_c++;
+	}
+	dirname[strlen(dirname)-6] = '\0';
+	gDirectory->cd("..");
+
+       	a_c++;
+      }
+      a13_c++;
+    }
+  }
+
 private:
   TFile *ifile;
-  Int_t n_AMC13;
+  TFile *ofile;
+  std::string ofilename;
 
+  std::vector<TDirectory*> AMC13dir;
+  std::vector<TDirectory*> AMCdir;
+  std::vector<TDirectory*> GEBdir;
+  std::vector<TDirectory*> VFATdir;
 
-
-  void bookHistograms(){}
   void get_dir(){}
 };
+
+
+
+
+      // control_bits = new TH1F("Control_Bits", "Control Bits ", 15,  0x0 , 0xf)
+      // Evt_ty       = new TH1F("Evt_ty", "Evt_ty", 15, 0x0, 0xf)
+      // LV1_id;      = new TH1F("LV1_id", "LV1_id", ?, 0x0, 0xffffff)
+      // Bx_id;       = new TH1F("Bx_id", "Bx_id", 4095, 0x0, 0xfff)
+      // Source_id;   = new TH1F("Source_id", "Source_id", 4095, 0x0, 0xfff)
+      // CalTyp;      = new TH1F("CalTyp", "CalTyp", 15, 0x0, 0xf)
+      // nAMC;        = new TH1F("nAMC", "nAMC", 15, 0x0, 0xf)
+      // OrN;         = new TH1F("OrN", "OrN", ?, 0x0, 0xffffffff)
+      // CRC_amc13;   = new TH1F("CRC_amc13", "CRC_amc13", ?, 0x0, 0xffffffff)
+      // Blk_Not;     = new TH1F("Blk_Not", "Blk_Not", 255, 0x0, 0xff)
+      // LV1_idT;     = new TH1F("LV1_idT", "LV1_idT", 255, 0x0, 0xff)
+      // BX_idT;      = new TH1F("BX_idT", "BX_idT", 4095, 0x0, 0xfff)
+      // EvtLength;   = new TH1F("EvtLength", "EvtLength", ?, 0x0, 0xffffff)
+      // CRC_cdf;     = new TH1F("CRC_cdf", "CRC_cdf", ?, 0x0, 0xffff)
+    
+
+
+
 
 
 // class AMC13_histogram: public Hardware_histogram
