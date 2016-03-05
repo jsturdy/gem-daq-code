@@ -166,7 +166,7 @@ class GEBdata
       m_ErrorC = 0b0001111111111111111 & (word);    /*!<Thirteen Flags*/
       for(int i=0; i<13; ++i)
       {
-        v_GEBflags.pushback(0x01 & (m_ErrorC >> i));
+        v_GEBflags.push_back(0x01 & (m_ErrorC >> i));
       }
     }
 
