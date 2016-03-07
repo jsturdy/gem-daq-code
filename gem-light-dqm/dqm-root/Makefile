@@ -44,6 +44,10 @@ all:
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
 	$(LS) $(BIN)
 
+dummy: 
+	mkdir -p $(BIN)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dummyMain.cxx $(LIB)/libEvent.so -o $(BIN)/dummy
+
 rundqm:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
