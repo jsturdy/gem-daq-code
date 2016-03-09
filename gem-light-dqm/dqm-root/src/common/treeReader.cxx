@@ -418,7 +418,7 @@ class gemTreeReader {
       //int sn_ = m_vfat->SlotNumber();
       //int sn_ = -1;
       //read slot
-      std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table_TAMUv2.csv"));
+      std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));
       int sn_ = slotInfo_->GEBslotIndex(m_vfat->ChipID());
       std::cout << "slot N " << sn_ << std::endl;
       m_hiVFATsn->Fill(sn_);
