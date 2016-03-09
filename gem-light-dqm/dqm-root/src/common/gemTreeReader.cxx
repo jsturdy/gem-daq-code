@@ -43,6 +43,7 @@
 #include <TBranch.h>
 #include <TError.h>
 #include <TBufferJSON.h>
+#include <memory>
 
 #include "gem/datachecker/GEMDataChecker.h"
 #include "gem/readout/GEMslotContents.h"
@@ -95,10 +96,10 @@ public:
     for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
       v_amc = a13->amcs();
       for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
-	v_geb = a->gebs();
-	for(auto g=v_geb.begin(); g!=v_geb.end();g++){
-	  v_vfat=g->vfats();
-	}
+        v_geb = a->gebs();
+        for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+          v_vfat=g->vfats();
+        }
       }
     }
     if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of TTree entries: " << nentries << "\n";
@@ -123,68 +124,77 @@ public:
     int v_c=0;   //counter through VFATs
     for(auto a13 = v_amc13.begin(); a13!=v_amc13.end(); a13++){
       v_amc = a13->amcs();
-      char a13_ch[2];
-      a13_ch[0]='\0';
-      sprintf(a13_ch, "%d", a13_c);
-      char dirname[30];
-      dirname[0]='\0';
-      strcat(dirname,"AMC13-");
-      strcat(dirname,a13_ch);
-      AMC13dir.push_back(ofile->mkdir(dirname));
-      ofile->cd(dirname);
-      if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 Directory " << dirname << " created" << std::endl;
-     //AMC13 HISTOGRAMS HERE
+      char diramc13[30];        //filename for AMC13 directory
+      diramc13[0]='\0';         
+      char serial_ch[20];       //char used to put serial number into directory name
+      serial_ch[0] = '\0';
+      int serial = v_amc13[a13_c].nAMC();  //obtains the serial number from the AMC13 Event
+      sprintf(serial_ch, "%d", serial);
+      strcat(diramc13,"AMC13-");
+      strcat(diramc13,serial_ch);
+      AMC13dir.push_back(ofile->mkdir(diramc13)); //creates a directory and adds it to vector of AMC13 directories
+      ofile->cd(diramc13);                        //moves to the newly created directory
+      if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 Directory " << diramc13 << " created" << std::endl;
+      //AMC13 HISTOGRAMS HERE
       a_c=0;
       for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
-	v_geb = a->gebs();
-	char a_ch[2];
-	a_ch[0]='\0';
-	sprintf(a_ch, "%d", a_c);
-	strcat(dirname,"--AMC");
-	strcat(dirname,a_ch);
-	if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC Directory " << dirname << " created" << std::endl;
-	AMCdir.push_back(gDirectory->mkdir(dirname));
-	gDirectory->cd(dirname);
-	//AMC HISTOGRAMS HERE
-	g_c=0;
-	for(auto g=v_geb.begin(); g!=v_geb.end();g++){
-	  v_vfat=g->vfats();
-	  char g_ch[2];
-	  g_ch[0]='\0';
-	  sprintf(g_ch, "%d", g_c);
-	  strcat(dirname,"--GTX");
-	  strcat(dirname,g_ch);
-	  if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB Directory " << dirname << " created" << std::endl;
-	  GEBdir.push_back(gDirectory->mkdir(dirname));
-	  gDirectory->cd(dirname);
-	  //GEB HISTOGRAMS HERE
-	  v_c=0;
-	  for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
-	    char v_ch[2];
-	    v_ch[0]='\0';
-	    sprintf(v_ch, "%d", v_c);
-	    strcat(dirname,"--VFAT");
-	    if(v_c<10) strcat(dirname,"0");
-	    strcat(dirname,v_ch);
-	    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT Directory " << dirname << " created" << std::endl;
-	    VFATdir.push_back(gDirectory->mkdir(dirname));
-	    gDirectory->cd(dirname);
-	    //VFAT HISTOGRAMS HERE
-	    dirname[strlen(dirname)-8] = '\0';
-	    gDirectory->cd("..");
-
-	    v_c++;
-	  }
-	  dirname[strlen(dirname)-6] = '\0';
-	  gDirectory->cd("..");
-
-	  g_c++;
-	}
-	dirname[strlen(dirname)-6] = '\0';
-	gDirectory->cd("..");
+        v_geb = a->gebs();
+        char diramc[30];        //filename for AMC directory  
+        diramc[0]='\0';
+        char aslot_ch[2];       //char used to put AMC slot number inot directory name
+        aslot_ch[0] = '\0';
+        int aslot = v_amc[a_c].AMCnum();  //obtains the slot number from the AMCdata
+        sprintf(aslot_ch, "%d", aslot);
+        strcat(diramc,"AMC-");
+        strcat(diramc, aslot_ch);
+        if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC Directory " << diramc << " created" << std::endl;
+        AMCdir.push_back(gDirectory->mkdir(diramc)); //creates a directory and adds it to vector of AMC directories
+        gDirectory->cd(diramc);                      //moves to newly created directory
+        //AMC HISTOGRAMS HERE
+        g_c=0;
+        for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+          v_vfat=g->vfats();
+          char dirgeb[30];    //filename for GEB directory
+          dirgeb[0]='\0';    
+          char g_ch[2];       //char used to put GEB number into directory name
+          g_ch[0]='\0';
+          sprintf(g_ch, "%d", g_c);
+          strcat(dirgeb,"GTX-");
+          strcat(dirgeb,g_ch);
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB Directory " << dirgeb << " created" << std::endl;
+          GEBdir.push_back(gDirectory->mkdir(dirgeb)); //creates a directory and adds it to vector of GEB directories
+          gDirectory->cd(dirgeb);                      //moves to the newly created directory
+          //GEB HISTOGRAMS HERE
+          v_c=0;
+          for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
+            char dirvfat[30];   //filename for VFAT directory
+            dirvfat[0]='\0';    
+            char v_ch[2];       //char used to put VFAT slot into directory name
+            v_ch[0]='\0';
+            sprintf(v_ch, "%d", v_c);
+            char vslot_ch[2];
+            vslot_ch[0] = '\0';
+            std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table_TAMUv2.csv"));     
+            int vslot = slotInfo_->GEBslotIndex(v_vfat[v_c].ChipID());  //converts Chip ID into VFAT slot number
+            sprintf(vslot_ch, "%d", vslot);
+            strcat(dirvfat,"VFAT-");
+            strcat(dirvfat, vslot_ch);
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT Directory " << dirvfat << " created" << std::endl;
+            VFATdir.push_back(gDirectory->mkdir(dirvfat));  //creates a directory and adds it to vector of VFAT directories
+            gDirectory->cd(dirvfat);                        //moves to the newly created directory
+            //VFAT HISTOGRAMS HERE
+            gDirectory->cd("..");   //moves back to previous directory
+            v_c++;
+          }
+          gDirectory->cd("..");     //moves back to previous directory
+          
+          g_c++;
+        }
+        gDirectory->cd("..");       //moves back to previous directory
 
        	a_c++;
       }
+     
       a13_c++;
     }
   }
@@ -207,18 +217,18 @@ private:
 
       // control_bits = new TH1F("Control_Bits", "Control Bits ", 15,  0x0 , 0xf)
       // Evt_ty       = new TH1F("Evt_ty", "Evt_ty", 15, 0x0, 0xf)
-      // LV1_id;      = new TH1F("LV1_id", "LV1_id", ?, 0x0, 0xffffff)
+      // LV1_id;      = new TH1F("LV1_id", "LV1_id", 0xffffff, 0x0, 0xffffff)
       // Bx_id;       = new TH1F("Bx_id", "Bx_id", 4095, 0x0, 0xfff)
       // Source_id;   = new TH1F("Source_id", "Source_id", 4095, 0x0, 0xfff)
       // CalTyp;      = new TH1F("CalTyp", "CalTyp", 15, 0x0, 0xf)
       // nAMC;        = new TH1F("nAMC", "nAMC", 15, 0x0, 0xf)
-      // OrN;         = new TH1F("OrN", "OrN", ?, 0x0, 0xffffffff)
-      // CRC_amc13;   = new TH1F("CRC_amc13", "CRC_amc13", ?, 0x0, 0xffffffff)
+      // OrN;         = new TH1F("OrN", "OrN", 0xffffffff, 0x0, 0xffffffff)
+      // CRC_amc13;   = new TH1F("CRC_amc13", "CRC_amc13", 0xffffffff, 0x0, 0xffffffff)
       // Blk_Not;     = new TH1F("Blk_Not", "Blk_Not", 255, 0x0, 0xff)
       // LV1_idT;     = new TH1F("LV1_idT", "LV1_idT", 255, 0x0, 0xff)
       // BX_idT;      = new TH1F("BX_idT", "BX_idT", 4095, 0x0, 0xfff)
-      // EvtLength;   = new TH1F("EvtLength", "EvtLength", ?, 0x0, 0xffffff)
-      // CRC_cdf;     = new TH1F("CRC_cdf", "CRC_cdf", ?, 0x0, 0xffff)
+      // EvtLength;   = new TH1F("EvtLength", "EvtLength", 0xffffff, 0x0, 0xffffff)
+      // CRC_cdf;     = new TH1F("CRC_cdf", "CRC_cdf", 0xffff, 0x0, 0xffff)
     
 
 
@@ -269,18 +279,18 @@ private:
 //       //dir[i] = ofile->mkdir(dirname[i].c_str());
 //       control_bits = new TH1F("Control_Bits", "Control Bits ", 15,  0x0 , 0xf)
 //       Evt_ty       = new TH1F("Evt_ty", "Evt_ty", 15, 0x0, 0xf)
-//       LV1_id;      = new TH1F("LV1_id", "LV1_id", ?, 0x0, 0xffffff)
+//       LV1_id;      = new TH1F("LV1_id", "LV1_id", 0xffffff, 0x0, 0xffffff)
 //       Bx_id;       = new TH1F("Bx_id", "Bx_id", 4095, 0x0, 0xfff)
 //       Source_id;   = new TH1F("Source_id", "Source_id", 4095, 0x0, 0xfff)
 //       CalTyp;      = new TH1F("CalTyp", "CalTyp", 15, 0x0, 0xf)
 //       nAMC;        = new TH1F("nAMC", "nAMC", 15, 0x0, 0xf)
-//       OrN;         = new TH1F("OrN", "OrN", ?, 0x0, 0xffffffff)
-//       CRC_amc13;   = new TH1F("CRC_amc13", "CRC_amc13", ?, 0x0, 0xffffffff)
+//       OrN;         = new TH1F("OrN", "OrN", 0xffffffff, 0x0, 0xffffffff)
+//       CRC_amc13;   = new TH1F("CRC_amc13", "CRC_amc13", 0xffffffff, 0x0, 0xffffffff)
 //       Blk_Not;     = new TH1F("Blk_Not", "Blk_Not", 255, 0x0, 0xff)
 //       LV1_idT;     = new TH1F("LV1_idT", "LV1_idT", 255, 0x0, 0xff)
 //       BX_idT;      = new TH1F("BX_idT", "BX_idT", 4095, 0x0, 0xfff)
-//       EvtLength;   = new TH1F("EvtLength", "EvtLength", ?, 0x0, 0xffffff)
-//       CRC_cdf;     = new TH1F("CRC_cdf", "CRC_cdf", ?, 0x0, 0xffff)
+//       EvtLength;   = new TH1F("EvtLength", "EvtLength", 0xffffff, 0x0, 0xffffff)
+//       CRC_cdf;     = new TH1F("CRC_cdf", "CRC_cdf", 0xffff, 0x0, 0xffff)
 //     }
 
 // };
@@ -331,25 +341,25 @@ private:
 //     void bookHistograms()
 //     {
 //       AMCnum     = new TH1F("AMCnum", "AMC number", 15,  0x0 , 0xf)
-//       L1A        = new TH1F("L1A", "L1A ID", ?,  0x0 , 0xffffff)      
+//       L1A        = new TH1F("L1A", "L1A ID", 0xffffff,  0x0 , 0xffffff)      
 //       BX         = new TH1F("BX", "BX ID", 4095,  0x0 , 0xfff)
-//       Dlength    = new TH1F("Dlength", "Data Length", ?,  0x0 , 0xfffff)
+//       Dlength    = new TH1F("Dlength", "Data Length", 0xfffff,  0x0 , 0xfffff)
 //       FV         = new TH1F("FV", "Format Version", 15,  0x0 , 0xf)
 //       Rtype      = new TH1F("Rtype", "Run Type", 15,  0x0 , 0xf)
 //       Param1     = new TH1F("Param1", "Run Param 1", 255,  0x0 , 0xff)
 //       Param2     = new TH1F("Param2", "Run Param 2", 255,  0x0 , 0xff)
 //       Param3     = new TH1F("Param3", "Run Param 3", 255,  0x0 , 0xff)
-//       Onum       = new TH1F("Onum", "Orbit Number", ?,  0x0 , 0xffff)
-//       BID        = new TH1F("BID", "Board ID", ?,  0x0 , 0xffff)
-//       GEMDAV     = new TH1F("GEMDAV", "GEM DAV list", ?,  0x0 , 0xffffff)
-//       Bstatus    = new TH1F("Bstatus", "Buffer Status", ?,  0x0 , 0xffffff)
+//       Onum       = new TH1F("Onum", "Orbit Number", 0xffff,  0x0 , 0xffff)
+//       BID        = new TH1F("BID", "Board ID", 0xffff,  0x0 , 0xffff)
+//       GEMDAV     = new TH1F("GEMDAV", "GEM DAV list", 0xffffff,  0x0 , 0xffffff)
+//       Bstatus    = new TH1F("Bstatus", "Buffer Status", 0xffffff,  0x0 , 0xffffff)
 //       GDcount    = new TH1F("GDcount", "GEM DAV count", 31,  0x0 , 0b11111)
 //       Tsate      = new TH1F("Tstate", "TTS state", 7,  0x0 , 0b111)
-//       ChamT      = new TH1F("ChamT", "Chamber Timeout", ?,  0x0 , 0xffffff)
+//       ChamT      = new TH1F("ChamT", "Chamber Timeout", 0xffffff,  0x0 , 0xffffff)
 //       OOSG       = new TH1F("OOSG", "OOS GLIB", 1,  0x0 , 0b1)
-//       CRC        = new TH1F("CRC", "CRC", ?,  0x0 , 0xffffffff)
-//       L1AT       = new TH1F("L1AT", "L1AT", ?,  0x0 , 0xffffff)
-//       DlengthT   = new TH1F("DlengthT", "DlengthT", ?,  0x0 , 0xffffff)
+//       CRC        = new TH1F("CRC", "CRC", 0xffffffff,  0x0 , 0xffffffff)
+//       L1AT       = new TH1F("L1AT", "L1AT", 0xffffff,  0x0 , 0xffffff)
+//       DlengthT   = new TH1F("DlengthT", "DlengthT", 0xffffff,  0x0 , 0xffffff)
 //     }
 
 // }
@@ -387,11 +397,11 @@ private:
    
 //     void bookHistograms()
 //     {
-//       ZeroSup  = new TH1F("ZeroSup", "Zero Suppression", ?,  0x0 , 0xffffff)
+//       ZeroSup  = new TH1F("ZeroSup", "Zero Suppression", 0xffffff,  0x0 , 0xffffff)
 //       InputID  = new TH1F("InputID", "GLIB input ID", 31,  0x0 , 0b11111)      
 //       Vwh      = new TH1F("Vwh", "VFAT word count", 4095,  0x0 , 0xfff)
-//       ErrorC   = new TH1F("ErrorC", "Thirteen Flags", ?,  0x0 , 0b11111111111111111)
-//       OHCRC    = new TH1F("OHCRC", "OH CRC", ?,  0x0 , 0xffff)
+//       ErrorC   = new TH1F("ErrorC", "Thirteen Flags", 0b1111111111111111,  0x0 , 0b1111111111111111)
+//       OHCRC    = new TH1F("OHCRC", "OH CRC", 0xffff,  0x0 , 0xffff)
 //       Vwt      = new TH1F("Vwt", "VFAT word count", 4095,  0x0 , 0xfff)
 //       InFU     = new TH1F("InFu", "InFIFO underflow flag", 15,  0x0 , 0xf)
 //       Stuckd   = new TH1F("Stuckd", "Stuck data flag", 1,  0x0 , 0b1)
