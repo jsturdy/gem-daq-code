@@ -27,22 +27,10 @@ int main(int argc, char** argv)
     }
   }
 
-  // std::cout << "[MAIN]: Slot table : " << m_slot_file << std::endl;
-  // gemTreeWriter *m_gemTreeWriter = new gemTreeWriter();
-  // m_gemTreeWriter->makeTree(m_dat_filename, m_slot_file);
-  // string m_raw_filename;
-  // m_raw_filename = m_gemTreeWriter->getOutputFileName();
-
   string m_raw_filename = m_root_filename;
 
-  // std::cout << "[MAIN]: ROOT TTree is finished" << std::endl;
-  // std::cout << "Raw file name " << m_raw_filename << std::endl;
-
-  //gemTreeReader *m_gemTreeReader = new gemTreeReader(m_raw_filename, print_hist);
-  //m_gemTreeReader->bookHistograms();
-
-  Hardware_histogram *hw_histogram = new Hardware_histogram(m_raw_filename);
- 
+  std::cout << "[MAIN]: Beginning DQM treeReader" << std::endl;
+  treeReader *reader = new treeReader(m_raw_filename);
   std::cout << "[MAIN]: DQM analysis done" << std::endl;
 
   return 0;
