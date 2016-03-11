@@ -219,6 +219,22 @@ public:
     hi1010 = new TH1I((slot_s+"_1010").c_str(), "Control Bits 1010", 15, 0x0, 0xf );
     hi1100 = new TH1I((slot_s+"_1100").c_str(), "Control Bits 1100", 15, 0x0, 0xf );
     hi1110 = new TH1I((slot_s+"_1110").c_str(), "Control Bits 1110", 15, 0x0, 0xf );
+
+    hiBC     = new TH1I((slot_s+"_BC").c_str(), "Bunch Crossing Number", 0xfff, 0x0, 0xfff);
+    hiEC     = new TH1I((slot_s+"_EV").c_str(), "Event Counter", 255, 0x0, 0xff);
+    hiFlag   = new TH1I((slot_s+"_Flag").c_str(), "Control Flag", 15, 0x0, 0xf);
+    hiChipID = new TH1I((slot_s+"_ChipID").c_str(), "Chip ID", 0xfff, 0x0, 0xfff);
+    hicrc    = new TH1I((slot_s+"_CRC").c_str(), "Check Sum Value", 0xffff, 0x0, 0xffff);
+    hiBC->Fill(vfat->BC());
+    hiEC->Fill(vfat->EC());
+    hiFlag->Fill(vfat->Flag());
+    hiChipID->Fill(vfat->ChipID());
+    hicrc->Fill(vfat->crc());
+    setTitles(hiBC, "bunch crossing number", "Number of VFAT blocks");
+    setTitles(hiEC, "event counter",         "Number of VFAT blocks");
+    setTitles(hiFlag, "control flag",          "Number of VFAT blocks");
+    setTitles(hiChipID, "chip ID",               "Number of VFAT blocks");
+    setTitles(hicrc, "check sum value",       "Number of VFAT blocks");
     
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Filling VFAT Histograms for " << vdir->GetName() << std::endl;   
     this->fillVFATHistograms(vfat, hi1010,hi1100,hi1110);
@@ -239,6 +255,19 @@ public:
 
   }
 
+//     {
+//       b1010    = new TH1F("b1010", "Control Bits", 15,  0x0 , 0xf)
+//       BC       = new TH1F("BC", "Bunch Crossing Number", 4095,  0x0 , 0xfff)      
+//       b1100    = new TH1F("b1100", "Control Bits", 15,  0x0 , 0xf)
+//       EC       = new TH1F("EC", "Event Counter", 255,  0x0 , 0xff)
+//       Flag     = new TH1F("Flag", "Control Flags", 15,  0x0 , 0xf)
+//       b1110    = new TH1F("b1110", "Control Bits", 15,  0x0 , 0xf)
+//       ChipID   = new TH1F("ChipID", "Chip ID", 4095,  0x0 , 0xfff)
+//       lsData   = new TH1F("lsData", "channels from 1 to 64", ?,  0x0 , ?)
+//       msData   = new TH1F("msData", "cahnnels from 65 to 128", ?,  0x0 , ?)
+//       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff)
+//       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff)
+//     }
 
 
 
@@ -472,8 +501,6 @@ private:
   TH1I* hi1010                     ; // Control bit 1010
   TH1I* hi1100                     ; // Control bit 1100
   TH1I* hi1110                     ; // Control bit 1110
-  TH1I* hiFlag                     [3]; // VFAT Flag
-  TH1I* hiCRC                      [3]; // VFAT CRC
   TH1I* hiDiffCRC                  [3]; // CRC difference between the one supplied by VFAT and recomputed one
   TH1I* hiFake                     [3]; // Number of bad VFAT blocks in event 
   TH1F* hiCh128                    [3];     
@@ -493,6 +520,12 @@ private:
   TH1I* hiClusterMultEta     [3][NETA];
   TH1I* hiClusterSizeEta     [3][NETA];
   TH2I* hiBeamProfile              [3];
+  TH1I* hiBC                          ; //Bunch Crossing Number
+  TH1I* hiEC                          ; //Event Counter
+  TH1I* hiFlag                        ; //VFAT Flag
+  TH1I* hiChipID                      ; //VFAT Chip ID
+  TH1I* hicrc                         ; //Check Value Sum
+
 
   TDirectory *dir[3];
 
