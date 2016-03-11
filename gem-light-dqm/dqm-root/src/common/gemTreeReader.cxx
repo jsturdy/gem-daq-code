@@ -86,9 +86,6 @@ private:
   TFile *ofile;
   std::string ofilename;
 
-  std::vector<int> tmp_strips;
-
-
   std::vector<TDirectory*> AMC13dir;
   std::vector<TDirectory*> AMCdir;
   std::vector<TDirectory*> GEBdir;
@@ -150,6 +147,7 @@ private:
     int v_c=0;      //counter through VFATs
     int vdir_c=0;   //running counter through total number of VDirs
 
+    /* LOOP THROUGH AMC13s */
     for(auto a13 = v_amc13.begin(); a13!=v_amc13.end(); a13++){
       v_amc = a13->amcs();
 
@@ -166,6 +164,8 @@ private:
       if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 Directory " << diramc13 << " created" << std::endl;
       //AMC13 HISTOGRAMS HERE
       a_c=0;
+
+      /* LOOP THROUGH AMCs */
       for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
         v_geb = a->gebs();
         char diramc[30];        //filename for AMC directory  
@@ -181,6 +181,8 @@ private:
         gDirectory->cd(diramc);                      //moves to newly created directory
         //AMC HISTOGRAMS HERE
         g_c=0;
+
+	/* LOOP THROUGH GEBs */
         for(auto g=v_geb.begin(); g!=v_geb.end();g++){
           v_vfat=g->vfats();
           char dirgeb[30];    //filename for GEB directory
@@ -195,6 +197,8 @@ private:
           gDirectory->cd(dirgeb);                      //moves to the newly created directory
           //GEB HISTOGRAMS HERE
           v_c=0;
+
+	  /* LOOP THROUGH VFATs */
           for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
             char dirvfat[30];   //filename for VFAT directory
             dirvfat[0]='\0';    
@@ -218,30 +222,28 @@ private:
 
             gDirectory->cd("..");   //moves back to previous directory
             v_c++;
-          }
+          } /* END VFAT LOOP */
           gDirectory->cd("..");     //moves back to previous directory
-          
           g_c++;
-        }
+        } /* END GEB LOOP */
         gDirectory->cd("..");       //moves back to previous directory
-
        	a_c++;
-      }
-     
+      } /* END AMC LOOP */
       a13_c++;
-    }
+    } /* END AMC13 LOOP */
+
     ofile->Write();
   }
 
   void createVFATHistograms(VFATdata *vfat, int slot, TDirectory* vdir)
   {
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Creating VFAT Histograms for " << vdir->GetName() << std::endl;   
-    //gDirectory->cd(vdir->GetPath());
     vdir->cd();
 
     std::string slot_s = "Slot";
     slot_s += to_string(static_cast<long long>(slot)); //string Slot#
 
+    //book histograms
     hi1010 = new TH1I((slot_s+"_1010").c_str(), "Control Bits 1010", 15, 0x0, 0xf );
     hi1100 = new TH1I((slot_s+"_1100").c_str(), "Control Bits 1100", 15, 0x0, 0xf );
     hi1110 = new TH1I((slot_s+"_1110").c_str(), "Control Bits 1110", 15, 0x0, 0xf );
@@ -249,7 +251,7 @@ private:
     hiEC     = new TH1I((slot_s+"_EV").c_str(), "Event Counter", 255, 0x0, 0xff);
     hiFlag   = new TH1I((slot_s+"_Flag").c_str(), "Control Flag", 15, 0x0, 0xf);
     hiChipID = new TH1I((slot_s+"_ChipID").c_str(), "Chip ID", 0xfff, 0x0, 0xfff);
-
+    //fill histograms
     hi1010->Fill(vfat->b1010());
     hi1100->Fill(vfat->b1100());
     hi1110->Fill(vfat->b1110());
@@ -257,41 +259,44 @@ private:
     hiEC->Fill(vfat->EC());
     hiFlag->Fill(vfat->Flag());
     hiChipID->Fill(vfat->ChipID());
-
+    //label histograms
     setTitles(hi1010, "1010 marker, max 0xf", "Number of VFAT blocks");   
     setTitles(hi1100, "1100 marker, max 0xf", "Number of VFAT blocks");   
     setTitles(hi1110, "1110 marker, max 0xf", "Number of VFAT blocks"); 
     setTitles(hiBC, "bunch crossing number", "Number of VFAT blocks");
-    setTitles(hiEC, "event counter",         "Number of VFAT blocks");
-    setTitles(hiFlag, "control flag",          "Number of VFAT blocks");
-    setTitles(hiChipID, "chip ID",               "Number of VFAT blocks");
-
+    setTitles(hiEC, "event counter", "Number of VFAT blocks");
+    setTitles(hiFlag, "control flag", "Number of VFAT blocks");
+    setTitles(hiChipID, "chip ID", "Number of VFAT blocks");
   }
 
   void createGEBHistograms()
-  {
-  }
+  {}
 
+  void createAMCHistograms()
+  {}
+
+  void createAMC13Histograms()
+  {}
 
 };
 
 
 
 
-      // control_bits = new TH1F("Control_Bits", "Control Bits ", 15,  0x0 , 0xf)
-      // Evt_ty       = new TH1F("Evt_ty", "Evt_ty", 15, 0x0, 0xf)
-      // LV1_id;      = new TH1F("LV1_id", "LV1_id", 0xffffff, 0x0, 0xffffff)
-      // Bx_id;       = new TH1F("Bx_id", "Bx_id", 4095, 0x0, 0xfff)
-      // Source_id;   = new TH1F("Source_id", "Source_id", 4095, 0x0, 0xfff)
-      // CalTyp;      = new TH1F("CalTyp", "CalTyp", 15, 0x0, 0xf)
-      // nAMC;        = new TH1F("nAMC", "nAMC", 15, 0x0, 0xf)
-      // OrN;         = new TH1F("OrN", "OrN", 0xffffffff, 0x0, 0xffffffff)
-      // CRC_amc13;   = new TH1F("CRC_amc13", "CRC_amc13", 0xffffffff, 0x0, 0xffffffff)
-      // Blk_Not;     = new TH1F("Blk_Not", "Blk_Not", 255, 0x0, 0xff)
-      // LV1_idT;     = new TH1F("LV1_idT", "LV1_idT", 255, 0x0, 0xff)
-      // BX_idT;      = new TH1F("BX_idT", "BX_idT", 4095, 0x0, 0xfff)
-      // EvtLength;   = new TH1F("EvtLength", "EvtLength", 0xffffff, 0x0, 0xffffff)
-      // CRC_cdf;     = new TH1F("CRC_cdf", "CRC_cdf", 0xffff, 0x0, 0xffff)
+// control_bits = new TH1F("Control_Bits", "Control Bits ", 15,  0x0 , 0xf)
+// Evt_ty       = new TH1F("Evt_ty", "Evt_ty", 15, 0x0, 0xf)
+// LV1_id;      = new TH1F("LV1_id", "LV1_id", 0xffffff, 0x0, 0xffffff)
+// Bx_id;       = new TH1F("Bx_id", "Bx_id", 4095, 0x0, 0xfff)
+// Source_id;   = new TH1F("Source_id", "Source_id", 4095, 0x0, 0xfff)
+// CalTyp;      = new TH1F("CalTyp", "CalTyp", 15, 0x0, 0xf)
+// nAMC;        = new TH1F("nAMC", "nAMC", 15, 0x0, 0xf)
+// OrN;         = new TH1F("OrN", "OrN", 0xffffffff, 0x0, 0xffffffff)
+// CRC_amc13;   = new TH1F("CRC_amc13", "CRC_amc13", 0xffffffff, 0x0, 0xffffffff)
+// Blk_Not;     = new TH1F("Blk_Not", "Blk_Not", 255, 0x0, 0xff)
+// LV1_idT;     = new TH1F("LV1_idT", "LV1_idT", 255, 0x0, 0xff)
+// BX_idT;      = new TH1F("BX_idT", "BX_idT", 4095, 0x0, 0xfff)
+// EvtLength;   = new TH1F("EvtLength", "EvtLength", 0xffffff, 0x0, 0xffffff)
+// CRC_cdf;     = new TH1F("CRC_cdf", "CRC_cdf", 0xffff, 0x0, 0xffff)
     
 
 
@@ -315,7 +320,6 @@ private:
   
 
 //   private:
-
 //     TFile *ifile;
 //     TFile *ofile;
 //     std::string ofilename;
