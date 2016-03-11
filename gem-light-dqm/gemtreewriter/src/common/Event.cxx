@@ -120,6 +120,6 @@ void Event::SetHeader(Int_t i, Int_t run, Int_t date)
 //______________________________________________________________________________
 void Event::Clear()
 {
-    famcs.clear();
+    famc13s.clear();
     fisEventGood = false;
 }
