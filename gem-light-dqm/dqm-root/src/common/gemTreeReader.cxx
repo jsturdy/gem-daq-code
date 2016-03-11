@@ -91,14 +91,23 @@ private:
   std::vector<TDirectory*> GEBdir;
   std::vector<TDirectory*> VFATdir;
 
-
+  //VFAT data
   TH1I* hi1010                     ; // Control bit 1010
   TH1I* hi1100                     ; // Control bit 1100
   TH1I* hi1110                     ; // Control bit 1110
-  TH1I* hiBC                       ; //Bunch Crossing Number
-  TH1I* hiEC                       ; //Event Counter
-  TH1I* hiFlag                     ; //VFAT Flag
-  TH1I* hiChipID                   ; //VFAT Chip ID
+  TH1I* hiBC                       ; // Bunch Crossing Number
+  TH1I* hiEC                       ; // Event Counter
+  TH1I* hiFlag                     ; // VFAT Flag
+  TH1I* hiChipID                   ; // VFAT Chip ID
+  //GEB data
+  TH1I* hiZeroSup                  ; // Zero Suppression Flag
+  TH1I* hiInputID                  ; // GLIV input ID
+  TH1I* hiVwh                      ; // VFAT word count (expected)
+  TH1I* hiErrorC                   ; // Thirteen Flags (may need to separate into thriteen histograms)
+  TH1I* hiOHCRC                    ; // OH CRC
+  TH1I* hiVwt                      ; // VFAT word count (counted)
+  TH1I* hiInFU                     ; // InFIFO underflow flag
+  TH1I* hiStuckd                   ; // Stuck data Flag
 
 
   TDirectory *dir[3];
@@ -196,6 +205,8 @@ private:
           GEBdir.push_back(gDirectory->mkdir(dirgeb)); //creates a directory and adds it to vector of GEB directories
           gDirectory->cd(dirgeb);                      //moves to the newly created directory
           //GEB HISTOGRAMS HERE
+          this->createGEBHistograms(&v_geb[g_c],g_c,GEBdir[GEBdir.size()-1]);
+
           v_c=0;
 
 	  /* LOOP THROUGH VFATs */
@@ -217,7 +228,7 @@ private:
             gDirectory->cd(dirvfat);                        //moves to the newly created directory
 
             //VFAT HISTOGRAMS HERE
-	    this->createVFATHistograms(&v_vfat[v_c],vslot,VFATdir[VFATdir.size()-1]);
+            this->createVFATHistograms(&v_vfat[v_c],vslot,VFATdir[VFATdir.size()-1]);
 
 
             gDirectory->cd("..");   //moves back to previous directory
@@ -269,8 +280,43 @@ private:
     setTitles(hiChipID, "chip ID", "Number of VFAT blocks");
   }
 
-  void createGEBHistograms()
-  {}
+  void createGEBHistograms(GEBdata *geb, int index, TDirectory* gdir)
+  {
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Creating GEB Histograms for " << gdir->GetName() << std::endl;   
+    gdir->cd();
+
+    std::string index_s = "Index";
+    index_s += to_string(static_cast<long long>(index)); //string GTX index (0 or 1)
+
+    //book histograms
+    hiZeroSup = new TH1I((index_s+"_ZeroSup").c_str(), "Zero Suppression flag", 0xffffff, 0x0, 0xffffff );
+    hiInputID = new TH1I((index_s+"_InputID").c_str(), "GLIB input ID", 0b11111, 0x0, 0b11111 );
+    hiVwh     = new TH1I((index_s+"_Vwh").c_str(), "expected VFAT word count", 4095, 0x0, 0xfff );
+    hiErrorC  = new TH1I((index_s+"_ErrorC").c_str(), "Error flags", 0b1111111111111, 0x0, 0b1111111111111 ); //may need to change into thirteen separate histograms
+    hiOHCRC   = new TH1I((index_s+"_OHCRC").c_str(), "OH CRC", 0xffff, 0x0, 0xffff);
+    hiVwt     = new TH1I((index_s+"_Vwt").c_str(), "counted VFAT word count", 4095, 0x0, 0xfff);
+    hiInFU    = new TH1I((index_s+"_InFu").c_str(), "InFIFO underflow flag", 15, 0x0, 0xf);
+    hiStuckd  = new TH1I((index_s+"_Stuckd").c_str(), "Stuck data flag", 1, 0x0, 0b1);
+    //fill histograms
+    hiZeroSup->Fill(geb->ZeroSup());
+    hiInputID->Fill(geb->InputID());
+    hiVwh->Fill(geb->Vwh());
+    hiErrorC->Fill(geb->ErrorC());
+    hiOHCRC->Fill(geb->OHCRC());
+    hiVwt->Fill(geb->Vwt());
+    hiInFU->Fill(geb->InFu());
+    hiStuckd->Fill(geb->Stuckd());
+    //label histograms
+    setTitles(hiZeroSup, "zero suppression flag", "Number of GEB blocks");
+    setTitles(hiInputID, "input ID marker", "Number of GEB blocks");   
+    setTitles(hiVwh,     "expected word count", "Number of GEB blocks");   
+    setTitles(hiErrorC,  "error flags", "Number of GEB blocks"); 
+    setTitles(hiOHCRC,   "OH CRC", "Number of GEB blocks");
+    setTitles(hiVwt,     "counted word count", "Number of GEB blocks");
+    setTitles(hiInFU,    "InFIFO underflow flag", "Number of GEB blocks");
+    setTitles(hiStuckd,  "stuck data flag", "Number of GEB blocks");
+
+  }
 
   void createAMCHistograms()
   {}
@@ -279,8 +325,6 @@ private:
   {}
 
 };
-
-
 
 
 // control_bits = new TH1F("Control_Bits", "Control Bits ", 15,  0x0 , 0xf)
@@ -418,7 +462,14 @@ private:
 //       Param3     = new TH1F("Param3", "Run Param 3", 255,  0x0 , 0xff)
 //       Onum       = new TH1F("Onum", "Orbit Number", 0xffff,  0x0 , 0xffff)
 //       BID        = new TH1F("BID", "Board ID", 0xffff,  0x0 , 0xffff)
-//       GEMDAV     = new TH1F("GEMDAV", "GEM DAV list", 0xffffff,  0x0 , 0xffffff)
+//       GEMDAV     = new TH1F("GEMDAV", "GEM DAV list", ZeroSup  = new TH1F("ZeroSup", "Zero Suppression", 0xffffff,  0x0 , 0xffffff)
+//       InputID  = new TH1F("InputID", "GLIB input ID", 31,  0x0 , 0b11111)      
+//       Vwh      = new TH1F("Vwh", "VFAT word count", 4095,  0x0 , 0xfff)
+//       ErrorC   = new TH1F("ErrorC", "Thirteen Flags", 0b1111111111111111,  0x0 , 0b1111111111111111)
+//       OHCRC    = new TH1F("OHCRC", "OH CRC", 0xffff,  0x0 , 0xffff)
+//       Vwt      = new TH1F("Vwt", "VFAT word count", 4095,  0x0 , 0xfff)
+//       InFU     = new TH1F("InFu", "InFIFO underflow flag", 15,  0x0 , 0xf)
+//       Stuckd   = new TH1F("Stuckd", "Stuck data flag", 1,  0x0 , 0b1)
 //       Bstatus    = new TH1F("Bstatus", "Buffer Status", 0xffffff,  0x0 , 0xffffff)
 //       GDcount    = new TH1F("GDcount", "GEM DAV count", 31,  0x0 , 0b11111)
 //       Tsate      = new TH1F("Tstate", "TTS state", 7,  0x0 , 0b111)
