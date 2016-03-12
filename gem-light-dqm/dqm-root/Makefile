@@ -15,6 +15,8 @@ ROOTCFLAGS=$(shell root-config --cflags)
 ROOTLIBS  =$(shell root-config --libs) 
 ROOTGLIBS =$(shell root-config --glibs) 
 
+ROOTLIBS += -lRHTTP
+
 #Project=gem
 Project=gem-light-dqm
 Package=dqm-root
