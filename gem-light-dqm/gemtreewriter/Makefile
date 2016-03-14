@@ -60,6 +60,9 @@ event:
 	mkdir -p $(LIB)
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
 
+unpacker:
+	mkdir -p $(BIN)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/GEMUnpacker.cc $(LIB)/libEvent.so -o $(BIN)/unpacker
 
 
 clean:
