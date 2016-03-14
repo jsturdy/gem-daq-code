@@ -55,6 +55,7 @@
 #include "logger.cxx"
 #include "integrity_checker.cxx"
 #include "GEMDQMerrors.cxx"
+#include "AMC13_histogram.cxx"
 
 using namespace std;
 
@@ -75,7 +76,7 @@ public:
     this->fetchHardware();
 
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
-    this->bookHistograms();
+    this->bookAllHistograms();
   }
   ~treeReader(){}
 
@@ -148,7 +149,7 @@ private:
   }
 
 
-  void bookHistograms()
+  void bookAllHistograms()
   {
     int a13_c=0;    //counter through AMC13s
     int a_c=0;      //counter through AMCs
@@ -168,10 +169,14 @@ private:
       sprintf(serial_ch, "%d", serial);
       strcat(diramc13,"AMC13-");
       strcat(diramc13,serial_ch);
-      AMC13dir.push_back(ofile->mkdir(diramc13)); //creates a directory and adds it to vector of AMC13 directories
-      ofile->cd(diramc13);                        //moves to the newly created directory
+      //AMC13dir.push_back(ofile->mkdir(diramc13)); //creates a directory and adds it to vector of AMC13 directories
+      //ofile->cd(diramc13);                        //moves to the newly created directory
       if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 Directory " << diramc13 << " created" << std::endl;
       //AMC13 HISTOGRAMS HERE
+
+      AMC13_histogram * m_amc13H = new AMC13_histogram(ofilename, gDirectory->mkdir(diramc13));
+      m_amc13H->bookHistograms();
+
       a_c=0;
 
       /* LOOP THROUGH AMCs */
@@ -186,9 +191,14 @@ private:
         strcat(diramc,"AMC-");
         strcat(diramc, aslot_ch);
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC Directory " << diramc << " created" << std::endl;
-        AMCdir.push_back(gDirectory->mkdir(diramc)); //creates a directory and adds it to vector of AMC directories
-        gDirectory->cd(diramc);                      //moves to newly created directory
+        //AMCdir.push_back(gDirectory->mkdir(diramc)); //creates a directory and adds it to vector of AMC directories
+        //gDirectory->cd(diramc);                      //moves to newly created directory
         //AMC HISTOGRAMS HERE
+
+        AMC_histogram * m_amcH = new AMC_histogram(ofilename, gDirectory->mkdir(diramc));
+        m_amcH->bookHistograms();
+        m_amc13H->addAMCH(*m_amcH);
+
         g_c=0;
 
 	/* LOOP THROUGH GEBs */
@@ -202,10 +212,13 @@ private:
           strcat(dirgeb,"GTX-");
           strcat(dirgeb,g_ch);
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB Directory " << dirgeb << " created" << std::endl;
-          GEBdir.push_back(gDirectory->mkdir(dirgeb)); //creates a directory and adds it to vector of GEB directories
-          gDirectory->cd(dirgeb);                      //moves to the newly created directory
-          //GEB HISTOGRAMS HERE
-          this->createGEBHistograms(&v_geb[g_c],g_c,GEBdir[GEBdir.size()-1]);
+          //GEBdir.push_back(gDirectory->mkdir(dirgeb)); //creates a directory and adds it to vector of GEB directories
+          //gDirectory->cd(dirgeb);                      //moves to the newly created directory
+          ////GEB HISTOGRAMS HERE
+          //this->createGEBHistograms(&v_geb[g_c],g_c,GEBdir[GEBdir.size()-1]);
+          GEB_histogram * m_gebH = new GEB_histogram(ofilename, gDirectory->mkdir(dirgeb));
+          m_gebH->bookHistograms();
+          m_amcH->addGEBH(*m_gebH);
 
           v_c=0;
 
@@ -224,11 +237,14 @@ private:
             strcat(dirvfat,"VFAT-");
             strcat(dirvfat, vslot_ch);
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT Directory " << dirvfat << " created" << std::endl;
-            VFATdir.push_back(gDirectory->mkdir(dirvfat));  //creates a directory and adds it to vector of VFAT directories
-            gDirectory->cd(dirvfat);                        //moves to the newly created directory
+            //VFATdir.push_back(gDirectory->mkdir(dirvfat));  //creates a directory and adds it to vector of VFAT directories
+            //gDirectory->cd(dirvfat);                        //moves to the newly created directory
 
             //VFAT HISTOGRAMS HERE
-            this->createVFATHistograms(&v_vfat[v_c],vslot,VFATdir[VFATdir.size()-1]);
+            //this->createVFATHistograms(&v_vfat[v_c],vslot,VFATdir[VFATdir.size()-1]);
+            VFAT_histogram * m_vfatH = new VFAT_histogram(ofilename, gDirectory->mkdir(dirvfat));
+            m_vfatH->bookHistograms();
+            m_gebH->addVFATH(*m_vfatH);
 
 
             gDirectory->cd("..");   //moves back to previous directory
