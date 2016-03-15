@@ -1,5 +1,6 @@
 #include "Hardware_histogram.h"
 #include "TH1.h"
+#include <Event.h>
 
 class VFAT_histogram: public Hardware_histogram
 {
@@ -19,6 +20,15 @@ class VFAT_histogram: public Hardware_histogram
       msData   = new TH1F("msData", "cahnnels from 65 to 128", 64,  0x0 , 63);
       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
+    }
+    void fillHistograms(VFATdata * vfat){
+      b1010->Fill(vfat->b1010());
+      b1100->Fill(vfat->b1100());
+      b1110->Fill(vfat->b1110());
+      BC->Fill(vfat->BC());
+      EC->Fill(vfat->EC());
+      Flag->Fill(vfat->Flag());
+      ChipID->Fill(vfat->ChipID());
     }
   private:
     TH1F* b1010;

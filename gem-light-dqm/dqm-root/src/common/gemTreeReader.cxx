@@ -77,6 +77,7 @@ public:
 
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
     this->bookAllHistograms();
+    this->fillAllHistograms();
   }
   ~treeReader(){}
 
@@ -120,6 +121,16 @@ private:
   vector<VFATdata> v_vfat;
 
 
+  vector<AMC13_histogram> v_amc13H;
+  vector<AMC_histogram> v_amcH;
+  vector<GEB_histogram> v_gebH;
+  vector<VFAT_histogram> v_vfatH;
+
+  AMC13_histogram * m_amc13H;
+  AMC_histogram * m_amcH;
+  GEB_histogram * m_gebH;
+  VFAT_histogram * m_vfatH;
+
   void fetchHardware()
   {
     TTree *tree = (TTree*)ifile->Get("GEMtree");
@@ -129,9 +140,6 @@ private:
     Int_t nentries = tree->GetEntries();
     branch->GetEntry(0);
     v_amc13 = event->amc13s();
-    // vector<AMCdata> v_amc;
-    // vector<GEBdata> v_geb;
-    // vector<VFATdata> v_vfat;
     for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
       v_amc = a13->amcs();
       for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
@@ -155,7 +163,6 @@ private:
     int a_c=0;      //counter through AMCs
     int g_c=0;      //counter through GEBs
     int v_c=0;      //counter through VFATs
-    int vdir_c=0;   //running counter through total number of VDirs
 
     /* LOOP THROUGH AMC13s */
     for(auto a13 = v_amc13.begin(); a13!=v_amc13.end(); a13++){
@@ -169,12 +176,9 @@ private:
       sprintf(serial_ch, "%d", serial);
       strcat(diramc13,"AMC13-");
       strcat(diramc13,serial_ch);
-      //AMC13dir.push_back(ofile->mkdir(diramc13)); //creates a directory and adds it to vector of AMC13 directories
-      //ofile->cd(diramc13);                        //moves to the newly created directory
       if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 Directory " << diramc13 << " created" << std::endl;
       //AMC13 HISTOGRAMS HERE
-
-      AMC13_histogram * m_amc13H = new AMC13_histogram(ofilename, gDirectory->mkdir(diramc13));
+      m_amc13H = new AMC13_histogram(ofilename, gDirectory->mkdir(diramc13));
       m_amc13H->bookHistograms();
 
       a_c=0;
@@ -191,17 +195,13 @@ private:
         strcat(diramc,"AMC-");
         strcat(diramc, aslot_ch);
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC Directory " << diramc << " created" << std::endl;
-        //AMCdir.push_back(gDirectory->mkdir(diramc)); //creates a directory and adds it to vector of AMC directories
-        //gDirectory->cd(diramc);                      //moves to newly created directory
-        //AMC HISTOGRAMS HERE
-
-        AMC_histogram * m_amcH = new AMC_histogram(ofilename, gDirectory->mkdir(diramc));
+        m_amcH = new AMC_histogram(ofilename, gDirectory->mkdir(diramc));
         m_amcH->bookHistograms();
-        m_amc13H->addAMCH(*m_amcH);
+        if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 AMCs size " << m_amc13H->amcsH().size() << std::endl;
 
         g_c=0;
 
-	/* LOOP THROUGH GEBs */
+	      /* LOOP THROUGH GEBs */
         for(auto g=v_geb.begin(); g!=v_geb.end();g++){
           v_vfat=g->vfats();
           char dirgeb[30];    //filename for GEB directory
@@ -212,134 +212,98 @@ private:
           strcat(dirgeb,"GTX-");
           strcat(dirgeb,g_ch);
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB Directory " << dirgeb << " created" << std::endl;
-          //GEBdir.push_back(gDirectory->mkdir(dirgeb)); //creates a directory and adds it to vector of GEB directories
-          //gDirectory->cd(dirgeb);                      //moves to the newly created directory
-          ////GEB HISTOGRAMS HERE
-          //this->createGEBHistograms(&v_geb[g_c],g_c,GEBdir[GEBdir.size()-1]);
-          GEB_histogram * m_gebH = new GEB_histogram(ofilename, gDirectory->mkdir(dirgeb));
+          //GEB HISTOGRAMS HERE
+          m_gebH = new GEB_histogram(ofilename, gDirectory->mkdir(dirgeb));
           m_gebH->bookHistograms();
-          m_amcH->addGEBH(*m_gebH);
+          if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC GEBs size " << m_amcH->gebsH().size() << std::endl;
 
           v_c=0;
 
-	  /* LOOP THROUGH VFATs */
+	        /* LOOP THROUGH VFATs */
           for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
             char dirvfat[30];   //filename for VFAT directory
             dirvfat[0]='\0';    
-            char v_ch[2];       //char used to put VFAT slot into directory name
-            v_ch[0]='\0';
-            sprintf(v_ch, "%d", v_c);
-            char vslot_ch[2];
+            char vslot_ch[2];   //char used to put VFAT number into directory name
             vslot_ch[0] = '\0';
-            std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table_TAMUv2.csv"));     
-            int vslot = slotInfo_->GEBslotIndex(v_vfat[v_c].ChipID());  //converts Chip ID into VFAT slot number
+            std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));     
+            int vslot = slotInfo_->GEBslotIndex(v->ChipID());  //converts Chip ID into VFAT slot number
             sprintf(vslot_ch, "%d", vslot);
             strcat(dirvfat,"VFAT-");
             strcat(dirvfat, vslot_ch);
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT Directory " << dirvfat << " created" << std::endl;
-            //VFATdir.push_back(gDirectory->mkdir(dirvfat));  //creates a directory and adds it to vector of VFAT directories
-            //gDirectory->cd(dirvfat);                        //moves to the newly created directory
-
             //VFAT HISTOGRAMS HERE
-            //this->createVFATHistograms(&v_vfat[v_c],vslot,VFATdir[VFATdir.size()-1]);
-            VFAT_histogram * m_vfatH = new VFAT_histogram(ofilename, gDirectory->mkdir(dirvfat));
+            m_vfatH = new VFAT_histogram(ofilename, gDirectory->mkdir(dirvfat));
             m_vfatH->bookHistograms();
+            //m_vfatH->fillHistograms(&*v);
             m_gebH->addVFATH(*m_vfatH);
-
+            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB VFATs size " << m_gebH->vfatsH().size() << std::endl;
 
             gDirectory->cd("..");   //moves back to previous directory
             v_c++;
           } /* END VFAT LOOP */
           gDirectory->cd("..");     //moves back to previous directory
           g_c++;
+          m_amcH->addGEBH(*m_gebH);
         } /* END GEB LOOP */
         gDirectory->cd("..");       //moves back to previous directory
        	a_c++;
+        m_amc13H->addAMCH(*m_amcH);
       } /* END AMC LOOP */
       a13_c++;
     } /* END AMC13 LOOP */
+  }
+  void fillAllHistograms()
+  {
+    int a13_c=0;    //counter through AMC13s
+    int a_c=0;      //counter through AMCs
+    int g_c=0;      //counter through GEBs
+    int v_c=0;      //counter through VFATs
 
+    TTree *tree = (TTree*)ifile->Get("GEMtree");
+    Event *event = new Event();
+    TBranch *branch = tree->GetBranch("GEMEvents");
+    branch->SetAddress(&event);
+    Int_t nentries = tree->GetEntries();
+    /* LOOP THROUGH Events */
+    for (int i = 0; i < nentries; i++){
+      branch->GetEntry(i);
+      v_amc13 = event->amc13s();
+      /* LOOP THROUGH AMC13s */
+      for(auto a13 = v_amc13.begin(); a13!=v_amc13.end(); a13++){
+        v_amc = a13->amcs();
+        v_amcH = m_amc13H->amcsH();
+        //m_amc13H->fillHistograms();
+        a_c=0;
+        /* LOOP THROUGH AMCs */
+        for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
+          v_geb = a->gebs();
+          v_gebH = v_amcH[a_c].gebsH();
+          //AMC_histogram * t_amcH = &(m_amc13H->amcsH().at(a_c));
+          //m_amcH->fillHistograms();
+          g_c=0;
+	        /* LOOP THROUGH GEBs */
+          for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+            v_vfat = g->vfats();
+            v_vfatH = v_gebH[g_c].vfatsH();
+            //GEB_histogram * t_gebH = &(m_amcH->gebsH().at(g_c));
+            //m_gebH->fillHistograms();
+            v_c=0;
+	          /* LOOP THROUGH VFATs */
+            for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
+              //m_gebH->vfatsH()[v_c].fillHistograms(&*v);
+              //VFAT_histogram * t_vfatH = &(t_gebH->vfatsH().at(v_c));
+              v_vfatH[v_c].fillHistograms(&*v);
+              v_c++;
+            } /* END VFAT LOOP */
+            g_c++;
+          } /* END GEB LOOP */
+         	a_c++;
+        } /* END AMC LOOP */
+        a13_c++;
+      } /* END AMC13 LOOP */
+    } /* END EVENTS LOOP */
     ofile->Write();
   }
-
-  void createVFATHistograms(VFATdata *vfat, int slot, TDirectory* vdir)
-  {
-    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Creating VFAT Histograms for " << vdir->GetName() << std::endl;   
-    vdir->cd();
-
-    std::string slot_s = "Slot";
-    slot_s += to_string(static_cast<long long>(slot)); //string Slot#
-
-    //book histograms
-    hi1010 = new TH1I((slot_s+"_1010").c_str(), "Control Bits 1010", 15, 0x0, 0xf );
-    hi1100 = new TH1I((slot_s+"_1100").c_str(), "Control Bits 1100", 15, 0x0, 0xf );
-    hi1110 = new TH1I((slot_s+"_1110").c_str(), "Control Bits 1110", 15, 0x0, 0xf );
-    hiBC     = new TH1I((slot_s+"_BC").c_str(), "Bunch Crossing Number", 0xfff, 0x0, 0xfff);
-    hiEC     = new TH1I((slot_s+"_EV").c_str(), "Event Counter", 255, 0x0, 0xff);
-    hiFlag   = new TH1I((slot_s+"_Flag").c_str(), "Control Flag", 15, 0x0, 0xf);
-    hiChipID = new TH1I((slot_s+"_ChipID").c_str(), "Chip ID", 0xfff, 0x0, 0xfff);
-    //fill histograms
-    hi1010->Fill(vfat->b1010());
-    hi1100->Fill(vfat->b1100());
-    hi1110->Fill(vfat->b1110());
-    hiBC->Fill(vfat->BC());
-    hiEC->Fill(vfat->EC());
-    hiFlag->Fill(vfat->Flag());
-    hiChipID->Fill(vfat->ChipID());
-    //label histograms
-    setTitles(hi1010, "1010 marker, max 0xf", "Number of VFAT blocks");   
-    setTitles(hi1100, "1100 marker, max 0xf", "Number of VFAT blocks");   
-    setTitles(hi1110, "1110 marker, max 0xf", "Number of VFAT blocks"); 
-    setTitles(hiBC, "bunch crossing number", "Number of VFAT blocks");
-    setTitles(hiEC, "event counter", "Number of VFAT blocks");
-    setTitles(hiFlag, "control flag", "Number of VFAT blocks");
-    setTitles(hiChipID, "chip ID", "Number of VFAT blocks");
-  }
-
-  void createGEBHistograms(GEBdata *geb, int index, TDirectory* gdir)
-  {
-    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Creating GEB Histograms for " << gdir->GetName() << std::endl;   
-    gdir->cd();
-
-    std::string index_s = "Index";
-    index_s += to_string(static_cast<long long>(index)); //string GTX index (0 or 1)
-
-    //book histograms
-    hiZeroSup = new TH1I((index_s+"_ZeroSup").c_str(), "Zero Suppression flag", 0xffffff, 0x0, 0xffffff );
-    hiInputID = new TH1I((index_s+"_InputID").c_str(), "GLIB input ID", 0b11111, 0x0, 0b11111 );
-    hiVwh     = new TH1I((index_s+"_Vwh").c_str(), "expected VFAT word count", 4095, 0x0, 0xfff );
-    hiErrorC  = new TH1I((index_s+"_ErrorC").c_str(), "Error flags", 0b1111111111111, 0x0, 0b1111111111111 ); //may need to change into thirteen separate histograms
-    hiOHCRC   = new TH1I((index_s+"_OHCRC").c_str(), "OH CRC", 0xffff, 0x0, 0xffff);
-    hiVwt     = new TH1I((index_s+"_Vwt").c_str(), "counted VFAT word count", 4095, 0x0, 0xfff);
-    hiInFU    = new TH1I((index_s+"_InFu").c_str(), "InFIFO underflow flag", 15, 0x0, 0xf);
-    hiStuckd  = new TH1I((index_s+"_Stuckd").c_str(), "Stuck data flag", 1, 0x0, 0b1);
-    //fill histograms
-    hiZeroSup->Fill(geb->ZeroSup());
-    hiInputID->Fill(geb->InputID());
-    hiVwh->Fill(geb->Vwh());
-    hiErrorC->Fill(geb->ErrorC());
-    hiOHCRC->Fill(geb->OHCRC());
-    hiVwt->Fill(geb->Vwt());
-    hiInFU->Fill(geb->InFu());
-    hiStuckd->Fill(geb->Stuckd());
-    //label histograms
-    setTitles(hiZeroSup, "zero suppression flag", "Number of GEB blocks");
-    setTitles(hiInputID, "input ID marker", "Number of GEB blocks");   
-    setTitles(hiVwh,     "expected word count", "Number of GEB blocks");   
-    setTitles(hiErrorC,  "error flags", "Number of GEB blocks"); 
-    setTitles(hiOHCRC,   "OH CRC", "Number of GEB blocks");
-    setTitles(hiVwt,     "counted word count", "Number of GEB blocks");
-    setTitles(hiInFU,    "InFIFO underflow flag", "Number of GEB blocks");
-    setTitles(hiStuckd,  "stuck data flag", "Number of GEB blocks");
-
-  }
-
-  void createAMCHistograms()
-  {}
-
-  void createAMC13Histograms()
-  {}
-
 };
 
 

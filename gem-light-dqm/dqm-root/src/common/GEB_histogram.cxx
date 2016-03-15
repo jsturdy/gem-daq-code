@@ -18,6 +18,7 @@ class GEB_histogram: public Hardware_histogram
       Stuckd   = new TH1F("Stuckd", "Stuck data flag", 1,  0x0 , 0b1);
     }
     void addVFATH(VFAT_histogram vfatH){m_vfatsH.push_back(vfatH);}
+    std::vector<VFAT_histogram> vfatsH(){return m_vfatsH;}
   private:
     std::vector<VFAT_histogram> m_vfatsH;
     TH1F* ZeroSup;

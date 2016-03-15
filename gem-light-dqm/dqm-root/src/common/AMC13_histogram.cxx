@@ -19,6 +19,7 @@ class AMC13_histogram: public Hardware_histogram
       Stuckd   = new TH1F("Stuckd", "Stuck data flag", 1,  0x0 , 0b1);
     }
     void addAMCH(AMC_histogram amcH){m_amcsH.push_back(amcH);}
+    std::vector<AMC_histogram> amcsH(){return m_amcsH;}
   private:
     std::vector<AMC_histogram> m_amcsH;
     // temp list of histograms, needs update

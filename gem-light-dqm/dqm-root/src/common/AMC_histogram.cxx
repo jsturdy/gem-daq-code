@@ -19,6 +19,7 @@ class AMC_histogram: public Hardware_histogram
       Stuckd   = new TH1F("Stuckd", "Stuck data flag", 1,  0x0 , 0b1);
     }
     void addGEBH(GEB_histogram gebH){m_gebsH.push_back(gebH);}
+    std::vector<GEB_histogram> gebsH(){return m_gebsH;}
   private:
     std::vector<GEB_histogram> m_gebsH;
     // temp list of histograms, needs update
