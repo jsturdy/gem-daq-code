@@ -16,8 +16,7 @@ class VFAT_histogram: public Hardware_histogram
       Flag     = new TH1F("Flag", "Control Flags", 15,  0x0 , 0xf);
       b1110    = new TH1F("b1110", "Control Bits", 15,  0x0 , 0xf);
       ChipID   = new TH1F("ChipID", "Chip ID", 4095,  0x0 , 0xfff);
-      lsData   = new TH1F("lsData", "channels from 1 to 64", 64,  0x0 , 63);
-      msData   = new TH1F("msData", "cahnnels from 65 to 128", 64,  0x0 , 63);
+      FiredChannels   = new TH1F("FiredChannels", "FiredChannels", 128,  0, 128);
       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
     }
@@ -29,6 +28,16 @@ class VFAT_histogram: public Hardware_histogram
       EC->Fill(vfat->EC());
       Flag->Fill(vfat->Flag());
       ChipID->Fill(vfat->ChipID());
+      uint16_t chan0xf = 0;
+      for (int chan = 0; chan < 128; ++chan) {
+        if (chan < 64){
+          chan0xf = ((vfat->lsData() >> chan) & 0x1);
+          if(chan0xf) FiredChannels->Fill(chan);
+        } else {
+          chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
+          if(chan0xf) FiredChannels->Fill(chan);
+        }
+      }
     }
   private:
     TH1F* b1010;
@@ -38,8 +47,7 @@ class VFAT_histogram: public Hardware_histogram
     TH1F* Flag;
     TH1F* b1110;
     TH1F* ChipID;
-    TH1F* lsData;
-    TH1F* msData;
+    TH1F* FiredChannels;
     TH1F* crc;
     TH1F* crc_calc;
 };
