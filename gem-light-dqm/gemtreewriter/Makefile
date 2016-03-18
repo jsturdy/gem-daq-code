@@ -48,7 +48,9 @@ all:
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gemTreeComposer.cxx $(LIB)/libEvent.so -o $(BIN)/gtc
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dummyEventWriter.cxx $(LIB)/libEvent.so -o $(BIN)/dummywriter
 	$(LS) $(BIN)
+
 event:
 	mkdir -p $(OBJ)
 	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(SRC)/Event.cxx -o $(OBJ)/Event.o
@@ -57,6 +59,12 @@ event:
 	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(DIC)/EventDict.cxx -o $(OBJ)/EventDict.o
 	mkdir -p $(LIB)
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so
+
+unpacker:
+	mkdir -p $(BIN)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/GEMUnpacker.cc $(LIB)/libEvent.so -o $(BIN)/unpacker
+
+
 clean:
 	rm -rf $(BIN) $(OBJ) $(DIC) $(LIB)
 print-env:
@@ -64,4 +72,8 @@ print-env:
 	@echo XDAQ_OS       $(XDAQ_OS)
 	@echo XDAQ_PLATFORM $(XDAQ_PLATFORM)
 	@echo INC           $(INC)
+
+
+
+
 

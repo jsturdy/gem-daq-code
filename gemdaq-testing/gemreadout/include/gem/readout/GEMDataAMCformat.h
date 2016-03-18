@@ -50,7 +50,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << gem.header1 << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << gem.header1 << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -59,6 +59,12 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app | std::ios::binary );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
+        uint64_t cdfHeader = 0x5fffffffffffffff;
+        uint64_t amc13Header1 = 0xff1ffffffffffff0;
+        uint64_t amc13Header2 = 0xffffffffffffffff;
+        outf.write( (char*)&cdfHeader, sizeof(cdfHeader));
+        outf.write( (char*)&amc13Header1, sizeof(amc13Header1));
+        outf.write( (char*)&amc13Header2, sizeof(amc13Header2));
         outf.write( (char*)&gem.header1, sizeof(gem.header1));
         outf.close();
         return true;
@@ -81,7 +87,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << gem.header2 << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << gem.header2 << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -112,7 +118,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << gem.header3 << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << gem.header3 << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -147,7 +153,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << geb.header << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << geb.header << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -186,7 +192,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << geb.runhed << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << geb.runhed << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -217,7 +223,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << geb.trailer << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << geb.trailer << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -258,7 +264,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << gem.trailer2 << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << gem.trailer2 << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -289,7 +295,7 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << gem.trailer1 << std::dec << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0') << gem.trailer1 << std::dec << std::endl;
         outf.close();
         return true;
       };	  
@@ -298,7 +304,11 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app | std::ios::binary );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
+        uint64_t amc13Trailer = 0xbadc0ffeebadcafe;
+        uint64_t cdfTrailer = 0xafffffffffffffff;
         outf.write( (char*)&gem.trailer1, sizeof(gem.trailer1));
+        outf.write( (char*)&amc13Trailer, sizeof(amc13Trailer));
+        outf.write( (char*)&cdfTrailer, sizeof(cdfTrailer));
         outf.close();
         return true;
       };
@@ -320,13 +330,15 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf << std::hex << vfat.BC << std::dec << std::endl;
-        outf << std::hex << vfat.EC << std::dec << std::endl;
-        outf << std::hex << vfat.ChipID << std::dec << std::endl;
-        outf << std::hex << vfat.lsData << std::dec << std::endl;
-        outf << std::hex << vfat.msData << std::dec << std::endl;
-        outf << std::hex << vfat.BXfrOH << std::dec << std::endl;
-        outf << std::hex << vfat.crc << std::dec << std::endl;
+        // have to have 64 bit word lengths
+        outf << std::hex << std::setw(16) << std::setfill('0')
+             << ((((((uint64_t)vfat.BC<<16)+vfat.EC)<<16)+vfat.ChipID)<<16)+(vfat.msData>>48) << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0')
+             << (((vfat.msData&0x0000ffffffffffff)<<16)+(vfat.lsData>>48)) << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0')
+             << (((vfat.lsData&0x0000ffffffffffff)<<16)+vfat.crc)          << std::endl;
+        outf << std::hex << std::setw(16) << std::setfill('0')
+             << vfat.BXfrOH << std::dec << std::endl;
         //writeZEROline(file);
         outf.close();
         return true;
@@ -349,26 +361,26 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app | std::ios::binary );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf.write( (char*)&vfat.BC, sizeof(vfat.BC));
-        outf.write( (char*)&vfat.EC, sizeof(vfat.EC));
+        outf.write( (char*)&vfat.BC,     sizeof(vfat.BC));
+        outf.write( (char*)&vfat.EC,     sizeof(vfat.EC));
         outf.write( (char*)&vfat.ChipID, sizeof(vfat.ChipID));
-        outf.write( (char*)&vfat.lsData, sizeof(vfat.lsData));  
         outf.write( (char*)&vfat.msData, sizeof(vfat.msData));
-        outf.write( (char*)&vfat.BXfrOH, sizeof(vfat.BXfrOH));
-        outf.write( (char*)&vfat.crc, sizeof(vfat.crc));
+        outf.write( (char*)&vfat.lsData, sizeof(vfat.lsData));  
+        outf.write( (char*)&vfat.crc,    sizeof(vfat.crc));
+        //outf.write( (char*)&vfat.BXfrOH, sizeof(vfat.BXfrOH));
         outf.close();
         return true;
       };	  
 
       static bool readVFATdataBinary(std::ifstream& inpf, int event, VFATData& vfat) {
         if (event<0) return false;
-        inpf.read( (char*)&vfat.BC, sizeof(vfat.BC));
-        inpf.read( (char*)&vfat.EC, sizeof(vfat.EC));
+        inpf.read( (char*)&vfat.BC,     sizeof(vfat.BC));
+        inpf.read( (char*)&vfat.EC,     sizeof(vfat.EC));
         inpf.read( (char*)&vfat.ChipID, sizeof(vfat.ChipID));
-        inpf.read( (char*)&vfat.lsData, sizeof(vfat.lsData));
         inpf.read( (char*)&vfat.msData, sizeof(vfat.msData));
+        inpf.read( (char*)&vfat.lsData, sizeof(vfat.lsData));
+        inpf.read( (char*)&vfat.crc,    sizeof(vfat.crc));
         inpf.read( (char*)&vfat.BXfrOH, sizeof(vfat.BXfrOH));
-        inpf.read( (char*)&vfat.crc, sizeof(vfat.crc));
         inpf.seekg (0, inpf.cur);
         if(inpf.eof()) return false;
         return true;
@@ -376,13 +388,15 @@ namespace gem {
 
       static bool readVFATdata(std::ifstream& inpf, int event, VFATData& vfat) {
         if (event<0) return false;
-        inpf >> std::hex >> vfat.BC;
-        inpf >> std::hex >> vfat.EC;
-        inpf >> std::hex >> vfat.ChipID;
-        inpf >> std::hex >> vfat.lsData;
-        inpf >> std::hex >> vfat.msData;
+        uint16_t msTmpUp, lsTmpUp;
+        uint16_t msTmpMid, lsTmpMid;
+        uint32_t msTmpLow, lsTmpLow;
+        inpf >> std::hex >> vfat.BC  >> vfat.EC >> vfat.ChipID >> msTmpUp;
+        inpf >> std::hex >> msTmpMid >> msTmpLow >> lsTmpUp;
+        inpf >> std::hex >> lsTmpMid >> lsTmpLow >> vfat.crc;
         inpf >> std::hex >> vfat.BXfrOH;
-        inpf >> std::hex >> vfat.crc;
+        vfat.msData = ((((uint64_t)msTmpUp<<16)+msTmpMid)<<32)+msTmpLow;
+        vfat.lsData = ((((uint64_t)lsTmpUp<<16)+lsTmpMid)<<32)+lsTmpLow;
         if(inpf.eof()) return false;
         return true;
       };	  

@@ -5,6 +5,8 @@
  */
 
 #include <sstream>
+#include <iostream>
+#include <fstream>
 #include <iomanip>
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -32,6 +34,7 @@
 #include <TFile.h>
 #include "TPaveStats.h"
 #include <math.h>
+#include "TBufferJSON.h"
 
 #include <iostream>
 
@@ -327,6 +330,7 @@ void setTitles(TH1 *h, TString xtitle, TString ytitle)
 {
     h->GetXaxis()->SetTitle(xtitle);
     h->GetYaxis()->SetTitle(ytitle);
+    h->GetYaxis()->SetTitleOffset(1.5);
 }
 
 void setTitles(TH1 *h, TString xtitle, TString ytitle, TString ztitle)
@@ -338,22 +342,29 @@ void setTitles(TH1 *h, TString xtitle, TString ytitle, TString ztitle)
 
 // Print all histograms in separate files
 // Type = "png", "eps", etc.
-void printHistograms(TDirectory* dir, TString type, TString prefix="")
+void printHistograms(TDirectory* dir, TString type, TString prefix="", bool createJSON=false)
 {
   dir->cd();
   TIter next(gDirectory->GetListOfKeys());
   TKey *key;
   while ((key = (TKey*)next())) 
   {
-      TClass *cl = gROOT->GetClass(key->GetClassName());
-      if (!cl->InheritsFrom("TH1")) continue;
-      TH1 *h = (TH1*)key->ReadObj();
-      TCanvas *c = newCanvas();
-      h->Draw("colz");
-      TString name =  h->GetTitle();
-      if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
-      c->Print(prefix+name+"."+type,type);
-      delete c;
+    TClass *cl = gROOT->GetClass(key->GetClassName());
+    if (!cl->InheritsFrom("TH1")) continue;
+    TH1 *h = (TH1*)key->ReadObj();
+    TCanvas *c = newCanvas();
+    h->Draw("colz");
+    TString name =  h->GetTitle();
+    if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
+    c->Print(prefix+name+"."+type,type);
+    delete c;
+    if (createJSON) {
+      ofstream jsonfile;
+      jsonfile.open(prefix+name+".json");
+      TString json = TBufferJSON::ConvertToJSON(h);
+      jsonfile << json;
+      jsonfile.close();
+    }
   }
 }
 void retrieveHistograms(TDirectory* dir, vector<TH1*>& v)
