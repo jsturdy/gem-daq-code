@@ -4,7 +4,7 @@
 class AMC_histogram: public Hardware_histogram
 {
   public:
-    AMC_histogram(const std::string & filename, TDirectory * dir):Hardware_histogram(filename, dir){}//call base constructor
+    AMC_histogram(const std::string & filename, TDirectory * dir, const std::string & hwid):Hardware_histogram(filename, dir, hwid){}//call base constructor
     void bookHistograms()
     {
       m_dir->cd();
