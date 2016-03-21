@@ -81,8 +81,6 @@ public:
   }
   ~treeReader(){}
 
-
-
 private:
   TFile *ifile;
   TFile *ofile;
@@ -92,28 +90,6 @@ private:
   std::vector<TDirectory*> AMCdir;
   std::vector<TDirectory*> GEBdir;
   std::vector<TDirectory*> VFATdir;
-
-  //VFAT data
-  TH1I* hi1010                     ; // Control bit 1010
-  TH1I* hi1100                     ; // Control bit 1100
-  TH1I* hi1110                     ; // Control bit 1110
-  TH1I* hiBC                       ; // Bunch Crossing Number
-  TH1I* hiEC                       ; // Event Counter
-  TH1I* hiFlag                     ; // VFAT Flag
-  TH1I* hiChipID                   ; // VFAT Chip ID
-  //GEB data
-  TH1I* hiZeroSup                  ; // Zero Suppression Flag
-  TH1I* hiInputID                  ; // GLIV input ID
-  TH1I* hiVwh                      ; // VFAT word count (expected)
-  TH1I* hiErrorC                   ; // Thirteen Flags (may need to separate into thriteen histograms)
-  TH1I* hiOHCRC                    ; // OH CRC
-  TH1I* hiVwt                      ; // VFAT word count (counted)
-  TH1I* hiInFU                     ; // InFIFO underflow flag
-  TH1I* hiStuckd                   ; // Stuck data Flag
-
-
-  TDirectory *dir[3];
-
 
   vector<AMC13Event> v_amc13;
   vector<AMCdata> v_amc;
@@ -155,7 +131,6 @@ private:
     if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of GEBs: " << v_geb.size()<< "\n";
     if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of VFATs: " << v_vfat.size()<< "\n";
   }
-
 
   void bookAllHistograms()
   {
