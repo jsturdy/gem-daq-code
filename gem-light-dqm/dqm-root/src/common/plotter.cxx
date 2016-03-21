@@ -355,11 +355,12 @@ void printHistograms(TDirectory* dir, TString type, TString prefix="", bool crea
     TCanvas *c = newCanvas();
     h->Draw("colz");
     TString name =  h->GetTitle();
-    if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix);
+    //if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix); // don't print images for the moment
     c->Print(prefix+name+"."+type,type);
     delete c;
     if (createJSON) {
       ofstream jsonfile;
+      //jsonfile.open("/tmp/"+name+".json");
       jsonfile.open(prefix+name+".json");
       TString json = TBufferJSON::ConvertToJSON(h);
       jsonfile << json;

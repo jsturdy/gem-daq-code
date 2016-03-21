@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <functional>
 #include <array>
+#include <memory>
 #include <TFile.h>
 #include <TKey.h>
 #include <TDirectory.h>
@@ -253,6 +254,7 @@ class gemTreeReader {
           for (unsigned ia = 0; ia < 128; ia++) {
             tmp_strips.push_back(0);
           }
+      
       //for (Int_t i = 0; i < nentries; i++)
       for (int i = 0; i < nentries; i++)
       {
@@ -378,20 +380,22 @@ class gemTreeReader {
         gErrorIgnoreLevel = kWarning; // Supress the Info outputs from ROOT
         gROOT->SetBatch(kTRUE);// don't draw all the canvases
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
-        TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
+        TString prefix[3] = {"/tmp/dqm_hists/","/tmp/dqm_hists/","/tmp/dqm_hists/"};
+
+        //TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
         std::string tempname = "OtherData";
 	      std::string type[NVFAT] = {"0" , "1" , "2" , "3" , "4" , "5" , "6" , "7",
                               "8" , "9" , "10", "11", "12", "13", "14", "15",
                               "16", "17", "18", "19", "20", "21", "22", "23"};
-	      for (int id = 0; id < 3; id++){
+	      for (int id = 0; id < 1; id++){// temporary print only all_events
 	        for (int j = 0; j < NVFAT; j++){
 		        dir[id]->cd();
 		        gDirectory->cd(("Slot"+ type[j]).c_str());
-		        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+type[j]);
+		        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+type[j]+"/",true);
 	        }
 	        dir[id]->cd();
 	        gDirectory->cd(tempname.c_str());
-	        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+tempname);
+	        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+tempname+"/",true);
         }
         gROOT->SetBatch(kFALSE);
         printDQMCanvases();
@@ -412,7 +416,11 @@ class gemTreeReader {
       m_hiChip->Fill(m_vfat->ChipID());
       // calculate and fill VFAT slot number
       //int sn_ = m_vfat->SlotNumber();
-      int sn_ = -1;
+      //int sn_ = -1;
+      //read slot
+      std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));
+      int sn_ = slotInfo_->GEBslotIndex(m_vfat->ChipID());
+      std::cout << "slot N " << sn_ << std::endl;
       m_hiVFATsn->Fill(sn_);
       // calculate and fill the crc and crc_diff
       m_hiCRC->Fill(m_vfat->crc());
@@ -466,7 +474,7 @@ class gemTreeReader {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_i = (int) m%8;
                 int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
@@ -484,7 +492,7 @@ class gemTreeReader {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_i = (int) m%8;
                 int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
