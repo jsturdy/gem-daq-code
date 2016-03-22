@@ -47,6 +47,18 @@ class VFAT_histogram: public Hardware_histogram
         }
       }
     }
+    void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV){
+      for (int i = 0; i < 128; i++){
+        uint16_t chan0xf = 0;
+        if (i < 64){
+          chan0xf = ((vfat->lsData() >> i) & 0x1);
+          if(chan0xf) thresholdScan[i]->Fill(deltaV);
+        } else {
+          chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
+          if(chan0xf) thresholdScan[i]->Fill(deltaV);
+        }
+      }// end loop on channels
+    }
   private:
     TH1F* b1010;
     TH1F* BC;
