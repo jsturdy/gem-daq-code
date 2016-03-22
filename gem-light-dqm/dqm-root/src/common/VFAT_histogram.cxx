@@ -1,6 +1,7 @@
 #include "Hardware_histogram.h"
 #include "TH1.h"
 #include <Event.h>
+#define NCHANNELS 128
 
 class VFAT_histogram: public Hardware_histogram
 {
@@ -20,6 +21,12 @@ class VFAT_histogram: public Hardware_histogram
       FiredChannels   = new TH1F("FiredChannels", "FiredChannels", 128,  0, 128);
       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
+      TDirectory * scandir = gDirectory->mkdir("Threshold_Scans");
+      scandir->cd();
+      for (int i = 0; i < 128; i++){
+        thresholdScan[i] = new TH1F(("thresholdScan"+to_string(static_cast<long long int>(i))).c_str(),("thresholdScan"+to_string(static_cast<long long int>(i))).c_str(),256,0,256);
+      }// end loop on channels
+      gDirectory->cd("..");
     }
     void fillHistograms(VFATdata * vfat){
       b1010->Fill(vfat->b1010());
@@ -51,4 +58,5 @@ class VFAT_histogram: public Hardware_histogram
     TH1F* FiredChannels;
     TH1F* crc;
     TH1F* crc_calc;
+    TH1F* thresholdScan[NCHANNELS];
 };
