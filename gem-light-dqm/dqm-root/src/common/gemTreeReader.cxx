@@ -280,7 +280,10 @@ private:
           v_gebH = v_amcH[a_c].gebsH();
           //AMC_histogram * t_amcH = &(m_amc13H->amcsH().at(a_c));
           v_amcH[a_c].fillHistograms(&*a);
-          if (m_RunType){m_deltaV = a->Param2() - a->Param3();}
+          if (m_RunType){
+            m_deltaV = a->Param2() - a->Param3();
+            m_Latency = a->Param1();
+          }
           g_c=0;
 	        /* LOOP THROUGH GEBs */
           for(auto g=v_geb.begin(); g!=v_geb.end();g++){
@@ -313,7 +316,7 @@ private:
               if(vfatH_ != vfat_map.end()) {
                 v_vfatH[vfatH_->second].fillHistograms(&*v);
                 if (m_RunType){
-                  v_vfatH[vfatH_->second].fillScanHistograms(&*v, m_RunType, m_deltaV);
+                  v_vfatH[vfatH_->second].fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
                 }
               }
               else {

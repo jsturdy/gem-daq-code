@@ -21,6 +21,8 @@ class VFAT_histogram: public Hardware_histogram
       FiredChannels   = new TH1F("FiredChannels", "FiredChannels", 128,  0, 128);
       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
+      latencyScan = new TH1F("latencyScan", "Latency Scan", 255,  0, 255);
+      thresholdScanChip = new TH1F("thresholdScan","Threshold Scan",256,0,256);
       TDirectory * scandir = gDirectory->mkdir("Threshold_Scans");
       scandir->cd();
       for (int i = 0; i < 128; i++){
@@ -47,15 +49,26 @@ class VFAT_histogram: public Hardware_histogram
         }
       }
     }
-    void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV){
+    void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV, int latency){
+      bool channelFired = false;
       for (int i = 0; i < 128; i++){
         uint16_t chan0xf = 0;
         if (i < 64){
           chan0xf = ((vfat->lsData() >> i) & 0x1);
-          if(chan0xf) thresholdScan[i]->Fill(deltaV);
+          if(chan0xf) {
+            thresholdScan[i]->Fill(deltaV);
+            channelFired = true;
+          }
         } else {
           chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
-          if(chan0xf) thresholdScan[i]->Fill(deltaV);
+          if(chan0xf) {
+            thresholdScan[i]->Fill(deltaV);
+            channelFired = true;
+          }
+        }
+        if (channelFired) {
+          latencyScan->Fill(latency);
+          thresholdScanChip->Fill(deltaV);
         }
       }// end loop on channels
     }
@@ -70,5 +83,7 @@ class VFAT_histogram: public Hardware_histogram
     TH1F* FiredChannels;
     TH1F* crc;
     TH1F* crc_calc;
+    TH1F* latencyScan;
+    TH1F* thresholdScanChip;
     TH1F* thresholdScan[NCHANNELS];
 };
