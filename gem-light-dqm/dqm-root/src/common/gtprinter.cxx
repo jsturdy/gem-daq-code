@@ -1,4 +1,4 @@
-#define DEBUG 1
+#define DEBUG 0
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -43,6 +43,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+  gErrorIgnoreLevel = kWarning;
   cout << endl;
   if (argc!=2) 
     {
@@ -68,11 +69,11 @@ int main(int argc, char** argv)
   if(DEBUG) std::cout<<"[gtprinter]" << "idir: " << idir->GetName() << std::endl;
 
 
-  TString iname; //name of file without extension
+  TString iname; //name of file without .analyzed.root extension
 
   TString name = ifilename;
   int loc = name.Last('/')+1;
-  int len = name.Length()-loc-5;
+  int len = name.Length()-loc-14;
   TSubString subname = name(loc,len);
   iname = subname;
   if(DEBUG) std::cout<<"[gtprinter]"<< "iname: " << iname << std::endl;
@@ -83,8 +84,7 @@ int main(int argc, char** argv)
   //char oPath [64];
   // strftime (oPath, 64, "./output/%m_%d-%H/%b%d_%G-%H_%M_%S/", timePtr);
 
-    
-  TString dPath = "./output/"; 
+  TString dPath = "/tmp/"+iname+"/"; 
   if(DEBUG) std::cout<<"[gtprinter]" << "dPath: " << dPath << std::endl;
 
   gROOT->ProcessLine(".!mkdir -p "+dPath);
@@ -94,6 +94,8 @@ int main(int argc, char** argv)
     
 
   gemTreePrint(idir,dPath,true);
+
+  if(DEBUG) std::cout<<"[gtprinter]"<< "Printing complete. " << iname << std::endl;
 
   
   return 0;

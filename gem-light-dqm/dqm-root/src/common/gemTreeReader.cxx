@@ -113,27 +113,33 @@ private:
 
   void fetchHardware()
   {
-    TTree *tree = (TTree*)ifile->Get("GEMtree");
-    Event *event = new Event();
-    TBranch *branch = tree->GetBranch("GEMEvents");
-    branch->SetAddress(&event);
-    Int_t nentries = tree->GetEntries();
-    branch->GetEntry(0);
-    v_amc13 = event->amc13s();
-    for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
-      v_amc = a13->amcs();
-      for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
-        v_geb = a->gebs();
-        for(auto g=v_geb.begin(); g!=v_geb.end();g++){
-          v_vfat=g->vfats();
-        }
+    try{
+      TTree *tree = (TTree*)ifile->Get("GEMtree");
+      Event *event = new Event();
+      TBranch *branch = tree->GetBranch("GEMEvents");
+      branch->SetAddress(&event);
+      Int_t nentries = tree->GetEntries();
+      branch->GetEntry(0);
+      v_amc13 = event->amc13s();
+      for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
+	v_amc = a13->amcs();
+	for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
+	  v_geb = a->gebs();
+	  for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+	    v_vfat=g->vfats();
+	  }
+	}
       }
+      if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of TTree entries: " << nentries << "\n";
+      if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMC13s: " << v_amc13.size()<< "\n";
+      if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMCs: " << v_amc.size()<< "\n";
+      if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of GEBs: " << v_geb.size()<< "\n";
+      if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of VFATs: " << v_vfat.size()<< "\n";
     }
-    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of TTree entries: " << nentries << "\n";
-    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMC13s: " << v_amc13.size()<< "\n";
-    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMCs: " << v_amc.size()<< "\n";
-    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of GEBs: " << v_geb.size()<< "\n";
-    if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of VFATs: " << v_vfat.size()<< "\n";
+    catch(...){
+      std::cout<< "[gemTreeReader]: " << "No GEMtree in input raw file!" << std::endl;
+      return;
+    }
   }
 
   void bookAllHistograms()

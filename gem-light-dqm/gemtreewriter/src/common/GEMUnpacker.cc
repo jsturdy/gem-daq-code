@@ -145,7 +145,7 @@ class GEMUnpacker
  
 int main (int argc, char** argv)
 {
-  std::cout << "---> Main()" << std::endl;
+  std::cout << "[GEMUnpacker]: ---> Main()" << std::endl;
   if (argc<2) 
   {
     std::cout << "Please provide input filename and conversion type" << std::endl;

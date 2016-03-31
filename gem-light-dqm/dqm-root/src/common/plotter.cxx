@@ -3,6 +3,7 @@
  *
  * N. Amapane, G. Cerminara, M. Dalchenko
  */
+#define DEBUG 1
 
 #include <sstream>
 #include <iostream>
@@ -35,7 +36,6 @@
 #include "TPaveStats.h"
 #include <math.h>
 #include "TBufferJSON.h"
-
 #include <iostream>
 
 using namespace std;
