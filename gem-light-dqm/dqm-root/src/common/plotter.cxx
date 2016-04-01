@@ -355,7 +355,8 @@ void printHistograms(TDirectory* dir, TString type, TString prefix="", bool crea
     TCanvas *c = newCanvas();
     h->Draw("colz");
     TString name =  h->GetTitle();
-    //if (prefix!="") gROOT->ProcessLine(".!mkdir -p ./"+prefix); // don't print images for the moment
+    //if (prefix!="") gROOT->ProcessLine(".!mkdir -p "+prefix); // don't print images for the moment
+    gROOT->ProcessLine(".!mkdir -p /tmp/test111/test222/test333");
     c->Print(prefix+name+"."+type,type);
     delete c;
     if (createJSON) {
