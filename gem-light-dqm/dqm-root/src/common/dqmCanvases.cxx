@@ -54,36 +54,36 @@ void printIntegrityCanvas()
   THStack *stack;
 
   integrity->cd(1);
-  stack = stackH1(integrity_plots[0], hi1010[1], hi1010[2], 4, 2);
+  stack = stackH1(integrity_plots[0], hi1010[0], hi1010[2], 4, 2);
   stack->Draw();
   //gPad->SetLogy();
 
   integrity->cd(2);
-  stack = stackH1(integrity_plots[1], hi1100[1], hi1100[2], 4, 2);
+  stack = stackH1(integrity_plots[1], hi1100[0], hi1100[2], 4, 2);
   stack->Draw();
   //gPad->SetLogy();
 
   integrity->cd(3);
-  stack = stackH1(integrity_plots[2], hi1110[1], hi1110[2], 4, 2);
+  stack = stackH1(integrity_plots[2], hi1110[0], hi1110[2], 4, 2);
   stack->Draw();
   //gPad->SetLogy();
 
   integrity->cd(4);
-  stack = stackH1(integrity_plots[3], hiFlag[1], hiFlag[2], 4, 2);
+  stack = stackH1(integrity_plots[3], hiFlag[0], hiFlag[2], 4, 2);
   stack->Draw();
   //gPad->SetLogy();
 
   integrity->cd(5);
-  stack = stackH1(integrity_plots[4], hiVFATsn[1], hiVFATsn[2], 4, 2, true);
+  stack = stackH1(integrity_plots[4], hiVFATsn[0], hiVFATsn[2], 4, 2, true);
   stack->Draw();
 
   integrity->cd(6);
-  stack = stackH1(integrity_plots[5], hiVFAT[1], hiVFAT[2], 4, 2);
+  stack = stackH1(integrity_plots[5], hiVFAT[0], hiVFAT[2], 4, 2);
   stack->Draw();
   //gPad->SetLogy();
 
   integrity->cd(7);
-  stack = stackH1(integrity_plots[6], hiDiffCRC[1], hiDiffCRC[2], 4, 2);
+  stack = stackH1(integrity_plots[6], hiDiffCRC[0], hiDiffCRC[2], 4, 2);
   stack->Draw();
   //gPad->SetLogy();
 
@@ -94,11 +94,11 @@ void printIntegrityCanvas()
   integrity->cd(8);
   hi2DCRC[2]->Draw("same");
 
-  integrity->Print("integrity.png","png");
-  integrity->Print("integrity.pdf","pdf");
+  //integrity->Print("integrity.png","png");
+  //integrity->Print("integrity.pdf","pdf");
 
   ofstream jsonfile;
-  jsonfile.open("integrity.json");
+  jsonfile.open("/tmp/dqm_hists/canvases/integrity.json");
   TString json = TBufferJSON::ConvertToJSON(integrity);
   jsonfile << json;
   jsonfile.close();
@@ -138,11 +138,11 @@ void printOccupancyCanvas()
     ss.str(std::string());
     ss << 9-nb;
     name+=ss.str();
-    hiBeamProfile[1]->GetXaxis()->SetBinLabel(nb, name.c_str());
+    hiBeamProfile[0]->GetXaxis()->SetBinLabel(nb, name.c_str());
   }
-  hiBeamProfile[1]->GetYaxis()->SetTitle("Strips");
-  hiBeamProfile[1]->GetXaxis()->SetTitle("Pseudorapidity partitions");
-  hiBeamProfile[1]->Draw("colz");
+  hiBeamProfile[0]->GetYaxis()->SetTitle("Strips");
+  hiBeamProfile[0]->GetXaxis()->SetTitle("Pseudorapidity partitions");
+  hiBeamProfile[0]->Draw("colz");
 
   //TPad *grid = new TPad("grid","",0,0,1,1);
   //grid->Draw();
@@ -170,7 +170,7 @@ void printOccupancyCanvas()
     ss.str(std::string());
     ss << 9-p_i;
     title+=ss.str();
-    p_temp = hiBeamProfile[1]->ProjectionY(title.c_str(),p_i,p_i);
+    p_temp = hiBeamProfile[0]->ProjectionY(title.c_str(),p_i,p_i);
     p_temp->SetTitle(title.c_str());
     p_temp->GetYaxis()->SetTitle("Number of events");
     p_temp->Draw();
@@ -180,11 +180,11 @@ void printOccupancyCanvas()
     //l3->Draw("same");
     //l4->Draw("same");
   }
-  occupancy->Print("occupancy.png","png");
-  occupancy->Print("occupancy.pdf","pdf");
+  //occupancy->Print("occupancy.png","png");
+  //occupancy->Print("occupancy.pdf","pdf");
 
   ofstream jsonfile;
-  jsonfile.open("occupancy.json");
+  jsonfile.open("/tmp/dqm_hists/canvases/occupancy.json");
   TString json = TBufferJSON::ConvertToJSON(occupancy);
   jsonfile << json;
   jsonfile.close();
@@ -200,10 +200,10 @@ void printClusterSizeCanvas()
   TCanvas *clusterSize = newCanvas("Cluster size plots", 3, 3, 1800,1800);
   std::stringstream ss;
   clusterSize->cd(1);
-  hiClusterSize[1]->GetYaxis()->SetTitle("Number of entries");
-  hiClusterSize[1]->GetXaxis()->SetTitle("Cluster size");
-  hiClusterSize[1]->SetTitle("Integrated over pseudorapidity");
-  hiClusterSize[1]->Draw();
+  hiClusterSize[0]->GetYaxis()->SetTitle("Number of entries");
+  hiClusterSize[0]->GetXaxis()->SetTitle("Cluster size");
+  hiClusterSize[0]->SetTitle("Integrated over pseudorapidity");
+  hiClusterSize[0]->Draw();
   gPad->SetLogy();
   for (int p_i = 1; p_i < NETA+1; p_i++)
   {
@@ -212,17 +212,17 @@ void printClusterSizeCanvas()
     ss.str(std::string());
     ss << 9-p_i;
     title+=ss.str();
-    hiClusterSizeEta[1][NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
-    hiClusterSizeEta[1][NETA-p_i]->GetXaxis()->SetTitle("Cluster size");
-    hiClusterSizeEta[1][NETA-p_i]->SetTitle(title.c_str());
-    hiClusterSizeEta[1][NETA-p_i]->Draw();
+    hiClusterSizeEta[0][NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
+    hiClusterSizeEta[0][NETA-p_i]->GetXaxis()->SetTitle("Cluster size");
+    hiClusterSizeEta[0][NETA-p_i]->SetTitle(title.c_str());
+    hiClusterSizeEta[0][NETA-p_i]->Draw();
     gPad->SetLogy();
   }
-  clusterSize->Print("clusterSize.png","png");
-  clusterSize->Print("clusterSize.pdf","pdf");
+  //clusterSize->Print("clusterSize.png","png");
+  //clusterSize->Print("clusterSize.pdf","pdf");
 
   ofstream jsonfile;
-  jsonfile.open("clusterSize.json");
+  jsonfile.open("/tmp/dqm_hists/canvases/clusterSize.json");
   TString json = TBufferJSON::ConvertToJSON(clusterSize);
   jsonfile << json;
   jsonfile.close();
@@ -239,10 +239,10 @@ void printClusterMultCanvas()
   TCanvas *clusterMult = newCanvas("Cluster multiplicity plots", 3, 3, 1800,1800);
   std::stringstream ss;
   clusterMult->cd(1);
-  hiClusterMult[1]->GetYaxis()->SetTitle("Number of entries");
-  hiClusterMult[1]->GetXaxis()->SetTitle("Cluster multiplicity");
-  hiClusterMult[1]->SetTitle("Integrated over pseudorapidity");
-  hiClusterMult[1]->Draw();
+  hiClusterMult[0]->GetYaxis()->SetTitle("Number of entries");
+  hiClusterMult[0]->GetXaxis()->SetTitle("Cluster multiplicity");
+  hiClusterMult[0]->SetTitle("Integrated over pseudorapidity");
+  hiClusterMult[0]->Draw();
   gPad->SetLogy();
   for (int p_i = 1; p_i < NETA+1; p_i++)
   {
@@ -251,17 +251,17 @@ void printClusterMultCanvas()
     ss.str(std::string());
     ss << 9-p_i;
     title+=ss.str();
-    hiClusterMultEta[1][NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
-    hiClusterMultEta[1][NETA-p_i]->GetXaxis()->SetTitle("Cluster multiplicity");
-    hiClusterMultEta[1][NETA-p_i]->SetTitle(title.c_str());
-    hiClusterMultEta[1][NETA-p_i]->Draw();
+    hiClusterMultEta[0][NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
+    hiClusterMultEta[0][NETA-p_i]->GetXaxis()->SetTitle("Cluster multiplicity");
+    hiClusterMultEta[0][NETA-p_i]->SetTitle(title.c_str());
+    hiClusterMultEta[0][NETA-p_i]->Draw();
     gPad->SetLogy();
   }
-  clusterMult->Print("clusterMult.png","png");
-  clusterMult->Print("clusterMult.pdf","pdf");
+  //clusterMult->Print("clusterMult.png","png");
+  //clusterMult->Print("clusterMult.pdf","pdf");
 
   ofstream jsonfile;
-  jsonfile.open("clusterMult.json");
+  jsonfile.open("/tmp/dqm_hists/canvases/clusterMult.json");
   TString json = TBufferJSON::ConvertToJSON(clusterMult);
   jsonfile << json;
   jsonfile.close();

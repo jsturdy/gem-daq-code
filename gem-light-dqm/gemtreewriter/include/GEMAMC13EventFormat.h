@@ -163,7 +163,7 @@ class GEBdata
       m_ZeroSup = 0x00ffffff & (word >> 40);        /*!<Zero Suppression*/
       m_InputID = 0b00011111 & (word >> 35);        /*!<GLIB Input ID*/
       m_Vwh = 0x0fff & (word >> 23);                /*!<VFAT word count*/
-      m_ErrorC = 0b0001111111111111111 & (word);    /*!<Thirteen Flags*/
+      m_ErrorC = 0b0001111111111111 & (word);    /*!<Thirteen Flags*/
       for(int i=0; i<13; ++i)
       {
         v_GEBflags.push_back(0x01 & (m_ErrorC >> i));
@@ -174,9 +174,9 @@ class GEBdata
     //!Returns one of thirteen flags from GEM chamber header.
     /**
      Argument must be between 0 and 12. The flags corresponding to a given argument are shown.
-     0->EvtFIFO full    1->InFIFO full    2->L1AFIFO full   3->Even size overflow    4->EvtFIFO near full   5->InFIFO near full    
-     6->L1AFIFO near full    7->Event size warn   8->No VFAT marker    9->OOS GLIB VFAT   10->OOS GLIB OH 
-     11->BX mismatch GLIB VFAT    12->BX mismatch GLIB OH
+     12->EvtFIFO full    11->InFIFO full    10->L1AFIFO full   9->Even size overflow    8->EvtFIFO near full   5->InFIFO near full    
+     6->L1AFIFO near full    5->Event size warn   4->No VFAT marker    3->OOS GLIB VFAT   2->OOS GLIB OH 
+     1->BX mismatch GLIB VFAT    0->BX mismatch GLIB OH
     */
     uint8_t GEBflag(int c)
     {
