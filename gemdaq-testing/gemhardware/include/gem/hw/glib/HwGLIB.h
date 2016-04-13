@@ -19,7 +19,7 @@ namespace gem {
         {
         public:
           
-          static const unsigned N_GTX = 2; /**maximum number of GTX links on the GLIB*/
+          static const unsigned N_GTX = 2; ///< maximum number of GTX links on the GLIB
 
           /**
            * @struct GLIBIPBusCounters
@@ -142,27 +142,30 @@ namespace gem {
           
           /**
            * Read the system firmware register
+           * @param system determines whether to read the system or user firmware register
            * @returns a string corresponding to firmware version
            **/
-          std::string getFirmwareVer();
+          std::string getFirmwareVer(bool const& system=true);
 
           /**
            * Read the system firmware register
+           * @param system determines whether to read the system or user firmware register
            * @returns the firmware version as a 32 bit unsigned
            **/
-          uint32_t getFirmwareVerRaw();
+          uint32_t getFirmwareVerRaw(bool const& system=true);
 
           /**
            * Read the system firmware register
            * @returns a string corresponding to the build date dd-mm-yyyy
            **/
-          std::string getFirmwareDate();
+          std::string getFirmwareDate(bool const& system=true);
 	  
           /**
            * Read the system firmware register
+           * @param system determines whether to read the system or user firmware register
            * @returns the build date as a 32 bit unsigned
            **/
-          uint32_t getFirmwareDateRaw();
+          uint32_t getFirmwareDateRaw(bool const& system=true);
 	  
           //external clocking control functions
           /**

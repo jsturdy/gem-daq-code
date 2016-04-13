@@ -7,8 +7,6 @@
 #include "gem/hw/optohybrid/exception/Exception.h"
 //#include "gem/hw/optohybrid/OptoHybridMonitor.h"
 
-#define MAX_VFATS 24
-
 namespace gem {
   namespace hw {
     namespace optohybrid {
@@ -17,7 +15,10 @@ namespace gem {
       class HwOptoHybrid: public gem::hw::GEMHwDevice
         {
         public:
-
+          static const int MAX_VFATS = 24;  ///< maximum number of VFATs that can be connected to an OptoHybrid
+          static const uint32_t ALL_VFATS_BCAST_MASK = 0xff000000; ///< send broadcast I2C requests to all chips
+          static const uint32_t ALL_VFATS_DATA_MASK  = 0xffffffff; ///< mask tracking data packets from all VFATs
+          
           /**
            * @struct OptoHybridWBMasterCounters
            * @brief This struct stores retrieved counters related to the OptoHybrid wishbone transactions
@@ -430,7 +431,7 @@ namespace gem {
            * Set the S-bit source
            * @param uint32_t mask which s-bits to forward (maximum 6)
            **/
-          void setSBitSource(uint32_t const& mask) {
+          void setSBitSource(uint32_t const mask) {
             writeReg(getDeviceBaseNode(),"CONTROL.OUTPUT.SBits",mask); };
 
           /**
@@ -833,7 +834,7 @@ namespace gem {
            * 4 sent along the GEB
            * 5 all
            **/
-          void resetT1Count(uint8_t const& signal, uint8_t const& mode) {
+          void resetT1Count(uint8_t const& signal, uint8_t const& mode=0x5) {
             std::stringstream t1Signal;
             if (signal == 0x0)
               t1Signal << "L1A";
@@ -887,7 +888,7 @@ namespace gem {
            * 4 sent along the GEB
            * 5 all
            **/
-          void resetL1ACount(uint8_t const& mode) {
+          void resetL1ACount(uint8_t const& mode=0x5) {
             resetT1Count(0x0,mode);
           };
 	  
@@ -901,7 +902,7 @@ namespace gem {
            * 4 sent along the GEB
            * 5 all
            **/
-          void resetCalPulseCount(uint8_t const& mode) {
+          void resetCalPulseCount(uint8_t const& mode=0x5) {
             return resetT1Count(0x1, mode); };
           
           /**
@@ -914,7 +915,7 @@ namespace gem {
            * 4 sent along the GEB
            * 5 all
            **/
-          void resetResyncCount(uint8_t const& mode=0x0) {
+          void resetResyncCount(uint8_t const& mode=0x5) {
             return resetT1Count(0x2, mode); };
 
           /**
@@ -927,7 +928,7 @@ namespace gem {
            * 4 sent along the GEB
            * 5 all
            **/
-          void resetBC0Count(uint8_t const& mode=0x0) {
+          void resetBC0Count(uint8_t const& mode=0x5) {
             return resetT1Count(0x3, mode); };
 
           /**
@@ -958,7 +959,7 @@ namespace gem {
            *  a 0 means the VFAT will NOT be masked, and it's data packets will go to the GLIB
            *  a 1 means the VFAT WILL be masked, and it's data packets will NOT go to the GLIB
            */
-          void setVFATMask(uint32_t const& mask) {
+          void setVFATMask(uint32_t const mask) {
             return writeReg(getDeviceBaseNode(),toolbox::toString("CONTROL.VFAT.MASK"),mask); };
           
           /**
@@ -966,7 +967,7 @@ namespace gem {
            * @param std::string name name of the register to broadcast the request to
            * @returns a std::vector of uint32_t words, one response for each VFAT
            */
-          std::vector<uint32_t> broadcastRead(std::string const& name, uint32_t const& mask, bool reset=false);
+          std::vector<uint32_t> broadcastRead(std::string const& name, uint32_t const mask, bool reset=false);
           
           /**
            * Sends a write request to all (un-masked) VFATs on the same register
@@ -975,6 +976,13 @@ namespace gem {
            * @returns a std::vector of uint32_t words, one response for each VFAT
            */
           void broadcastWrite(std::string const& name, uint32_t const& mask, uint32_t const& value, bool reset=false);
+
+          
+          /**
+           * Returns the slot number and chip IDs for connected VFATs
+           * @returns a std::vector of pairs of uint8_t and uint32_t words, one response for each VFAT
+           */
+          std::vector<std::pair<uint8_t,uint32_t> > getConnectedVFATs();
           
           /**
            * Uses a broadcast read to determine which slots are occupied and returns the
