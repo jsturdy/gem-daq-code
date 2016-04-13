@@ -1,12 +1,21 @@
 # Ignore everything
 *
+
+# Don't ignore git settings
+!*.gitignore
+!*.gitattributes
+
 # Don't ignore subdirectories
 !*/
+
 # Don't ignore source files, etc
 !*.cc
+!*.cpp
 !*.h
-!*.gitignore
+!*.hh
+!*.hpp
 !*.py
+
 # don't ignore CSS/JS etc
 !*.js
 !*.css
