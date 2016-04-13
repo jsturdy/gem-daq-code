@@ -19,7 +19,7 @@ gem::base::GEMApplication::GEMApplication(xdaq::ApplicationStub *stub)
   m_gemLogger(this->getApplicationLogger()),
   p_gemWebInterface(NULL),
   p_gemMonitor(     NULL),
-  m_runNumber(-1),
+  m_runNumber(0),
   m_runType("")
 
 {

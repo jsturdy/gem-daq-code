@@ -28,7 +28,8 @@ void gem::supervisor::GEMSupervisorWeb::webDefault(xgi::Input * in, xgi::Output 
   throw (xgi::exception::Exception)
 {
   if (p_gemFSMApp)
-    DEBUG("GEMSupervisorWeb::current supervisor state is" << dynamic_cast<gem::supervisor::GEMSupervisor*>(p_gemFSMApp)->getCurrentState());
+    DEBUG("GEMSupervisorWeb::current supervisor state is"
+          << dynamic_cast<gem::supervisor::GEMSupervisor*>(p_gemFSMApp)->getCurrentState());
   *out << cgicc::script().set("type","text/javascript")
     .set("src","/gemdaq/gemsupervisor/html/scripts/gemsupervisor.js")
        << cgicc::script() << std::endl;
@@ -54,8 +55,8 @@ void gem::supervisor::GEMSupervisorWeb::webDefault(xgi::Input * in, xgi::Output 
   *out << "</div>" << std::endl;
 
   std::string updateLink = "/" + p_gemApp->m_urn + "/jsonUpdate";
-  *out << "<script type=\"text/javascript\">"            << std::endl
-       << "    startUpdate( \"" << updateLink << "\" );" << std::endl
+  *out << "<script type=\"text/javascript\">"          << std::endl
+       << "    startUpdate(\"" << updateLink << "\");" << std::endl
        << "</script>" << std::endl;
 }
 
@@ -176,11 +177,11 @@ void gem::supervisor::GEMSupervisorWeb::displayManagedStateTable(xgi::Input * in
            << cgicc::h3() ;
       //<< dynamic_cast<gem::base::GEMFSMApplication*>(*managedApp)->getURN()
       std::string classname = (*managedApp)->getClassName();
-      INFO("GEMSupervisorWeb::managed class name is " << classname);
+      DEBUG("GEMSupervisorWeb::managed class name is " << classname);
       *out << classname;
       *out << "(";
       unsigned int instance = (*managedApp)->getInstance();
-      INFO("GEMSupervisorWeb::managed class instance is " << instance);
+      DEBUG("GEMSupervisorWeb::managed class instance is " << instance);
       *out << instance;
       *out << ")"
            << cgicc::h3() << std::endl
@@ -188,11 +189,11 @@ void gem::supervisor::GEMSupervisorWeb::displayManagedStateTable(xgi::Input * in
            << "<td>"      << std::endl
            << cgicc::h3();
       
-      INFO("GEMSupervisorWeb::trying to get the FSM class object for object " << std::hex << *managedApp << std::dec);
+      DEBUG("GEMSupervisorWeb::trying to get the FSM class object for object " << std::hex << *managedApp << std::dec);
       std::string classstate
         = gem::base::utils::GEMInfoSpaceToolBox::getString(xdata::getInfoSpaceFactory()->get((*managedApp)->getURN()),"FSMState");
       *out << classstate;
-      INFO("GEMSupervisorWeb::managed class FSM state is " << classstate);
+      DEBUG("GEMSupervisorWeb::managed class FSM state is " << classstate);
       *out << cgicc::h3() << std::endl
            << "</td>"     << std::endl
            << "</tr>"     << std::endl;

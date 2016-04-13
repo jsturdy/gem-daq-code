@@ -438,7 +438,6 @@ bool gem::base::GEMFSMApplication::initialize(toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in initialize gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -449,13 +448,11 @@ bool gem::base::GEMFSMApplication::initialize(toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in initialize, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in initialize, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -493,7 +490,6 @@ bool gem::base::GEMFSMApplication::configure( toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in configure gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -504,13 +500,11 @@ bool gem::base::GEMFSMApplication::configure( toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in configure, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in configure, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -538,7 +532,6 @@ bool gem::base::GEMFSMApplication::start(toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in start gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -549,13 +542,11 @@ bool gem::base::GEMFSMApplication::start(toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in start, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in start, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -583,7 +574,6 @@ bool gem::base::GEMFSMApplication::pause(toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in pause gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -594,13 +584,11 @@ bool gem::base::GEMFSMApplication::pause(toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in pause, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in pause, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -628,7 +616,6 @@ bool gem::base::GEMFSMApplication::resume(toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in resume gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -639,13 +626,11 @@ bool gem::base::GEMFSMApplication::resume(toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in resume, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in resume, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -673,7 +658,6 @@ bool gem::base::GEMFSMApplication::stop(toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in stop gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -684,13 +668,11 @@ bool gem::base::GEMFSMApplication::stop(toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in stop, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in stop, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -718,7 +700,6 @@ bool gem::base::GEMFSMApplication::halt(toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in halt gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -729,13 +710,11 @@ bool gem::base::GEMFSMApplication::halt(toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in halt, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in halt, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -786,7 +765,6 @@ bool gem::base::GEMFSMApplication::reset(toolbox::task::WorkLoop *wl)
     m_progress = 1.0;
   } catch (gem::utils::exception::Exception const& ex) {
     ERROR("GEMFSMApplication::Error in reset gem::utils::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
@@ -797,13 +775,11 @@ bool gem::base::GEMFSMApplication::reset(toolbox::task::WorkLoop *wl)
     return false;
   } catch (toolbox::net::exception::MalformedURN const& ex) {
     ERROR("GEMFSMApplication::Error in reset, malformed URN " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;
   } catch (std::exception const& ex) {
     ERROR("GEMFSMApplication::Error in reset, std::exception " << ex.what());
-    toolbox::Event::Reference e(new toolbox::Event("Fail",this));
     fireEvent("Fail");
     m_wl_semaphore.give();
     return false;

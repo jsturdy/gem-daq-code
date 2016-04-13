@@ -207,7 +207,7 @@ void gem::hw::amc13::AMC13Manager::configureAction()
   throw (gem::hw::amc13::exception::Exception)
 {
   //set the settings from the config options
-  usleep(500);
+  usleep(500); // just for testing the timing of different applications
 }
 
 void gem::hw::amc13::AMC13Manager::startAction()
@@ -229,14 +229,14 @@ void gem::hw::amc13::AMC13Manager::pauseAction()
   //what does pause mean here?
   //if local triggers are enabled, do we have a separate trigger application?
   //we can just disable them here maybe?
-  usleep(500);
+  usleep(500); // just for testing the timing of different applications
 }
 
 void gem::hw::amc13::AMC13Manager::resumeAction()
   throw (gem::hw::amc13::exception::Exception)
 {
   //undo the actions taken in pauseAction
-  usleep(500);
+  usleep(500); // just for testing the timing of different applications
 }
 
 void gem::hw::amc13::AMC13Manager::stopAction()
@@ -254,7 +254,7 @@ void gem::hw::amc13::AMC13Manager::haltAction()
   throw (gem::hw::amc13::exception::Exception)
 {
   //what is necessary for a halt on the AMC13?
-  usleep(500);
+  usleep(500); // just for testing the timing of different applications
 }
 
 void gem::hw::amc13::AMC13Manager::resetAction()
@@ -263,7 +263,7 @@ void gem::hw::amc13::AMC13Manager::resetAction()
   //what is necessary for a reset on the AMC13?
   DEBUG("Entering gem::hw::amc13::AMC13Manager::resetAction()");
   if (p_amc13!=0) delete p_amc13;
-  p_amc13=0;
+  p_amc13 = 0;
   usleep(500);
   //gem::base::GEMFSMApplication::resetAction();
 }

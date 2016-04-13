@@ -70,6 +70,8 @@ namespace gem {
          */
         bool manageApplication(const std::string& classname) const;
 
+        void updateRunNumber();
+
         /**
          * @param cfgType tells the application which type of configuration to use, XML or DB
          * @param ad is the application descriptor to send the SOAP message to

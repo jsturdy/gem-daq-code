@@ -153,7 +153,7 @@ void gem::base::GEMWebApplication::controlPanel(xgi::Input * in, xgi::Output * o
     }*/
     try {
       std::string state = dynamic_cast<gem::base::GEMFSMApplication*>(p_gemFSMApp)->getCurrentState();
-      INFO("controlPanel:: current state " << state);
+      DEBUG("controlPanel:: current state " << state);
       // update the page refresh, should definitely move this functionality to AJAX/JS
       if (!b_is_working && !b_is_running) {
       } else if (b_is_working) {

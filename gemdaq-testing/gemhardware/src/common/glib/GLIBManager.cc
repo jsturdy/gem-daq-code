@@ -300,7 +300,7 @@ void gem::hw::glib::GLIBManager::configureAction()
   DEBUG("GLIBManager::configureAction");
 
   for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {
-    usleep(100);
+    usleep(100); // just for testing the timing of different applications
     GLIBInfo& info = m_glibInfo[slot].bag;
 
     if (!info.present)
@@ -310,6 +310,11 @@ void gem::hw::glib::GLIBManager::configureAction()
       DEBUG("GLIBManager::setting trigger source to 0x" << std::hex << info.triggerSource.value_ << std::dec);
       m_glibs[slot]->setTrigSource(info.triggerSource.value_);
       m_glibs[slot]->resetDAQLink();
+      
+      // reset the DAQ
+      m_glibs[slot]->resetDAQLink();
+      m_glibs[slot]->setDAQLinkRunType(0x3);
+      m_glibs[slot]->setDAQLinkRunParameters(0xfaac);
       
       //should FIFOs be emptied in configure or at start?
       DEBUG("GLIBManager::emptying trigger/tracking data FIFOs");
@@ -336,17 +341,31 @@ void gem::hw::glib::GLIBManager::startAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for starting the GLIB?
-  for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {    
+  for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {
     usleep(100);
     DEBUG("GLIBManager::looping over slots(" << (slot+1) << ") and finding infospace items");
     GLIBInfo& info = m_glibInfo[slot].bag;
-    
+
     if (!info.present)
       continue;
-
-    // reset the hw monitor
-    if (m_glibMonitors[slot])
+    
+    if (m_glibs[slot]->isHwConnected()) {
+      DEBUG("connected a card in slot " << (slot+1));
+      // enable the DAQ
       m_glibs[slot]->enableDAQLink();
+      usleep(100); // just for testing the timing of different applications
+    } else {
+      ERROR("GLIB in slot " << (slot+1) << " is not connected");
+      fireEvent("Fail");
+      //maybe raise exception so as to not continue with other cards? let's just return for the moment
+      return;
+    }
+
+    /*
+    // reset the hw monitor, this was in release-v2 but not in integrated-application-framework, may have forgotten something
+    if (m_glibMonitors[slot])
+      m_glibMonitors[slot]->reset();
+    */
   }
   usleep(100);
 }
@@ -355,28 +374,28 @@ void gem::hw::glib::GLIBManager::pauseAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for pausing the GLIB?
-  usleep(100);
+  usleep(100); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::resumeAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for resuming the GLIB?
-  usleep(100);
+  usleep(100); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::stopAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for stopping the GLIB?
-  usleep(100);
+  usleep(100); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::haltAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for halting the GLIB?
-  usleep(100);
+  usleep(100); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::resetAction()
@@ -387,7 +406,7 @@ void gem::hw::glib::GLIBManager::resetAction()
   
   DEBUG("GLIBManager::resetAction begin");
   for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {    
-    usleep(100);
+    usleep(100); // just for testing the timing of different applications
     DEBUG("GLIBManager::looping over slots(" << (slot+1) << ") and finding infospace items");
     GLIBInfo& info = m_glibInfo[slot].bag;
     
@@ -451,6 +470,7 @@ void gem::hw::glib::GLIBManager::resetAction(toolbox::Event::Reference e)
 
 void gem::hw::glib::GLIBManager::createGLIBInfoSpaceItems(is_toolbox_ptr is_glib, glib_shared_ptr glib)
 {
+  // system registers
   is_glib->createUInt32("BOARD_ID",      glib->getBoardIDRaw(),      GEMUpdateType::NOUPDATE, "docstring", "id");
   is_glib->createUInt32("SYSTEM_ID",     glib->getSystemIDRaw(),     GEMUpdateType::NOUPDATE, "docstring", "id");
   is_glib->createUInt32("FIRMWARE_ID",   glib->getFirmwareVerRaw(),  GEMUpdateType::PROCESS,  "docstring", "fwver");
@@ -468,6 +488,7 @@ void gem::hw::glib::GLIBManager::createGLIBInfoSpaceItems(is_toolbox_ptr is_glib
   is_glib->createUInt32("V6_CPLD",       glib->V6CPLDStatus(),       GEMUpdateType::HW32);
   is_glib->createUInt32("CPLD_LOCK",     glib->CDCELockStatus(),     GEMUpdateType::HW32);
 
+  // ttc registers
   is_glib->createUInt32("L1A",      glib->getL1ACount(),      GEMUpdateType::HW32);
   is_glib->createUInt32("CalPulse", glib->getCalPulseCount(), GEMUpdateType::HW32);
   is_glib->createUInt32("Resync",   glib->getResyncCount(),   GEMUpdateType::HW32);
@@ -492,12 +513,14 @@ void gem::hw::glib::GLIBManager::createGLIBInfoSpaceItems(is_toolbox_ptr is_glib
   is_glib->createUInt32("GTX1_DAQ_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(1,0), GEMUpdateType::HW32);
   is_glib->createUInt32("GTX1_DAQ_EVN",                  glib->getDAQLinkCounters(1,1), GEMUpdateType::HW32);
 
+  // request counters
   is_glib->createUInt64("OptoHybrid_0", 0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
   is_glib->createUInt64("OptoHybrid_1", 0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
   is_glib->createUInt64("TRK_0",        0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
   is_glib->createUInt64("TRK_1",        0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
   is_glib->createUInt64("Counters",     0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
 
+  // link status registers
   is_glib->createUInt32("GTX0_TRG_ERR",      0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
   is_glib->createUInt32("GTX0_TRK_ERR",      0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
   is_glib->createUInt32("GTX0_DATA_Packets", 0, GEMUpdateType::PROCESS, "docstring", "raw/rate");

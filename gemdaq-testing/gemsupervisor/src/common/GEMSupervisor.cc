@@ -33,7 +33,7 @@ gem::supervisor::GEMSupervisor::GEMSupervisor(xdaq::ApplicationStub* stub) :
   v_supervisedApps.clear();
   // reset the GEMInfoSpaceToolBox object?
   //where can we get some nice PNG images for our different applications?
-  getApplicationDescriptor()->setAttribute("icon","/gemdaq/gemsupervisor/images/supervisor/GEMSupervisor.png");
+  //getApplicationDescriptor()->setAttribute("icon","/gemdaq/gemsupervisor/images/supervisor/GEMSupervisor.png");
   init();
 }
 
@@ -80,8 +80,11 @@ void gem::supervisor::GEMSupervisor::init()
             << " " << (*j)->getClassName()
             << " we are " << p_appDescriptor);
     
-      if (used.find(*j) != used.end()) continue; // no duplicates
-      if ((*j) == p_appDescriptor ) continue; // don't fire the command into the GEMSupervisor again
+      if (used.find(*j) != used.end())
+        continue; // no duplicates
+      if ((*j) == p_appDescriptor )
+        continue; // don't fire the command into the GEMSupervisor again
+
       //maybe just write a function that populates some vectors
       //with the application classes that we want to supervise
       //avoids the problem of picking up all the xDAQ related processes
@@ -150,11 +153,27 @@ void gem::supervisor::GEMSupervisor::configureAction()
 void gem::supervisor::GEMSupervisor::startAction()
   throw (gem::supervisor::exception::Exception)
 {
-  for (auto i = v_supervisedApps.begin(); i != v_supervisedApps.end(); ++i) {
-    INFO(std::string("Starting ")+(*i)->getClassName());
-    gem::utils::soap::GEMSOAPToolBox::sendCommand("Start",p_appContext,p_appDescriptor,*i);
+  updateRunNumber();
+  
+  try {
+    for (auto i = v_supervisedApps.begin(); i != v_supervisedApps.end(); ++i) {
+      sendRunNumber(m_runNumber,(*i));
+      INFO(std::string("Starting ")+(*i)->getClassName());
+      gem::utils::soap::GEMSOAPToolBox::sendCommand("Start",p_appContext,p_appDescriptor,*i);
+    }
+  } catch (gem::supervisor::exception::Exception& e) {
+    ERROR("GEMSupervisor::startAction " << e.what());
+    throw e;
+  } catch (xcept::Exception& e) {
+    ERROR("GEMSupervisor::startAction " << e.what());
+    throw e;
+  } catch (std::exception& e) {
+    ERROR("GEMSupervisor::startAction " << e.what());
+    throw e;
+  } catch (...) {
+    ERROR("GEMSupervisor::startAction ");
   }
-}
+  }
 
 void gem::supervisor::GEMSupervisor::pauseAction()
   throw (gem::supervisor::exception::Exception)
@@ -254,6 +273,12 @@ bool gem::supervisor::GEMSupervisor::manageApplication(const std::string& classn
     return true;
   */
   return false; // assume not ok.
+}
+
+void gem::supervisor::GEMSupervisor::updateRunNumber()
+{
+  // should be able to find the run number from the run number service, or some other source
+  m_runNumber = 10472;
 }
 
 void gem::supervisor::GEMSupervisor::sendCfgType(std::string const& cfgType, xdaq::ApplicationDescriptor* ad)

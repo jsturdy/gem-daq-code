@@ -190,17 +190,16 @@ bool gem::hw::glib::HwGLIB::isHwConnected()
       //need to make sure that this works only for "valid" FW results
       // for the moment we can do a check to see that 2015/2016 appears in the string
       // this no longer will work as desired, how to get whether the GTX is active?
-      // need to rethink this for future firmware versions and backwards compatibility
-      // i.e., no longer check GLIB connection per GTX (maybe reserve some link check in the future)
-      if ((this->getFirmwareVer()).rfind("5.")   != std::string::npos || 
-          (this->getFirmwareVer()).rfind(".201") != std::string::npos || 
+      if ((this->getFirmwareVer()).rfind("2.") != std::string::npos || // evka firmware versions
+          (this->getFirmwareVer()).rfind("5.") != std::string::npos || // system firmware version
+          (this->getFirmwareVer()).rfind(".201") != std::string::npos || // date string
           (this->getBoardID()).rfind("GLIB")     != std::string::npos ) {
         b_links[gtx] = true;
         INFO("gtx" << gtx << " present(" << this->getFirmwareVer() << ")");
         tmp_activeLinks.push_back(std::make_pair(gtx,this->LinkStatus(gtx)));
       } else {
         b_links[gtx] = false;
-        INFO("gtx" << gtx << " not reachable (unable to find 5 or 201 in the firmware string, " 
+        INFO("gtx" << gtx << " not reachable (unable to find 2 or 5 or 201 in the firmware string, " 
              << "or 'GLIB' in the board ID)"
              << " board ID "              << this->getBoardID()
              << " user firmware version " << this->getFirmwareVer());
@@ -294,13 +293,11 @@ uint64_t gem::hw::glib::HwGLIB::getMACAddressRaw()
   return ((uint64_t)val1 << 32) + val2;
 }
 
-std::string gem::hw::glib::HwGLIB::getFirmwareDate()
+std::string gem::hw::glib::HwGLIB::getFirmwareDate(bool const& system)
 {
-  // This returns the firmware build date. 
   //gem::utils::LockGuard<gem::utils::Lock> guardedLock(hwLock_);
   std::stringstream res;
   std::stringstream regName;
-
   uint32_t fwid = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.DATE");
   res <<         std::setfill('0') <<std::setw(2) << (fwid&0x1f)      // day
       << "-"  << std::setfill('0') <<std::setw(2) << ((fwid>>5)&0x0f) // month
@@ -308,40 +305,39 @@ std::string gem::hw::glib::HwGLIB::getFirmwareDate()
   return res.str();
 }
 
-uint32_t gem::hw::glib::HwGLIB::getFirmwareDateRaw()
+uint32_t gem::hw::glib::HwGLIB::getFirmwareDateRaw(bool const& system)
 {
-  // This returns the firmware build date. 
   //gem::utils::LockGuard<gem::utils::Lock> guardedLock(hwLock_);
-  uint32_t fwid = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.DATE");
-  return fwid;
+  if (system)
+    return readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.DATE");
+  else
+    return readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.DATE");
 }
 
-std::string gem::hw::glib::HwGLIB::getFirmwareVer()
+std::string gem::hw::glib::HwGLIB::getFirmwareVer(bool const& system)
 {
-  // This returns the firmware version number. 
   //gem::utils::LockGuard<gem::utils::Lock> guardedLock(hwLock_);
   std::stringstream res;
   std::stringstream regName;
-  /*
-    uint32_t versionMajor = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.MAJOR");
-    uint32_t versionMinor = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.MINOR");
-    uint32_t versionBuild = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.BUILD");
-    res << versionMajor << "." << versionMinor << "." << versionBuild;
-  */
+  uint32_t fwid;
 
-  uint32_t fwid = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.ID");
+  if (system)
+    fwid = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.ID");
+  else
+    fwid = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.ID");
   res << ((fwid>>12)&0x0f) << "." 
       << ((fwid>>8) &0x0f) << "."
       << ((fwid)    &0xff);
   return res.str();
 }
 
-uint32_t gem::hw::glib::HwGLIB::getFirmwareVerRaw()
+uint32_t gem::hw::glib::HwGLIB::getFirmwareVerRaw(bool const& system)
 {
-  // This returns the firmware version number. 
   //gem::utils::LockGuard<gem::utils::Lock> guardedLock(hwLock_);
-  uint32_t fwid = readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.ID");
-  return fwid;
+  if (system)
+    return readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.ID");
+  else
+    return readReg(getDeviceBaseNode(),"SYSTEM.FIRMWARE.ID");
 }
 
 void gem::hw::glib::HwGLIB::XPointControl(bool xpoint2, uint8_t const& input, uint8_t const& output)
@@ -651,7 +647,7 @@ bool gem::hw::glib::HwGLIB::hasTrackingData(uint8_t const& gtx)
 std::vector<uint32_t> gem::hw::glib::HwGLIB::getTrackingData(uint8_t const& gtx, size_t const& nBlocks)
 {
   if (!linkCheck(gtx, "Tracking data")) {
-    //do we really want to return a huge vector of 0s?
+    //do we really want to return a huge vector of 0s in the case that the link is not up?
     std::vector<uint32_t> data(7*nBlocks,0x0);
     return data;
   } 

@@ -148,12 +148,14 @@ void gem::hw::glib::GLIBMonitor::setupHwMonitoring()
   addMonitorable("DAQ", "HWMonitoring",
                  std::make_pair("DISPER_ERR", "GLIB.DAQ.EXT_STATUS.DISPER_ERR"),
                  GEMUpdateType::HW32, "hex");
+  /*
   addMonitorable("DAQ", "HWMonitoring",
                  std::make_pair("INPUT_KILL_MASK", "GLIB.DAQ.CONTROL.INPUT_KILL_MASK"),
                  GEMUpdateType::HW32, "hex");
   addMonitorable("DAQ", "HWMonitoring",
                  std::make_pair("DAV_TIMEOUT", "GLIB.DAQ.CONTROL.DAV_TIMEOUT"),
                  GEMUpdateType::HW32, "hex");
+  */
   addMonitorable("DAQ", "HWMonitoring",
                  std::make_pair("EVT_SENT", "GLIB.DAQ.EXT_STATUS.EVT_SENT"),
                  GEMUpdateType::HW32, "hex");

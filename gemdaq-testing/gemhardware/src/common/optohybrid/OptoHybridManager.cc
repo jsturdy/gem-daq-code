@@ -333,9 +333,9 @@ void gem::hw::optohybrid::OptoHybridManager::configureAction()
   DEBUG("OptoHybridManager::configureAction");
   //will the manager operate for all connected optohybrids, or only those connected to certain GLIBs?
   for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {
-    usleep(1000);
+    usleep(1000); // just for testing the timing of different applications
     for (unsigned link = 0; link < MAX_OPTOHYBRIDS_PER_AMC; ++link) {
-      usleep(1000);
+      usleep(1000); // just for testing the timing of different applications
       unsigned int index = (slot*MAX_OPTOHYBRIDS_PER_AMC)+link;
       OptoHybridInfo& info = m_optohybridInfo[index].bag;
 
@@ -367,24 +367,22 @@ void gem::hw::optohybrid::OptoHybridManager::configureAction()
         }
         */
         
+        std::vector<std::pair<uint8_t,uint32_t> > chipIDs = optohybrid->getConnectedVFATs();
+        for (auto chip = chipIDs.begin(); chip != chipIDs.end(); ++chip)
+          if (chip->second)
+            INFO("VFAT found in GEB slot " << std::setw(2) << (int)chip->first << " has ChipID " 
+                 << "0x" << std::hex << std::setw(4) << chip->second << std::dec);
+          else
+            INFO("No VFAT found in GEB slot " << std::setw(2) << (int)chip->first);
+        
         optohybrid->getConnectedVFATMask();
         
-        std::vector<uint32_t> connectedChipID0 = optohybrid->broadcastRead("ChipID0",info.vfatBroadcastMask);
-        std::vector<uint32_t> connectedChipID1 = optohybrid->broadcastRead("ChipID1",info.vfatBroadcastMask);
-        {
-          auto id0 = connectedChipID0.begin();
-          auto id1 = connectedChipID1.begin();
-          DEBUG(std::setw(12) << "ChipID 1" << std::setw(12) << "ChipID 0");
-          for (; id0 != connectedChipID0.end(); ++id0, ++id1) {
-            DEBUG(std::setw(10) << "0x" << std::hex << *id1 << std::dec << 
-                 std::setw(10) << "0x" << std::hex << *id0 << std::dec);
-          }
-        }
         //what else is required for configuring the OptoHybrid?
         //need to reset optical links?
         //reset counters?
       } else {
-        ERROR("OptoHybridManager::OptoHybrid connected on link " << link << " to GLIB in slot " << (slot+1) << " is not responding");
+        ERROR("configureAction::OptoHybrid connected on link " << (int)link << " to GLIB in slot " << (int)(slot+1)
+              << " is not responding");
         fireEvent("Fail");
         //maybe raise exception so as to not continue with other cards?
       }
