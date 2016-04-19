@@ -45,7 +45,7 @@ class AMC13manager:
     pEvt = []
     read_event = self.device.readEvent
     while self.isRunning:
-      nevt = self.device.read(self.device.Board.T1, 'STATUS.MONITOR_BUFFER.UNREAD_EVENTS')
+      nevt = self.device.read(self.device.Board.T1, 'STATUS.MONITOR_BUFFER.UNREAD_BLOCKS')
       #print "Trying to read %s events" % nevt
       for i in range(nevt):
         pEvt += read_event()
