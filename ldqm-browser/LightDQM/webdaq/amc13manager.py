@@ -28,9 +28,10 @@ class AMC13manager:
     mask = self.device.parseInputEnableList(inlist, True)
     self.device.AMCInputEnable(mask)
 
-  def configureTrigger(self, ena = True, mode = 2, burst = 1, rate = 10, rules = 0):
+  def configureTrigger(self, ena, mode = 2, burst = 1, rate = 10, rules = 0):
     self.localTrigger = ena
-    self.device.configureLocalL1A(ena, mode, burst, rate, rules)
+    if self.localTrigger:
+      self.device.configureLocalL1A(ena, mode, burst, rate, rules)
 
   #def startDataTaking(self, ofile, nevents):
   def startDataTaking(self, ofile):
