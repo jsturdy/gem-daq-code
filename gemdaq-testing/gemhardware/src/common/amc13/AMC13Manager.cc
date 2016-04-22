@@ -79,6 +79,8 @@ gem::hw::amc13::AMC13Manager::AMC13Manager(xdaq::ApplicationStub* stub) :
   //preInit();
   //DEBUG("done");
   p_appDescriptor->setAttribute("icon","/gemdaq/gemhardware/html/images/amc13/AMC13Manager.png");
+
+  xoap::bind(this, &gem::hw::amc13::AMC13Manager::sendTriggerBurst,"sendtriggerburst", XDAQ_NS_URI );   
 }
 
 gem::hw::amc13::AMC13Manager::~AMC13Manager() {
@@ -149,7 +151,6 @@ void gem::hw::amc13::AMC13Manager::initializeAction()
   //std::string addressBase = "${AMC13_ADDRESS_TABLE_PATH}/";
   //std::string connection  = "${BUILD_HOME}/gemdaq-testing/gemhardware/xml/amc13/"+m_connectionFile;
   std::string connection  = "${GEM_ADDRESS_TABLE_PATH}/"+m_connectionFile;
-  //std::string cardname    = toolbox::toString("gem.shelf%02d.amc13",m_crateID);
   std::string cardname    = m_cardname;
   try {
     gem::utils::LockGuard<gem::utils::Lock> guardedLock(m_amc13Lock);
@@ -224,14 +225,6 @@ void gem::hw::amc13::AMC13Manager::initializeAction()
   //DEBUG("Looking at L1A history before configure");
   //p_amc13->getL1AHistory(4);
   //std::cout << p_amc13->getL1AHistory(4) << std::endl;
-  if (m_enableLocalL1A) p_amc13->configureLocalL1A(m_enableLocalL1A,m_L1Amode,m_L1Aburst,m_internalPeriodicPeriod,m_L1Arules);
-  //DEBUG("Looking at L1A history after configure");
-  //std::cout << p_amc13->getL1AHistory(4) << std::endl;
-
-  if (m_enableCalpulse){
-    p_amc13->configureBGOShort(m_bgochannel, m_bgocmd, m_bgobx, m_bgoprescale, m_bgorepeat);
-    p_amc13->getBGOConfig(m_bgochannel);
-  }
 
   //unlock the access
 }
@@ -239,6 +232,16 @@ void gem::hw::amc13::AMC13Manager::initializeAction()
 void gem::hw::amc13::AMC13Manager::configureAction()
   throw (gem::hw::amc13::exception::Exception)
 {
+  if (m_enableLocalL1A) p_amc13->configureLocalL1A(m_enableLocalL1A,m_L1Amode,m_L1Aburst,m_internalPeriodicPeriod,m_L1Arules);
+  //DEBUG("Looking at L1A history after configure");
+  //std::cout << p_amc13->getL1AHistory(4) << std::endl;
+
+  if (m_enableCalpulse){
+  p_amc13->configureBGOShort( m_bgochannel, m_bgocmd, m_bgobx, m_bgoprescale, m_bgorepeat);
+  p_amc13->getBGOConfig(m_bgochannel);
+  }
+
+
   //set the settings from the config options
   usleep(500);
 }
@@ -252,7 +255,6 @@ void gem::hw::amc13::AMC13Manager::startAction()
   usleep(500);
 
   p_amc13->reset(::amc13::AMC13::T1);
-
   p_amc13->startRun();
 
   if (m_enableLocalL1A && m_startL1ATricont) {
@@ -260,7 +262,6 @@ void gem::hw::amc13::AMC13Manager::startAction()
       p_amc13->enableLocalL1A(m_enableLocalL1A);
       p_amc13->startContinuousL1A();
     }
-
   if (m_enableCalpulse) {
     p_amc13->enableBGO(m_bgochannel);
     p_amc13->sendBGO();
@@ -344,13 +345,18 @@ void gem::hw::amc13::AMC13Manager::resetAction(toolbox::Event::Reference e)
   throw (toolbox::fsm::exception::Exception) {
 }
 
-void gem::hw::amc13::AMC13Manager::sendTriggerBurst()
-  throw (gem::hw::amc13::exception::Exception)
+//void gem::hw::amc13::AMC13Manager::sendTriggerBurst()
+//  throw (gem::hw::amc13::exception::Exception)
+
+xoap::MessageReference gem::hw::amc13::AMC13Manager::sendTriggerBurst(xoap::MessageReference msg) throw (xoap::exception::Exception)
 {
   //set to send a burst of trigger
-  if (m_enableLocalL1A && m_sendL1ATriburst) {
-    p_amc13->localTtcSignalEnable(m_enableLocalL1A);
-    p_amc13->enableLocalL1A(m_enableLocalL1A);
-    p_amc13->sendL1ABurst();
-  }
+  INFO("Entering gem::hw::amc13::AMC13Manager::sendTriggerBurst()");
+  if (m_enableLocalL1A &&  m_sendL1ATriburst) 
+    {
+      p_amc13->localTtcSignalEnable(m_enableLocalL1A);
+      p_amc13->enableLocalL1A(m_enableLocalL1A);
+      p_amc13->sendL1ABurst();
+    }
+
 }
