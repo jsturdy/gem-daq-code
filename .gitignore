@@ -11,6 +11,7 @@
 # Don't ignore source files, etc
 !*.cc
 !*.cpp
+!*.cxx
 !*.h
 !*.hh
 !*.hpp
