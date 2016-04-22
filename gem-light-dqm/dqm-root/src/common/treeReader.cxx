@@ -1,5 +1,5 @@
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 #define NVFAT 24
 #define NETA 8
@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <functional>
 #include <array>
+#include <memory>
 #include <TFile.h>
 #include <TKey.h>
 #include <TDirectory.h>
@@ -154,6 +155,7 @@ class gemTreeReader {
     TH2I* hiBeamProfile              [3];
 
     TDirectory *dir[3];
+    TDirectory *subdir[24];
 
     int counters_[4]; // [0] - total events
                       // [1] - good events
@@ -164,6 +166,7 @@ class gemTreeReader {
     {
       std::string dirname[3] = {"AllEvents", "GoodEvents", "BadEvents"};
       std::string eta_partitions[8] = {"eta_1", "eta_2", "eta_3", "eta_4", "eta_5", "eta_6", "eta_7", "eta_8"};
+      std::string tempname = "OtherData";
       char name[4][128], title[4][500];
       std::string type[NVFAT] = {"Slot0" , "Slot1" , "Slot2" , "Slot3" , "Slot4" , "Slot5" , "Slot6" , "Slot7", 
                               "Slot8" , "Slot9" , "Slot10", "Slot11", "Slot12", "Slot13", "Slot14", "Slot15", 
@@ -173,6 +176,8 @@ class gemTreeReader {
         dir[i] = ofile->mkdir(dirname[i].c_str());
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Directory " << i+1 << " created" << std::endl;   
         dir[i]->cd();
+      	gDirectory->mkdir(tempname.c_str());
+	      gDirectory->cd(tempname.c_str());
         hiVFAT         [i] = new TH1F((dirname[i]+"_VFAT").c_str(), "Number VFAT blocks per event", 24,  0., 24. );
         hiVFATsn       [i] = new TH1F((dirname[i]+"_VFATsn").c_str(), "VFAT slot number", 24,  0., 24. );
         hiDiffBXandBC  [i] = new TH1I((dirname[i]+"_DiffBXandBC").c_str(), "Difference of BX and BC", 100000, 0x0, 0x1869F );
@@ -200,6 +205,9 @@ class gemTreeReader {
           hiClusterSizeEta  [i][ie] = new TH1I((dirname[i]+"_ClusterSize"+eta_partitions[ie]).c_str(), "Cluster size", 384,  0, 384 );
         }
         for(int j=0; j < NVFAT; j++){
+	  dir[i]->cd();
+          gDirectory->mkdir(type[j].c_str());
+          gDirectory->cd(type[j].c_str());
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Start 2d array of histograms ["<<i<<"]["<<j<<"] creation" << std::endl;   
           sprintf (name[0]  , (dirname[i]+"_hiVFATfired_perevent_%s").c_str(), type[j].c_str());
           sprintf (title[0] , "VFAT chip %s fired per event", type[j].c_str());
@@ -246,6 +254,7 @@ class gemTreeReader {
           for (unsigned ia = 0; ia < 128; ia++) {
             tmp_strips.push_back(0);
           }
+      
       //for (Int_t i = 0; i < nentries; i++)
       for (int i = 0; i < nentries; i++)
       {
@@ -261,15 +270,17 @@ class gemTreeReader {
         for (int g=0; g < 3; g++){
           for (int l = 0; l<NVFAT; l++){
             vfatId[g][l] = 0;
-            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter when initializing event"  <<  vfatId[g][l]  << std::endl;   
+            //if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter when initializing event"  <<  vfatId[g][l]  << std::endl;   
           }
         }
         // Retrieve next entry
         branch->GetEntry(i);
-        bool eventIsOK = event->isEventGood();
-        vector<AMCdata> v_amc = event->amcs();
+        //bool eventIsOK = event->isEventGood();
+        bool eventIsOK = true;
+        vector<AMC13Event> v_amc13 = event->amc13s();
+        vector<AMCdata> v_amc = v_amc13[0].amcs();
         // retrieve bunch crossing from evet
-        uint32_t BX = v_amc[0].BXID();
+        uint32_t BX = v_amc[0].BX();
         uint16_t BC;
         // create vector of GEBdata. For data format details look at Event.h
         vector<GEBdata> v_geb;
@@ -286,57 +297,57 @@ class gemTreeReader {
           // loop over vfats
           for (Int_t k = 0; k < v_vfat.size(); k++)
           {
-            GEMDQMIntegrityChecker *intCheck = new GEMDQMIntegrityChecker(v_vfat.at(k));
-            if (!intCheck->check()) errors_->addError(i,"AMC0","C0",v_vfat.at(k).ChipID(), v_vfat.at(k).SlotNumber(), intCheck->getErrorCode());
-            delete intCheck;
+            //GEMDQMIntegrityChecker *intCheck = new GEMDQMIntegrityChecker(v_vfat.at(k));
+            //if (!intCheck->check()) errors_->addError(i,"AMC0","C0",v_vfat.at(k).ChipID(), v_vfat.at(k).SlotNumber(), intCheck->getErrorCode());
+            //delete intCheck;
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT # "  <<  k << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: EC of the vfat inside loop===> "  <<  static_cast<uint32_t>(v_vfat.at(k).EC()) << std::hex << std::endl;   
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: BC of the vfat inside loop===> "  <<  v_vfat.at(k).BC() << std::hex << std::endl;   
-            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Slot number of responded chip "  <<  v_vfat.at(k).SlotNumber()  << std::endl;   
-            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter before incrementing"  <<  vfatId[v_vfat.at(k).SlotNumber()]  << std::endl;   
-            if (v_vfat.at(k).SlotNumber()>(-1)){ 
-              vfatId[0][v_vfat.at(k).SlotNumber()]++;
-              if (eventIsOK) {vfatId[1][v_vfat.at(k).SlotNumber()]++;} else {vfatId[2][v_vfat.at(k).SlotNumber()]++;}
-            }
-            if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter "  <<  vfatId[v_vfat.at(k).SlotNumber()]  << std::endl;   
+            //if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Slot number of responded chip "  <<  v_vfat.at(k).SlotNumber()  << std::endl;   
+            //if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter before incrementing"  <<  vfatId[v_vfat.at(k).SlotNumber()]  << std::endl;   
+            //if (v_vfat.at(k).SlotNumber()>(-1)){ 
+            //  vfatId[0][v_vfat.at(k).SlotNumber()]++;
+            //  if (eventIsOK) {vfatId[1][v_vfat.at(k).SlotNumber()]++;} else {vfatId[2][v_vfat.at(k).SlotNumber()]++;}
+            //}
+            //if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fired chip counter "  <<  vfatId[v_vfat.at(k).SlotNumber()]  << std::endl;   
             // fill histograms for all events
             dir[0]->cd();
             this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[0], hiCh128[0], hiCh_notfired[0], hiChip[0], hi1010[0], hi1100[0], hi1110[0], hiFlag[0], hiCRC[0], hiDiffCRC[0], hi2DCRC[0], hi2DCRCperVFAT[0], hiCh128chipFired[0], hiStripsFired[0], hiBeamProfile[0], firedchannels[0], notfiredchannels[0]);
-            if (v_vfat.at(k).isBlockGood()){
-              nGoodVFAT[0]++;
-            }else {
-              nBadVFAT[0]++;
-            }// end if isBlockGood
-            // fill histograms for good and bad events
-            if (eventIsOK){
-              if (v_vfat.at(k).isBlockGood()){
-                nGoodVFAT[1]++;
-              }else {
-                nBadVFAT[1]++;
-              }
-              dir[1]->cd();
-              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[1], hiCh128[1], hiCh_notfired[1], hiChip[1], hi1010[1], hi1100[1], hi1110[1], hiFlag[1], hiCRC[1], hiDiffCRC[1], hi2DCRC[1], hi2DCRCperVFAT[1], hiCh128chipFired[1], hiStripsFired[1], hiBeamProfile[1], firedchannels[1], notfiredchannels[1]);
-            } else {
-              if (v_vfat.at(k).isBlockGood()){
-                nGoodVFAT[2]++;
-              }else {
-                nBadVFAT[2]++;
-              }
-              dir[2]->cd();
-              this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[2], hiCh128[2], hiCh_notfired[2], hiChip[2], hi1010[2], hi1100[2], hi1110[2], hiFlag[2], hiCRC[2], hiDiffCRC[2], hi2DCRC[2], hi2DCRCperVFAT[2], hiCh128chipFired[2], hiStripsFired[2], hiBeamProfile[2], firedchannels[2], notfiredchannels[2]);
-            }// end if eventIsOK
+            //if (v_vfat.at(k).isBlockGood()){
+            //  nGoodVFAT[0]++;
+            //}else {
+            //  nBadVFAT[0]++;
+            //}// end if isBlockGood
+            //// fill histograms for good and bad events
+            //if (eventIsOK){
+            //  if (v_vfat.at(k).isBlockGood()){
+            //    nGoodVFAT[1]++;
+            //  }else {
+            //    nBadVFAT[1]++;
+            //  }
+            //  dir[1]->cd();
+            //  this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[1], hiCh128[1], hiCh_notfired[1], hiChip[1], hi1010[1], hi1100[1], hi1110[1], hiFlag[1], hiCRC[1], hiDiffCRC[1], hi2DCRC[1], hi2DCRCperVFAT[1], hiCh128chipFired[1], hiStripsFired[1], hiBeamProfile[1], firedchannels[1], notfiredchannels[1]);
+            //} else {
+            //  if (v_vfat.at(k).isBlockGood()){
+            //    nGoodVFAT[2]++;
+            //  }else {
+            //    nBadVFAT[2]++;
+            //  }
+            //  dir[2]->cd();
+            //  this->fillVFATHistograms(&v_vfat.at(k), hiVFATsn[2], hiCh128[2], hiCh_notfired[2], hiChip[2], hi1010[2], hi1100[2], hi1110[2], hiFlag[2], hiCRC[2], hiDiffCRC[2], hi2DCRC[2], hi2DCRCperVFAT[2], hiCh128chipFired[2], hiStripsFired[2], hiBeamProfile[2], firedchannels[2], notfiredchannels[2]);
+            //}// end if eventIsOK
             BC = v_vfat.at(k).BC();
           }// end of loop over VFATs
         }// end of loop over GEBs
         dir[0]->cd();
         this->fillEventHistograms(BX, BC, nVFAT[0], nBadVFAT[0], nGoodVFAT[0], firedchannels[0], notfiredchannels[0], hiDiffBXandBC[0], hiRatioBXandBC[0], hiVFAT[0], hiFake[0], hiSignal[0], hichfired[0], hichnotfired[0], hiVFATfired_perevent[0], vfatId[0], hiClusterMult[0], hiClusterSize[0], hiClusterMultEta[0], hiClusterSizeEta[0]);
-        if (eventIsOK){
-          dir[1]->cd();
-          this->fillEventHistograms(BX, BC, nVFAT[1], nBadVFAT[1], nGoodVFAT[1], firedchannels[1], notfiredchannels[1], hiDiffBXandBC[1], hiRatioBXandBC[1], hiVFAT[1], hiFake[1], hiSignal[1], hichfired[1], hichnotfired[1], hiVFATfired_perevent[1], vfatId[1], hiClusterMult[1], hiClusterSize[1], hiClusterMultEta[1], hiClusterSizeEta[1]);
-        } else {
-          dir[2]->cd();
-          this->fillEventHistograms(BX, BC, nVFAT[2], nBadVFAT[2], nGoodVFAT[2], firedchannels[2], notfiredchannels[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiVFAT[2], hiFake[2], hiSignal[2], hichfired[2], hichnotfired[2], hiVFATfired_perevent[2], vfatId[2], hiClusterMult[2], hiClusterSize[2], hiClusterMultEta[2], hiClusterSizeEta[2]);
-        }
+        //if (eventIsOK){
+        //  dir[1]->cd();
+        //  this->fillEventHistograms(BX, BC, nVFAT[1], nBadVFAT[1], nGoodVFAT[1], firedchannels[1], notfiredchannels[1], hiDiffBXandBC[1], hiRatioBXandBC[1], hiVFAT[1], hiFake[1], hiSignal[1], hichfired[1], hichnotfired[1], hiVFATfired_perevent[1], vfatId[1], hiClusterMult[1], hiClusterSize[1], hiClusterMultEta[1], hiClusterSizeEta[1]);
+        //} else {
+        //  dir[2]->cd();
+        //  this->fillEventHistograms(BX, BC, nVFAT[2], nBadVFAT[2], nGoodVFAT[2], firedchannels[2], notfiredchannels[2], hiDiffBXandBC[2], hiRatioBXandBC[2], hiVFAT[2], hiFake[2], hiSignal[2], hichfired[2], hichnotfired[2], hiVFATfired_perevent[2], vfatId[2], hiClusterMult[2], hiClusterSize[2], hiClusterMultEta[2], hiClusterSizeEta[2]);
+        //}
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Event histograms filled for event  " << i << std::endl;   
         logger_->addEvent(i,eventIsOK,nVFAT[0],nGoodVFAT[0],nBadVFAT[0]);
         allstrips.clear();
@@ -369,9 +380,22 @@ class gemTreeReader {
         gErrorIgnoreLevel = kWarning; // Supress the Info outputs from ROOT
         gROOT->SetBatch(kTRUE);// don't draw all the canvases
         drawStack(dir[1], dir[2], 4, 2, "png", ofilename.substr(0, ofilename.size()-14)+"_hist/stacks/");
-        TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
-        for (int id = 0; id < 3; id++){
-          printHistograms(dir[id],"png",prefix[id], true);
+        TString prefix[3] = {"/tmp/dqm_hists/","/tmp/dqm_hists/","/tmp/dqm_hists/"};
+
+        //TString prefix[3] = {ofilename.substr(0, ofilename.size()-14)+"_hist/all_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/good_events/", ofilename.substr(0, ofilename.size()-14)+"_hist/bad_events/"};
+        std::string tempname = "OtherData";
+	      std::string type[NVFAT] = {"0" , "1" , "2" , "3" , "4" , "5" , "6" , "7",
+                              "8" , "9" , "10", "11", "12", "13", "14", "15",
+                              "16", "17", "18", "19", "20", "21", "22", "23"};
+	      for (int id = 0; id < 1; id++){// temporary print only all_events
+	        for (int j = 0; j < NVFAT; j++){
+		        dir[id]->cd();
+		        gDirectory->cd(("Slot"+ type[j]).c_str());
+		        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+type[j]+"/",true);
+	        }
+	        dir[id]->cd();
+	        gDirectory->cd(tempname.c_str());
+	        printHistograms(gDirectory->GetDirectory(""),"png",prefix[id]+tempname+"/",true);
         }
         gROOT->SetBatch(kFALSE);
         printDQMCanvases();
@@ -391,7 +415,12 @@ class gemTreeReader {
       m_hiFlag->Fill(m_vfat->Flag());
       m_hiChip->Fill(m_vfat->ChipID());
       // calculate and fill VFAT slot number
-      int sn_ = m_vfat->SlotNumber();
+      //int sn_ = m_vfat->SlotNumber();
+      //int sn_ = -1;
+      //read slot
+      std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));
+      int sn_ = slotInfo_->GEBslotIndex(m_vfat->ChipID());
+      std::cout << "slot N " << sn_ << std::endl;
       m_hiVFATsn->Fill(sn_);
       // calculate and fill the crc and crc_diff
       m_hiCRC->Fill(m_vfat->crc());
@@ -445,7 +474,7 @@ class gemTreeReader {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_i = (int) m%8;
                 int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
@@ -463,7 +492,7 @@ class gemTreeReader {
                 tmp_strips[chan] += 1;
                 m_hiCh128chipFired[m]->Fill(chan);
                 m_hiStripsFired[m]->Fill(strip_maps[m].find(chan+1)->second);
-                int m_i = (int) m_vfat->SlotNumber()%8;
+                int m_i = (int) m%8;
                 int m_j = 127 - strip_maps[m].find(chan+1)->second + ((int) m/8)*128;
 		            if (allstrips.find(m_i) == allstrips.end()){
 		              GEMStripCollection strips;
@@ -524,22 +553,22 @@ class gemTreeReader {
       for (int il = 0; il < 128; il++) {
         std::string line;
         std::getline(icsvfile_, line);
-        if (DEBUG) std::cout << "[gemTreeReader]: Read line : " << line << std::endl; 
+        //if (DEBUG) std::cout << "[gemTreeReader]: Read line : " << line << std::endl; 
         std::istringstream iss(line);
         std::pair<int,int> map_;
         std::string val;
         std::getline(iss,val,',');
-        if (DEBUG) std::cout << "[gemTreeReader]: First val : " << val << std::endl; 
+        //if (DEBUG) std::cout << "[gemTreeReader]: First val : " << val << std::endl; 
         std::stringstream convertor(val);
         convertor >> std::dec >> map_.second;
-        if (DEBUG) std::cout << "[gemTreeReader]: First val recorded : " << map_.second << std::endl; 
+        //if (DEBUG) std::cout << "[gemTreeReader]: First val recorded : " << map_.second << std::endl; 
         std::getline(iss,val,',');
-        if (DEBUG) std::cout << "[gemTreeReader]: Second val : " << val << std::endl; 
+        //if (DEBUG) std::cout << "[gemTreeReader]: Second val : " << val << std::endl; 
         convertor.str("");
         convertor.clear();
         convertor << val;
         convertor >> std::dec >> map_.first;
-        if (DEBUG) std::cout << "[gemTreeReader]: Second val recorded : " << map_.first << std::endl; 
+        //if (DEBUG) std::cout << "[gemTreeReader]: Second val recorded : " << map_.first << std::endl; 
         strip_maps[slot].insert(map_);
       }
     }
