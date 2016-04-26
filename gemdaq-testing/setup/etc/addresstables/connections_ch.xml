@@ -9,6 +9,12 @@
        Final Byte for Virtex/Kintex Chip (T1) = 255 - 2*SN[6:0].
        z is 1 for SN 0-127 and 2 for SN 128-255 and 3 for SN 256-383.
     -->
+  <connection id="gem.tamu.amc13.T1" uri="chtcp-2.0://localhost:10203?target=192.168.1.89:50001"
+	      address_table="file://${AMC13_ADDRESS_TABLE_PATH}/AMC13XG_T1.xml" />
+
+  <connection id="gem.tamu.amc13.T2" uri="chtcp-2.0://localhost:10203?target=192.168.1.88:50001"
+	      address_table="file://${AMC13_ADDRESS_TABLE_PATH}/AMC13XG_T2.xml" />
+
   <connection id="gem.amc13-sn7.T1" uri="chtcp-2.0://localhost:10203?target=192.168.1.241:50001"
               address_table="file://AMC13XG_T1.xml" />
   <connection id="gem.amc13-sn7.T2" uri="chtcp-2.0://localhost:10203?target=192.168.1.240:50001"
