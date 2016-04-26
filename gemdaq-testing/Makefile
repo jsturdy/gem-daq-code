@@ -1,10 +1,6 @@
 #
 # Global Makefile for GEM
 #
-include $(XDAQ_ROOT)/config/mfAutoconf.rules
-include $(XDAQ_ROOT)/config/mfDefs.$(XDAQ_OS)
-include $(XDAQ_ROOT)/config/Makefile.rules
-include $(XDAQ_ROOT)/config/mfRPM.rules
 
 SUBPACKAGES := \
         gemutils \
@@ -65,4 +61,5 @@ print-env:
 	@echo ROOTCFLAGS    $(ROOTCFLAGS)
 	@echo ROOTLIBS      $(ROOTLIBS)
 	@echo ROOTGLIBS     $(ROOTGLIBS)
-
+	@echo GIT_VERSION   $(GIT_VERSION)
+	@echo GEMDEVLOPER   $(GEMDEVLOPER)
