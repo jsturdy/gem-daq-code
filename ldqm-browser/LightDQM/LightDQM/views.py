@@ -25,7 +25,6 @@ with open(csvfilename, 'rd') as csvfile:
   for num in vfat_ids:
       vfat_address.extend(num)
 
-#NEEDS REDOING
 hist_list = ["b1010",
              "b1100",
              "b1110",
@@ -38,6 +37,9 @@ hist_list = ["b1010",
              "crc_calc",
              "latencyScan",
              "thresholdScan"];
+
+threshold_channels = range(0,127);
+
 amc13_hist_list = ["Control_Bit5",
                    "Control_BitA",
                    "Evt_ty",
@@ -722,6 +724,7 @@ def vfats(request, runType, runN, amc_boardid, geb_chamberid, vfatN):
                                        'hist_list':hist_list,
                                        'hist_list_long':hist_list_long,
                                        'geb_hist_list':geb_hist_list,
+                                       'threshold_channels':threshold_channels,
                                        'run':run,
                                        'amc_boardid':amc_boardid,
                                        'geb_chamberid':geb_chamberid,
