@@ -97,6 +97,7 @@ uint16_t gem::hw::glib::GLIBManager::parseAMCEnableList(std::string const& enabl
 
   boost::split(slots, enableList, boost::is_any_of(", "), boost::token_compress_on);  
   DEBUG("GLIBManager::AMC input enable list is " << enableList);
+  // would be great to multithread this portion
   for (auto slot = slots.begin(); slot != slots.end(); ++slot) {
     DEBUG("GLIBManager::slot is " << *slot);
     if (slot->find('-') != std::string::npos) { // found a possible range
@@ -245,12 +246,18 @@ void gem::hw::glib::GLIBManager::initializeAction()
                                                                                 true));
     }
     DEBUG("GLIBManager::exporting config parameters into infospace");
-    is_glibs[slot]->createString("ControlHubAddress", info.controlHubAddress.value_, GEMUpdateType::NOUPDATE);
-    is_glibs[slot]->createString("IPBusProtocol",     info.ipBusProtocol.value_    , GEMUpdateType::NOUPDATE);
-    is_glibs[slot]->createString("DeviceIPAddress",   info.deviceIPAddress.value_  , GEMUpdateType::NOUPDATE);
-    is_glibs[slot]->createString("AddressTable",      info.addressTable.value_     , GEMUpdateType::NOUPDATE);
-    is_glibs[slot]->createUInt32("ControlHubPort",    info.controlHubPort.value_   , GEMUpdateType::NOUPDATE);
-    is_glibs[slot]->createUInt32("IPBusPort",         info.ipBusPort.value_        , GEMUpdateType::NOUPDATE);
+    is_glibs[slot]->createString("ControlHubAddress", info.controlHubAddress.value_, &(info.controlHubAddress),
+                                 GEMUpdateType::NOUPDATE);
+    is_glibs[slot]->createString("IPBusProtocol",     info.ipBusProtocol.value_    , &(info.ipBusProtocol),
+                                 GEMUpdateType::NOUPDATE);
+    is_glibs[slot]->createString("DeviceIPAddress",   info.deviceIPAddress.value_  , &(info.deviceIPAddress),
+                                 GEMUpdateType::NOUPDATE);
+    is_glibs[slot]->createString("AddressTable",      info.addressTable.value_     , &(info.addressTable),
+                                 GEMUpdateType::NOUPDATE);
+    is_glibs[slot]->createUInt32("ControlHubPort",    info.controlHubPort.value_   , &(info.controlHubPort),
+                                 GEMUpdateType::NOUPDATE);
+    is_glibs[slot]->createUInt32("IPBusPort",         info.ipBusPort.value_        , &(info.ipBusPort),
+                                 GEMUpdateType::NOUPDATE);
     
     DEBUG("GLIBManager::InfoSpace found item: ControlHubAddress " << is_glibs[slot]->getString("ControlHubAddress"));
     DEBUG("GLIBManager::InfoSpace found item: IPBusProtocol "     << is_glibs[slot]->getString("IPBusProtocol")    );
@@ -263,13 +270,18 @@ void gem::hw::glib::GLIBManager::initializeAction()
       DEBUG("GLIBManager::obtaining pointer to HwGLIB");
       //m_glibs[slot] = glib_shared_ptr(new gem::hw::glib::HwGLIB(info.crateID.value_,info.slotID.value_));
       m_glibs[slot] = glib_shared_ptr(new gem::hw::glib::HwGLIB(deviceName, m_connectionFile.toString()));
-
-      createGLIBInfoSpaceItems(is_glibs[slot], m_glibs[slot]);
-
-      m_glibMonitors[slot] = std::shared_ptr<GLIBMonitor>(new GLIBMonitor(m_glibs[slot], this, slot+1));
-      m_glibMonitors[slot]->addInfoSpace("HWMonitoring", is_glibs[slot]);
-      m_glibMonitors[slot]->setupHwMonitoring();
-      m_glibMonitors[slot]->startMonitoring();
+      if (m_glibs[slot]->isHwConnected()) {
+        // maybe better to rais exception here and fail if not connected, as we expected the card to be here?
+        createGLIBInfoSpaceItems(is_glibs[slot], m_glibs[slot]);
+        
+        m_glibMonitors[slot] = std::shared_ptr<GLIBMonitor>(new GLIBMonitor(m_glibs[slot], this, slot+1));
+        m_glibMonitors[slot]->addInfoSpace("HWMonitoring", is_glibs[slot]);
+        m_glibMonitors[slot]->setupHwMonitoring();
+        m_glibMonitors[slot]->startMonitoring();
+      } else {
+        ERROR("GLIBManager:: unable to communicate with GLIB in slot " << slot);
+        XCEPT_RAISE(gem::hw::glib::exception::Exception, "initializeAction failed");
+      }
     } catch (gem::hw::glib::exception::Exception const& ex) {
       ERROR("GLIBManager::caught exception " << ex.what());
       XCEPT_RAISE(gem::hw::glib::exception::Exception, "initializeAction failed");
@@ -301,6 +313,7 @@ void gem::hw::glib::GLIBManager::initializeAction()
       return;
     }
   }
+  usleep(10000); // just for testing the timing of different applications
   DEBUG("GLIBManager::initializeAction end");
 }
 
@@ -310,7 +323,7 @@ void gem::hw::glib::GLIBManager::configureAction()
   DEBUG("GLIBManager::configureAction");
 
   for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {
-    usleep(100); // just for testing the timing of different applications
+    usleep(5000); // just for testing the timing of different applications
     GLIBInfo& info = m_glibInfo[slot].bag;
 
     if (!info.present)
@@ -320,7 +333,11 @@ void gem::hw::glib::GLIBManager::configureAction()
       DEBUG("GLIBManager::setting trigger source to 0x" << std::hex << info.triggerSource.value_ << std::dec);
       m_glibs[slot]->setTrigSource(info.triggerSource.value_);
       
+      m_glibs[slot]->resetL1ACount();
+      m_glibs[slot]->resetCalPulseCount();
+
       // reset the DAQ
+      m_glibs[slot]->setL1AInhibit(0x1);
       m_glibs[slot]->resetDAQLink();
       m_glibs[slot]->setDAQLinkRunType(0x3);
       m_glibs[slot]->setDAQLinkRunParameters(0xfaac);
@@ -353,7 +370,7 @@ void gem::hw::glib::GLIBManager::startAction()
   INFO("gem::hw::glib::GLIBManager::startAction begin");
   //what is required for starting the GLIB?
   for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {
-    usleep(100);
+    usleep(500);
     DEBUG("GLIBManager::looping over slots(" << (slot+1) << ") and finding infospace items");
     GLIBInfo& info = m_glibInfo[slot].bag;
 
@@ -364,6 +381,7 @@ void gem::hw::glib::GLIBManager::startAction()
       DEBUG("connected a card in slot " << (slot+1));
       // enable the DAQ
       m_glibs[slot]->enableDAQLink();
+      m_glibs[slot]->setL1AInhibit(0x0);
       usleep(100); // just for testing the timing of different applications
     } else {
       ERROR("GLIB in slot " << (slot+1) << " is not connected");
@@ -378,7 +396,7 @@ void gem::hw::glib::GLIBManager::startAction()
       m_glibMonitors[slot]->reset();
     */
   }
-  usleep(100);
+  usleep(10000);
   INFO("gem::hw::glib::GLIBManager::startAction end");
 }
 
@@ -386,14 +404,14 @@ void gem::hw::glib::GLIBManager::pauseAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for pausing the GLIB?
-  usleep(100); // just for testing the timing of different applications
+  usleep(10000); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::resumeAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for resuming the GLIB?
-  usleep(100); // just for testing the timing of different applications
+  usleep(10000); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::stopAction()
@@ -401,14 +419,14 @@ void gem::hw::glib::GLIBManager::stopAction()
 {
   INFO("gem::hw::glib::GLIBManager::stopAction begin");
   //what is required for stopping the GLIB?
-  usleep(100); // just for testing the timing of different applications
+  usleep(10000); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::haltAction()
   throw (gem::hw::glib::exception::Exception)
 {
   //what is required for halting the GLIB?
-  usleep(100); // just for testing the timing of different applications
+  usleep(10000); // just for testing the timing of different applications
 }
 
 void gem::hw::glib::GLIBManager::resetAction()
@@ -419,7 +437,7 @@ void gem::hw::glib::GLIBManager::resetAction()
   
   DEBUG("GLIBManager::resetAction begin");
   for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {    
-    usleep(100); // just for testing the timing of different applications
+    usleep(500); // just for testing the timing of different applications
     DEBUG("GLIBManager::looping over slots(" << (slot+1) << ") and finding infospace items");
     GLIBInfo& info = m_glibInfo[slot].bag;
     
@@ -484,64 +502,64 @@ void gem::hw::glib::GLIBManager::resetAction(toolbox::Event::Reference e)
 void gem::hw::glib::GLIBManager::createGLIBInfoSpaceItems(is_toolbox_ptr is_glib, glib_shared_ptr glib)
 {
   // system registers
-  is_glib->createUInt32("BOARD_ID",      glib->getBoardIDRaw(),      GEMUpdateType::NOUPDATE, "docstring", "id");
-  is_glib->createUInt32("SYSTEM_ID",     glib->getSystemIDRaw(),     GEMUpdateType::NOUPDATE, "docstring", "id");
-  is_glib->createUInt32("FIRMWARE_ID",   glib->getFirmwareVerRaw(),  GEMUpdateType::PROCESS,  "docstring", "fwver");
-  is_glib->createUInt32("FIRMWARE_DATE", glib->getFirmwareDateRaw(), GEMUpdateType::PROCESS,  "docstring", "date");
-  is_glib->createUInt32("IP_ADDRESS",    glib->getIPAddressRaw(),    GEMUpdateType::NOUPDATE, "docstring", "ip");
-  is_glib->createUInt64("MAC_ADDRESS",   glib->getMACAddressRaw(),   GEMUpdateType::NOUPDATE, "docstring", "mac");
-  is_glib->createUInt32("SFP1_STATUS",   glib->SFPStatus(1),         GEMUpdateType::HW32);
-  is_glib->createUInt32("SFP2_STATUS",   glib->SFPStatus(2),         GEMUpdateType::HW32);
-  is_glib->createUInt32("SFP3_STATUS",   glib->SFPStatus(3),         GEMUpdateType::HW32);
-  is_glib->createUInt32("SFP4_STATUS",   glib->SFPStatus(4),         GEMUpdateType::HW32);
-  is_glib->createUInt32("FMC1_STATUS",   glib->FMCPresence(0),       GEMUpdateType::HW32);
-  is_glib->createUInt32("FMC2_STATUS",   glib->FMCPresence(1),       GEMUpdateType::HW32);
-  is_glib->createUInt32("FPGA_RESET",    glib->FPGAResetStatus(),    GEMUpdateType::HW32);
-  is_glib->createUInt32("GBE_INT",       glib->GbEInterrupt(),       GEMUpdateType::HW32);
-  is_glib->createUInt32("V6_CPLD",       glib->V6CPLDStatus(),       GEMUpdateType::HW32);
-  is_glib->createUInt32("CPLD_LOCK",     glib->CDCELockStatus(),     GEMUpdateType::HW32);
+  is_glib->createUInt32("BOARD_ID",      glib->getBoardIDRaw(),      NULL, GEMUpdateType::NOUPDATE, "docstring", "id");
+  is_glib->createUInt32("SYSTEM_ID",     glib->getSystemIDRaw(),     NULL, GEMUpdateType::NOUPDATE, "docstring", "id");
+  is_glib->createUInt32("FIRMWARE_ID",   glib->getFirmwareVerRaw(),  NULL, GEMUpdateType::PROCESS,  "docstring", "fwver");
+  is_glib->createUInt32("FIRMWARE_DATE", glib->getFirmwareDateRaw(), NULL, GEMUpdateType::PROCESS,  "docstring", "date");
+  is_glib->createUInt32("IP_ADDRESS",    glib->getIPAddressRaw(),    NULL, GEMUpdateType::NOUPDATE, "docstring", "ip");
+  is_glib->createUInt64("MAC_ADDRESS",   glib->getMACAddressRaw(),   NULL, GEMUpdateType::NOUPDATE, "docstring", "mac");
+  is_glib->createUInt32("SFP1_STATUS",   glib->SFPStatus(1),         NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("SFP2_STATUS",   glib->SFPStatus(2),         NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("SFP3_STATUS",   glib->SFPStatus(3),         NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("SFP4_STATUS",   glib->SFPStatus(4),         NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("FMC1_STATUS",   glib->FMCPresence(0),       NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("FMC2_STATUS",   glib->FMCPresence(1),       NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("FPGA_RESET",    glib->FPGAResetStatus(),    NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("GBE_INT",       glib->GbEInterrupt(),       NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("V6_CPLD",       glib->V6CPLDStatus(),       NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("CPLD_LOCK",     glib->CDCELockStatus(),     NULL, GEMUpdateType::HW32);
 
   // ttc registers
-  is_glib->createUInt32("L1A",      glib->getL1ACount(),      GEMUpdateType::HW32);
-  is_glib->createUInt32("CalPulse", glib->getCalPulseCount(), GEMUpdateType::HW32);
-  is_glib->createUInt32("Resync",   glib->getResyncCount(),   GEMUpdateType::HW32);
-  is_glib->createUInt32("BC0",      glib->getBC0Count(),      GEMUpdateType::HW32);
+  is_glib->createUInt32("L1A",      glib->getL1ACount(),      NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("CalPulse", glib->getCalPulseCount(), NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("Resync",   glib->getResyncCount(),   NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("BC0",      glib->getBC0Count(),      NULL, GEMUpdateType::HW32);
 
   // DAQ link registers
-  is_glib->createUInt32("CONTROL",        glib->getDAQLinkControl(),               GEMUpdateType::HW32);
-  is_glib->createUInt32("STATUS",         glib->getDAQLinkStatus(),                GEMUpdateType::HW32);
-  is_glib->createUInt32("INPUT_KILL_MASK",glib->getDAQLinkInputMask(),             GEMUpdateType::HW32);
-  is_glib->createUInt32("DAV_TIMEOUT",    glib->getDAQLinkDAVTimeout(),            GEMUpdateType::HW32);
-  is_glib->createUInt32("MAX_DAV_TIMER",  glib->getDAQLinkDAVTimer(0),             GEMUpdateType::HW32);
-  is_glib->createUInt32("LAST_DAV_TIMER", glib->getDAQLinkDAVTimer(1),             GEMUpdateType::HW32);
-  is_glib->createUInt32("NOTINTABLE_ERR", glib->getDAQLinkNonidentifiableErrors(), GEMUpdateType::HW32);
-  is_glib->createUInt32("DISPER_ERR",     glib->getDAQLinkDisperErrors(),          GEMUpdateType::HW32);
-  is_glib->createUInt32("EVT_SENT",       glib->getDAQLinkEventsSent(),            GEMUpdateType::HW32);
-  is_glib->createUInt32("L1AID",          glib->getDAQLinkL1AID(),                 GEMUpdateType::HW32);
+  is_glib->createUInt32("CONTROL",        glib->getDAQLinkControl(),               NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("STATUS",         glib->getDAQLinkStatus(),                NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("INPUT_ENABLE_MASK",glib->getDAQLinkInputMask(),             NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("DAV_TIMEOUT",    glib->getDAQLinkDAVTimeout(),            NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("MAX_DAV_TIMER",  glib->getDAQLinkDAVTimer(0),             NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("LAST_DAV_TIMER", glib->getDAQLinkDAVTimer(1),             NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("NOTINTABLE_ERR", glib->getDAQLinkNonidentifiableErrors(), NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("DISPER_ERR",     glib->getDAQLinkDisperErrors(),          NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("EVT_SENT",       glib->getDAQLinkEventsSent(),            NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("L1AID",          glib->getDAQLinkL1AID(),                 NULL, GEMUpdateType::HW32);
 
-  is_glib->createUInt32("GTX0_DAQ_STATUS",               glib->getDAQLinkStatus(0),     GEMUpdateType::HW32);
-  is_glib->createUInt32("GTX0_DAQ_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(0,0), GEMUpdateType::HW32);
-  is_glib->createUInt32("GTX0_DAQ_EVN",                  glib->getDAQLinkCounters(0,1), GEMUpdateType::HW32);
-  is_glib->createUInt32("GTX1_DAQ_STATUS",               glib->getDAQLinkStatus(1),     GEMUpdateType::HW32);
-  is_glib->createUInt32("GTX1_DAQ_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(1,0), GEMUpdateType::HW32);
-  is_glib->createUInt32("GTX1_DAQ_EVN",                  glib->getDAQLinkCounters(1,1), GEMUpdateType::HW32);
+  is_glib->createUInt32("GTX0_DAQ_STATUS",               glib->getDAQLinkStatus(0),     NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("GTX0_DAQ_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(0,0), NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("GTX0_DAQ_EVN",                  glib->getDAQLinkCounters(0,1), NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("GTX1_DAQ_STATUS",               glib->getDAQLinkStatus(1),     NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("GTX1_DAQ_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(1,0), NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("GTX1_DAQ_EVN",                  glib->getDAQLinkCounters(1,1), NULL, GEMUpdateType::HW32);
 
   // request counters
-  is_glib->createUInt64("OptoHybrid_0", 0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
-  is_glib->createUInt64("OptoHybrid_1", 0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
-  is_glib->createUInt64("TRK_0",        0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
-  is_glib->createUInt64("TRK_1",        0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
-  is_glib->createUInt64("Counters",     0, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
+  is_glib->createUInt64("OptoHybrid_0", 0, NULL, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
+  is_glib->createUInt64("OptoHybrid_1", 0, NULL, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
+  is_glib->createUInt64("TRK_0",        0, NULL, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
+  is_glib->createUInt64("TRK_1",        0, NULL, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
+  is_glib->createUInt64("Counters",     0, NULL, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
 
   // link status registers
-  is_glib->createUInt32("GTX0_TRG_ERR",      0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
-  is_glib->createUInt32("GTX0_TRK_ERR",      0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
-  is_glib->createUInt32("GTX0_DATA_Packets", 0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
-  is_glib->createUInt32("GTX1_TRG_ERR",      0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
-  is_glib->createUInt32("GTX1_TRK_ERR",      0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
-  is_glib->createUInt32("GTX1_DATA_Packets", 0, GEMUpdateType::PROCESS, "docstring", "raw/rate");
+  is_glib->createUInt32("GTX0_TRG_ERR",      0, NULL, GEMUpdateType::PROCESS, "docstring", "raw/rate");
+  is_glib->createUInt32("GTX0_TRK_ERR",      0, NULL, GEMUpdateType::PROCESS, "docstring", "raw/rate");
+  is_glib->createUInt32("GTX0_DATA_Packets", 0, NULL, GEMUpdateType::PROCESS, "docstring", "raw/rate");
+  is_glib->createUInt32("GTX1_TRG_ERR",      0, NULL, GEMUpdateType::PROCESS, "docstring", "raw/rate");
+  is_glib->createUInt32("GTX1_TRK_ERR",      0, NULL, GEMUpdateType::PROCESS, "docstring", "raw/rate");
+  is_glib->createUInt32("GTX1_DATA_Packets", 0, NULL, GEMUpdateType::PROCESS, "docstring", "raw/rate");
 
   // TTC registers
-  is_glib->createUInt32("TTC_CONTROL", glib->getTTCControl(),   GEMUpdateType::HW32);
-  is_glib->createUInt32("TTC_SPY",     glib->getTTCSpyBuffer(), GEMUpdateType::HW32);
+  is_glib->createUInt32("TTC_CONTROL", glib->getTTCControl(),   NULL, GEMUpdateType::HW32);
+  is_glib->createUInt32("TTC_SPY",     glib->getTTCSpyBuffer(), NULL, GEMUpdateType::HW32);
 }

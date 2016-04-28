@@ -85,20 +85,55 @@ void gem::base::GEMWebApplication::webDefault(xgi::Input * in, xgi::Output * out
   throw (xgi::exception::Exception)
 {
   DEBUG("GEMWebApplication::webDefault");
+  *out << cgicc::script().set("type","text/javascript")
+    .set("src","/gemdaq/gembase/html/scripts/gemwebapp.js")
+       << cgicc::script() << std::endl;
+
   if (p_gemFSMApp)
     DEBUG("GEMWebApplication::current state is" << p_gemFSMApp->getCurrentState());
   *out << "<div class=\"xdaq-tab-wrapper\">" << std::endl;
 
+  if (p_gemFSMApp) {
+    std::string classname = p_gemFSMApp->getApplicationDescriptor()->getClassName();
+    classname = classname.erase(0,classname.rfind(":")+1);
+    *out << "<div class=\"xdaq-tab\" title=\""
+         << classname
+         << " Control Panel\" >"  << std::endl;
+    controlPanel(in,out);
+    *out << "</div>" << std::endl;
+  }
+  
   *out << "<div class=\"xdaq-tab\" title=\"Monitoring page\"/>"  << std::endl;
-  monitorPage(in,out);
+  this->monitorPage(in,out);
   *out << "</div>" << std::endl;
 
   *out << "<div class=\"xdaq-tab\" title=\"Expert page\"/>"  << std::endl;
-  expertPage(in,out);
+  this->expertPage(in,out);
   *out << "</div>" << std::endl;
 
+  *out << " <div class=\"gem-push\"></div>" << std::endl;
+  
   *out << "</div>" << std::endl;
+  
+  webFooterGEM(in, out);
+
+  std::string updateLink = "/" + p_gemApp->m_urn + "/jsonUpdate";
+  *out << "<script type=\"text/javascript\">"            << std::endl
+       << "    startUpdate( \"" << updateLink << "\" );" << std::endl
+       << "</script>" << std::endl;
 }
+
+void gem::base::GEMWebApplication::webFooterGEM(xgi::Input * in, xgi::Output * out)
+  throw (xgi::exception::Exception)
+{
+  *out << "<div class=\"gem-footer\" id=\"xdaq-footer\">" << std::endl;
+  //*out << cgicc::br() << std::endl
+  * out << "GEM DAQ GIT_VERSION:" << GIT_VERSION
+        << " -- developer:"       << GEMDEVELOPER;
+  //<< cgicc::br() << std::endl;
+  *out << std::endl << "</div>" << std::endl;
+}
+
 
 /*To be filled in with the control page code (only for FSM derived classes?*/
 void gem::base::GEMWebApplication::controlPanel(xgi::Input * in, xgi::Output * out)
@@ -211,7 +246,7 @@ void gem::base::GEMWebApplication::monitorPage(xgi::Input * in, xgi::Output * ou
 {
   DEBUG("GEMWebApplication::monitorPage");
   *out << "monitorPage</br>" << std::endl;
-  webRedirect(in,out);
+  //webRedirect(in,out);
 }
 
 /*To be filled in with the expert page code*/
@@ -220,7 +255,7 @@ void gem::base::GEMWebApplication::expertPage(xgi::Input * in, xgi::Output * out
 {
   DEBUG("GEMWebApplication::expertPage");
   *out << "expertPage</br>" << std::endl;
-  webRedirect(in,out);
+  //webRedirect(in,out);
 }
 
 /*To be filled in with the json update code*/
@@ -234,6 +269,7 @@ void gem::base::GEMWebApplication::jsonUpdate(xgi::Input * in, xgi::Output * out
 void gem::base::GEMWebApplication::jsonStateUpdate(xgi::Input * in, xgi::Output * out)
   throw (xgi::exception::Exception)
 {
+  DEBUG("GEMWebApplication::jsonStateUpdate");
   out->getHTTPResponseHeader().addHeader("Content-Type", "application/json");
   *out << " {" << std::endl;
   *out << "   \"name\":\"fsmState\"" << ",\"value\": \"" 
@@ -245,15 +281,16 @@ void gem::base::GEMWebApplication::jsonStateUpdate(xgi::Input * in, xgi::Output 
 void gem::base::GEMWebApplication::jsonUpdate(xgi::Input * in, xgi::Output * out)
   throw (xgi::exception::Exception)
 {
+  DEBUG("GEMWebApplication::jsonUpdate");
   out->getHTTPResponseHeader().addHeader("Content-Type", "application/json");
-  *out << " { \n";
+  *out << " { " << std::endl;
   auto monitor = p_gemFSMApp->p_gemMonitor;
   //if (p_gemMonitor) {
   if (monitor) {
     //p_gemMonitor->jsonUpdateItemSets(out);
     monitor->jsonUpdateItemSets(out);
   }
-  *out << " } \n";
+  *out << " } " << std::endl;
 }
 
 /** FSM callbacks */
@@ -267,7 +304,7 @@ void gem::base::GEMWebApplication::webInitialize(xgi::Input * in, xgi::Output * 
     try {
       p_gemFSMApp->fireEvent("Initialize");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Initialize failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webInitialize failed", e );
     }
   }
   //DEBUG("GEMWebApplication::webInitialize end");
@@ -284,7 +321,7 @@ void gem::base::GEMWebApplication::webEnable(xgi::Input * in, xgi::Output * out)
     try {
       p_gemFSMApp->fireEvent("Enable");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Enable failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webEnable failed", e );
     }
   }
   //webRedirect(in,out);
@@ -297,10 +334,10 @@ void gem::base::GEMWebApplication::webConfigure(xgi::Input * in, xgi::Output * o
   DEBUG("GEMWebApplication::webConfigure");
   if (p_gemFSMApp) {
     DEBUG("GEMWebApplication::p_gemFSMApp non-zero");
-    try{
+    try {
       p_gemFSMApp->fireEvent("Configure");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Configure failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webConfigure failed", e );
     }
   }
   //webRedirect(in,out);
@@ -313,10 +350,10 @@ void gem::base::GEMWebApplication::webStart(xgi::Input * in, xgi::Output * out)
   DEBUG("GEMWebApplication::webStart");
   if (p_gemFSMApp) {
     DEBUG("GEMWebApplication::p_gemFSMApp non-zero");
-    try{
+    try {
       p_gemFSMApp->fireEvent("Start");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Start failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webStart failed", e );
     }
   }
   //webRedirect(in,out);
@@ -328,10 +365,10 @@ void gem::base::GEMWebApplication::webPause(xgi::Input * in, xgi::Output * out)
   DEBUG("GEMWebApplication::webPause");
   if (p_gemFSMApp) {
     DEBUG("GEMWebApplication::p_gemFSMApp non-zero");
-    try{
+    try {
       p_gemFSMApp->fireEvent("Pause");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Pause failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webPause failed", e );
     }
   }
   //webRedirect(in,out);
@@ -344,10 +381,10 @@ void gem::base::GEMWebApplication::webResume(xgi::Input * in, xgi::Output * out)
   DEBUG("GEMWebApplication::webResume");
   if (p_gemFSMApp) {
     DEBUG("GEMWebApplication::p_gemFSMApp non-zero");
-    try{
+    try {
       p_gemFSMApp->fireEvent("Resume");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Resume failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webResume failed", e );
     }
   }
   //webRedirect(in,out);
@@ -360,10 +397,10 @@ void gem::base::GEMWebApplication::webStop(xgi::Input * in, xgi::Output * out)
   DEBUG("GEMWebApplication::webStop");
   if (p_gemFSMApp) {
     DEBUG("GEMWebApplication::p_gemFSMApp non-zero");
-    try{
+    try {
       p_gemFSMApp->fireEvent("Stop");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Stop failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webStop failed", e );
     }
   }
   //webRedirect(in,out);
@@ -376,10 +413,10 @@ void gem::base::GEMWebApplication::webHalt(xgi::Input * in, xgi::Output * out)
   DEBUG("GEMWebApplication::webHalt");
   if (p_gemFSMApp) {
     DEBUG("GEMWebApplication::p_gemFSMApp non-zero");
-    try{
+    try {
       p_gemFSMApp->fireEvent("Halt");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Halt failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webHalt failed", e );
     }
   }
   //webRedirect(in,out);
@@ -392,10 +429,10 @@ void gem::base::GEMWebApplication::webReset(xgi::Input * in, xgi::Output * out)
   DEBUG("GEMWebApplication::webReset");
   if (p_gemFSMApp) {
     DEBUG("GEMWebApplication::p_gemFSMApp non-zero");
-    try{
+    try {
       p_gemFSMApp->fireEvent("Reset");
     } catch( toolbox::fsm::exception::Exception& e ) {
-      XCEPT_RETHROW( xgi::exception::Exception, "Reset failed", e );
+      XCEPT_RETHROW( xgi::exception::Exception, "webReset failed", e );
     }
   }
   //webRedirect(in,out);

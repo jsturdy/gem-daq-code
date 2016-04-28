@@ -75,10 +75,10 @@ print "--=======================================--"
 print
 
 if (options.daq_enable>=0):
-        #writeRegister(glib, "GLIB.DAQ.CONTROL", options.daq_enable)
-        writeRegister(glib, "GLIB.DAQ.CONTROL", 0x8)
-        #writeRegister(glib, "GLIB.DAQ.EXT_CONTROL.INPUT_TIMEOUT", 0x30D40)
-        #writeRegister(glib, "GLIB.DAQ.CONTROL", 0x181)
+        writeRegister(glib, "GLIB.DAQ.CONTROL.DAQ_ENABLE", 0x1)
+        writeRegister(glib, "GLIB.DAQ.CONTROL.TTS_OVERRIDE", 0x8)
+        writeRegister(glib, "GLIB.DAQ.CONTROL.INPUT_KILL_MASK", 0x1)
+        writeRegister(glib, "GLIB.DAQ.EXT_CONTROL.INPUT_TIMEOUT", 0x30D40)
         print "Reset daq_enable: %i"%(options.daq_enable)
 
 print "-> DAQ control reg    :0x%08x"%(readRegister(glib,"GLIB.DAQ.CONTROL"))
@@ -94,8 +94,7 @@ print
 print "-> DAQ GTX NOT_IN_TABLE error counter:0x%08x"%(readRegister(glib,"GLIB.DAQ.EXT_STATUS.NOTINTABLE_ERR"))
 print "-> DAQ GTX dispersion error counter  :0x%08x"%(readRegister(glib,"GLIB.DAQ.EXT_STATUS.DISPER_ERR"))
 print
-print "-> GLIB MAX_DAV_TIMER :0x%08x"%(readRegister(glib,"GLIB.DAQ.EXT_STATUS.MAX_DAV_TIMER"))
-print "-> GLIB LAST_DAV_TIMER:0x%08x"%(readRegister(glib,"GLIB.DAQ.EXT_STATUS.LAST_DAV_TIMER"))
+
 if options.gemttc in [0,1]:
         writeRegister(glib,"GLIB.TTC.CONTROL.GEMFORMAT",options.gemttc)
 print "-> TTC Control :0x%08x"%(readRegister(glib,"GLIB.TTC.CONTROL"))
@@ -113,9 +112,9 @@ for olink in range(NGTX):
         print "---------> DAQ GTX%d corrupted VFAT block counter:0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.COUNTERS.CORRUPT_VFAT_BLK_CNT"%(olink)))
         print "---------> DAQ GTX%d evn                         :0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.COUNTERS.EVN"%(olink)))
         print
-        print "---------> DAQ GTX%d MAX_DAV_TIMER :0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.DAV_STATS.MAX_DAV_TIMER" %(olink)))
-        print "---------> DAQ GTX%d LAST_DAV_TIMER:0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.DAV_STATS.LAST_DAV_TIMER"%(olink)))
-        print "---------> DAQ GTX%d DAV_TIMEOUT   :0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.DAV_TIMEOUT"%(olink)))
+        print "---------> DAQ GTX%d MAX_DAV_TIMER :0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.COUNTERS.MAX_DAV_TIMER" %(olink)))
+        print "---------> DAQ GTX%d LAST_DAV_TIMER:0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.COUNTERS.LAST_DAV_TIMER"%(olink)))
+        print "---------> DAQ GTX%d DAV_TIMEOUT   :0x%08x"%(olink,readRegister(glib,"GLIB.DAQ.GTX%d.CONTROL.DAV_TIMEOUT"%(olink)))
         print "-------------------------================--"
         print "-------------> DEBUG INFO <----------------"
         print "-------------------------================--"
