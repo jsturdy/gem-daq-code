@@ -123,16 +123,16 @@ private:
       TBranch *branch = tree->GetBranch("GEMEvents");
       branch->SetAddress(&event);
       Int_t nentries = tree->GetEntries();
-      branch->GetEntry(0);
+      branch->GetEntry(120);
       v_amc13 = event->amc13s();
       for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
-	v_amc = a13->amcs();
-	for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
-	  v_geb = a->gebs();
-	  for(auto g=v_geb.begin(); g!=v_geb.end();g++){
-	    v_vfat=g->vfats();
-	  }
-	}
+	      v_amc = a13->amcs();
+	      for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
+	        v_geb = a->gebs();
+	        for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+	          v_vfat=g->vfats();
+	        }
+	      }
       }
       if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of TTree entries: " << nentries << "\n";
       if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMC13s: " << v_amc13.size()<< "\n";
