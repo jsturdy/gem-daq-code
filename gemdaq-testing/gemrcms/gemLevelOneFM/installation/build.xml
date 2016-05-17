@@ -1,13 +1,13 @@
 <!-- build file for compiling and deploying a RCMS2 User State Machine -->
 
 <project name="statemachine" default="release" basedir=".">
-  
+
   <!-- Properties the user needs to modify -->
   <property name="fm.name" value="GEMLevelOneFM" />
-  
+
   <property environment="env" />
   <property file="${env.RCMS_HOME}/framework/installation/configuration/RCMS.properties" />
-  
+
   <!-- Other properties -->
   <property name="jakarta.common" value="${jakarta.home}/common/lib" />
   <property name="jakarta.fmdeploy" value="${jakarta.home}/webapps/ROOT/functionmanagers" />
@@ -16,7 +16,7 @@
   <property name="rcms.classes" value="${rcms.webapp}/WEB-INF/classes" />
   <property name="rcms.libs" value="${rcms.webapp}/WEB-INF/lib" />
   <property name="rcms.src" value="${rcms.webapp}/WEB-INF/src" />
-  
+
   <property name="fm.classes" value="../classes" />
   <property name="fm.src" value="../src" />
   <property name="fm.jar" value="${fm.name}.jar" />
@@ -41,7 +41,7 @@
       <classpath refid="rcms.classpath"/>
     </javac>
   </target>
-  
+
   <!-- Documents the source code. -->
   <target name="javadoc">
     <echo message="Documenting source code..." />
@@ -64,11 +64,11 @@
     <mkdir dir="${jakarta.fmdeploy}" />
     <copy file="${fm.jar}" todir="${jakarta.fmdeploy}" />
   </target>
-  
+
   <!-- Compiles and deploys this StateMachine -->
   <target name="release" depends="jar,deploy">
   </target>
-  
+
   <!-- Cleans compilation and deployment results -->
   <target name="clean">
     <delete dir="${fm.classes}" />

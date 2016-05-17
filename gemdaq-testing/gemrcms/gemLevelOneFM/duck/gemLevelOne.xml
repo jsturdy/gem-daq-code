@@ -1,10 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" user="gempro" path="904/xdaqgem/levelOne/test">
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               user="gempro"
+               path="904/xdaqgem/levelOne/test">
   <FunctionManager name="GEMLevelOneFM"
-		   hostname="localhost"
-		   port="10000"
-		   qualifiedResourceType="rcms.fm.resource.qualifiedresource.FunctionManager"
-		   sourceURL="http://localhost:10000/functionmanagers/GEMLevelOneFM.jar"
-		   className="rcms.fm.gem.gemLevelOne.GEMLevelOneFM">
+                   hostname="gem904daq01"
+                   port="10000"
+                   qualifiedResourceType="rcms.fm.resource.qualifiedresource.FunctionManager"
+                   sourceURL="http://gem904daq01:10000/functionmanagers/GEMLevelOneFM.jar"
+                   className="rcms.fm.gem.gemLevelOne.GEMLevelOneFM">
+    
+    <!-- GEMSupervisor XDAQ Application -->
+    <XdaqExecutive hostname="gem904daq01" port="20000"
+                   urn="urn:xdaq-application:lid=0"
+                   qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqExecutive"
+                   instance="0"
+                   pathToExecutive="/opt/xdaq/bin/xdaq.exe"
+                   unixUser="gemuser"
+                   logLevel="DEBUG"
+                   logURL="file:/tmp/local_for_GEM_tests.log"
+                   environmentString="HOME=/data/bigdisk/users/gemuser BUILD_HOME=/data/bigdisk/users/gemuser/TriDAS LD_LIBRARY_PATH=/data/bigdisk/users/gemuser/TriDAS/x86_64_slc6/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem904 XDAQ_DOCUMENT_ROOT=/opt/xdaq/htdocs XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
+      <configFile location="file">${BUILD_HOME}/gemdaq-testing/gemsupervisor/xml/gemsupervisor_new.xml</configFile>
+    </XdaqExecutive>
+    <XdaqApplication className="gem::supervisor::GEMSupervisor" hostname="gem904daq01" port="20000"
+                     urn="urn:xdaq-application:lid=40"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+
+    <!-- FEDKit XDAQ Applications -->
+    <XdaqExecutive hostname="gem904daq04" port="33000"
+                   urn="urn:xdaq-application:lid=0"
+                   qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqExecutive"
+                   instance="0"
+                   pathToExecutive="/opt/xdaq/bin/xdaq.exe"
+                   unixUser="gemuser"
+                   logLevel="DEBUG"
+                   logURL="file:/tmp/local_for_GEM_tests.log"
+                   environmentString="HOME=/data/bigdisk/users/gemuser BUILD_HOME=/data/bigdisk/users/gemuser/TriDAS LD_LIBRARY_PATH=/data/bigdisk/users/gemuser/TriDAS/x86_64_slc6/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem904 XDAQ_DOCUMENT_ROOT=/opt/xdaq/htdocs XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
+      <configFile location="file">/data/bigdisk/users/gemuser/config/fm/Local/fedKit_local_904.xml</configFile>
+    </XdaqExecutive>
+    <XdaqApplication className="ferol::FerolController" hostname="gem904daq04" port="33000"
+                     urn="urn:xdaq-application:lid=11"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+
+    <XdaqExecutive hostname="gem904daq04" port="33001"
+                   urn="urn:xdaq-application:lid=0"
+                   qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqExecutive"
+                   instance="0"
+                   pathToExecutive="/opt/xdaq/bin/xdaq.exe"
+                   unixUser="gemuser"
+                   logLevel="DEBUG"
+                   logURL="file:/tmp/local_for_GEM_tests.log"
+                   environmentString="HOME=/data/bigdisk/users/gemuser BUILD_HOME=/data/bigdisk/users/gemuser/TriDAS LD_LIBRARY_PATH=/data/bigdisk/users/gemuser/TriDAS/x86_64_slc6/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem904 XDAQ_DOCUMENT_ROOT=/opt/xdaq/htdocs XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
+      <configFile location="file">/data/bigdisk/users/gemuser/config/fm/Local/fedKit_local_904.xml</configFile>
+    </XdaqExecutive>
+    <XdaqApplication className="pt::blit::Application" hostname="gem904daq04" port="33001"
+                     urn="urn:xdaq-application:lid=11"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+
+    <XdaqApplication className="evb::EVM" hostname="gem904daq04" port="33001"
+                     urn="urn:xdaq-application:lid=12"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+
+    <XdaqApplication className="evb::BU" hostname="gem904daq04" port="33001"
+                     urn="urn:xdaq-application:lid=13"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+
+    <!-- job control -->
+    <Service name="JobControl"
+             hostname="gem904daq01" port="9999" urn="urn:xdaq-application:lid=10"
+             qualifiedResourceType="rcms.fm.resource.qualifiedresource.JobControl" />
+
+    <Service name="JobControl"
+             hostname="gem904daq04" port="9999" urn="urn:xdaq-application:lid=10"
+             qualifiedResourceType="rcms.fm.resource.qualifiedresource.JobControl" />
   </FunctionManager>
 </Configuration>
