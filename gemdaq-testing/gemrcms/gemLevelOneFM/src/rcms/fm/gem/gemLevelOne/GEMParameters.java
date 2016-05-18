@@ -41,17 +41,20 @@ public class GEMParameters {
     public static final String SID              = "SID";
     public static final String SEQ_NAME         = "DEFAULT";
     public static final String STATE            = "STATE";
-    public static final String RUN_KEY          = "RUN_KEY";
+    public static final String RUN_NUMBER       = "RUN_NUMBER";
     public static final String RUN_TYPE         = "RUN_TYPE";
     public static final String RUN_MODE         = "RUN_MODE";
+    public static final String RUN_KEY          = "RUN_KEY";
     public static final String GLOBAL_CONF_KEY  = "GLOBAL_CONF_KEY";
-    public static final String RUN_NUMBER       = "RUN_NUMBER";
     public static final String NUMBER_OF_EVENTS = "NUMBER_OF_EVENTS";
     public static final String ACTION_MSG       = "ACTION_MSG";
     public static final String ERROR_MSG        = "ERROR_MSG";
     public static final String COMPLETION       = "COMPLETION";
     public static final String FED_ENABLE_MASK  = "FED_ENABLE_MASK";
     public static final String GEM_NS           = "CMS.GEM";
+
+    // for fixing soft errors
+    public static final String TRIGGER_NUMBER_AT_PAUSE = "TRIGGER_NUMBER_AT_PAUSE";
 
     // TTS testing set
     public static final String TTS_TEST_FED_ID          = "TTS_TEST_FED_ID";
@@ -68,9 +71,7 @@ public class GEMParameters {
     public static final String LOCAL_CONF_KEY           ="LOCAL_CONF_KEY";
 
 
-    public static final String RUN_KEY         = "RUN_KEY";
     public static final String TPG_KEY         = "TPG_KEY";
-    public static final String FED_ENABLE_MASK = "FED_ENABLE_MASK";
     
     public static final String INITIALIZED_WITH_SID             = "INITIALIZED_WITH_SID";
     public static final String INITIALIZED_WITH_GLOBAL_CONF_KEY = "INITIALIZED_WITH_GLOBAL_CONF_KEY";
@@ -81,13 +82,12 @@ public class GEMParameters {
     public static final String STARTED_WITH_RUN_NUMBER          = "STARTED_WITH_RUN_NUMBER";
     
     //GEM specific parameters
-    public static final String GEM_TCDSCONTROL = "GEM_TCDSCONTROL";
-    public static final String GEM_RUN_TYPE    = "GEM_RUN_TYPE";
-    public static final String GEM_CFGSCRIPT   = "GEM_CFGSCRIPT";
-    public static final String GEM_COMMENT     = "GEM_COMMENT";
+    public static final String GEM_TCDSCONTROL      = "GEM_TCDSCONTROL";
+    public static final String GEM_RUN_TYPE         = "GEM_RUN_TYPE";
+    public static final String GEM_CFGSCRIPT        = "GEM_CFGSCRIPT";
+    public static final String GEM_COMMENT          = "GEM_COMMENT";
     public static final String GEM_EVENTSTAKEN      = "GEM_EVENTSTAKEN";
     public static final String GEM_TIME_OF_FM_START = "GEM_TIME_OF_FM_START";
-    public static final String GEM_RUN_TYPE         = "GEM_RUN_TYPE";
     //public static final String GEM_SHIFTERS    = "GEM_SHIFTERS";
     //public static final String CLOCK_CHANGED   = "CLOCK_CHANGED";
     
@@ -139,13 +139,20 @@ public class GEMParameters {
 	/**
 	 * parameters for cross checks (RCMS task #12155)
 	 */
-	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (INITIALIZED_WITH_SID            , new StringT(""), Exported.READONLY));
-	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (INITIALIZED_WITH_GLOBAL_CONF_KEY, new StringT(""), Exported.READONLY));
-	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (CONFIGURED_WITH_RUN_KEY         , new StringT(""), Exported.READONLY));
-	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (CONFIGURED_WITH_TPG_KEY         , new StringT(""), Exported.READONLY));
-	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (CONFIGURED_WITH_FED_ENABLE_MASK , new StringT(""), Exported.READONLY));
-	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(CONFIGURED_WITH_RUN_NUMBER      , new IntegerT(0), Exported.READONLY));
-	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(STARTED_WITH_RUN_NUMBER         , new IntegerT(0), Exported.READONLY));
+	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (INITIALIZED_WITH_SID,
+                                                                         new StringT(""), Exported.READONLY));
+	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (INITIALIZED_WITH_GLOBAL_CONF_KEY,
+                                                                         new StringT(""), Exported.READONLY));
+	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (CONFIGURED_WITH_RUN_KEY,
+                                                                         new StringT(""), Exported.READONLY));
+	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (CONFIGURED_WITH_TPG_KEY,
+                                                                         new StringT(""), Exported.READONLY));
+	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (CONFIGURED_WITH_FED_ENABLE_MASK,
+                                                                         new StringT(""), Exported.READONLY));
+	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(CONFIGURED_WITH_RUN_NUMBER,
+                                                                         new IntegerT(0), Exported.READONLY));
+	LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(STARTED_WITH_RUN_NUMBER,
+                                                                         new IntegerT(0), Exported.READONLY));
 
 
     }
