@@ -38,6 +38,8 @@
        srcdir="${fm.src}"
        destdir="${fm.classes}"
        failonerror="true">
+      <compilerarg value="-Xlint:deprecation"/>
+      <compilerarg value="-Xlint:unchecked"/>
       <classpath refid="rcms.classpath"/>
     </javac>
   </target>
