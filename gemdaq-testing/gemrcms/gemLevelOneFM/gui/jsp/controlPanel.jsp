@@ -22,8 +22,8 @@
 <link rel="StyleSheet" href="../css/common.css" type="text/css" />
 <link rel="StyleSheet" href="../css/control.css" type="text/css" />
 
-<rcms.control:customResourceRenderer indentation="1" type="css" path="/css/myControlPanel.css" />
-<rcms.control:customResourceRenderer indentation="1" type="js" path="/js/myControl.js" />
+<rcms.control:customResourceRenderer indentation="1" type="css" path="/css/gemControlPanel.css" />
+<rcms.control:customResourceRenderer indentation="1" type="js" path="/js/gemControl.js" />
 <rcms.control:customResourceRenderer indentation="1" type="js" path="/js/ajaxRequest.js" />
 
 <script type="text/javascript" src="../js/stateNotification.js"></script>
@@ -63,9 +63,9 @@
 <div class="ParaTableName"></div>	
 <form name="FMPilotForm" id="FMPilotForm" method="POST" action="../../gui/servlet/FMPilotServlet?PAGE=/gui/jsp/controlPanel.jsp">
 	
-	<input type="hidden" id="globalParameterName3 "name="globalParameterName3" value="" />
+	<input type="hidden" id="globalParameterName3"  name="globalParameterName3"  value="" />
 	<input type="hidden" id="globalParameterValue3" name="globalParameterValue3" value="" />
-	<input type="hidden" id="globalParameterType3" name="globalParameterType3" value="" />
+	<input type="hidden" id="globalParameterType3"  name="globalParameterType3"  value="" />
 	
 	<rcms.control:actionHiddenInputRenderer indentation="4" /> 
 	<rcms.control:commandHiddenInputRenderer indentation="4" /> 

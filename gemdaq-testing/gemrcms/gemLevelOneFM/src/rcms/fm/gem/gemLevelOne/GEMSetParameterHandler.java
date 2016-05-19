@@ -42,8 +42,7 @@ public class GEMSetParameterHandler extends UserEventHandler {
 
         subscribeForEvents(ParameterSet.class);
 
-        // Adds callbacks action associated to a specific Function Manager
-        // State.
+        // Adds callbacks action associated to a specific Function Manager State.
         addAnyStateAction("onParameterSet");
     }
 
@@ -59,7 +58,7 @@ public class GEMSetParameterHandler extends UserEventHandler {
 	throws UserActionException {
 
         // debug
-        logger.info("paramters: " + parameters);
+        logger.info("[GEMSetParameterHandler onParameterSet] paramters: " + parameters);
         String debug="";
         for (Object obj : parameters.getParameters() ) {
             FunctionManagerParameter fp = (FunctionManagerParameter)obj;
@@ -69,11 +68,11 @@ public class GEMSetParameterHandler extends UserEventHandler {
             String s = (String)obj;
             debug += s + "\n";
         }
-        logger.info("onParameterSetSet parameter of GEM FM is called.\n" + debug);
+        logger.info("[GEMSetParameterHandler onParameterSet] parameter of GEM FM is called.\n" + debug);
 
         processGuiCommands(parameters);
 
-        logger.info("parameters: " + parameters);
+        logger.info("[GEMSetParameterHandler onParameterSet] parameters: " + parameters);
     }
 
 
@@ -83,7 +82,7 @@ public class GEMSetParameterHandler extends UserEventHandler {
         // copy gui command
         Parameter p = parameters.get(GEMParameters.GUI_COMMAND);
         if (p==null) {
-        logger.debug("no gui command found.");
+        logger.debug("[GEMSetParameterHandler processGuiCommands] no gui command found.");
         return;
         }
 

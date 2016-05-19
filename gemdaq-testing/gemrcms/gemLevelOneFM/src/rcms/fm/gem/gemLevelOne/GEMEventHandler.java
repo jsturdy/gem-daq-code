@@ -2,37 +2,114 @@ package rcms.fm.gem.gemLevelOne;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+
+import java.lang.Integer;
+import java.lang.Double;
+
+import java.math.BigInteger;
+
+import java.net.URI;
+import java.net.URL;
+import java.net.URISyntaxException;
+
+import java.text.DecimalFormat;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.TimeZone;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Vector;
+import java.util.Iterator;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.Scanner;
+
+import java.util.regex.MatchResult;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.w3c.dom.DOMException;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.soap.SOAPException;
+
+import rcms.common.db.DBConnectorException;
+
 import rcms.errorFormat.CMS.CMSError;
+
 import rcms.fm.fw.EventHandlerException;
 import rcms.fm.fw.StateEnteredEvent;
+
 import rcms.fm.fw.parameter.CommandParameter;
 import rcms.fm.fw.parameter.FunctionManagerParameter;
+import rcms.fm.fw.parameter.Parameter;
 import rcms.fm.fw.parameter.ParameterException;
 import rcms.fm.fw.parameter.ParameterSet;
+import rcms.fm.fw.parameter.type.BooleanT;
+import rcms.fm.fw.parameter.type.DateT;
 import rcms.fm.fw.parameter.type.IntegerT;
+import rcms.fm.fw.parameter.type.ParameterType;
 import rcms.fm.fw.parameter.type.StringT;
+import rcms.fm.fw.parameter.type.VectorT;
+import rcms.fm.fw.service.parameter.ParameterServiceException;
+
 import rcms.fm.fw.user.UserActionException;
 import rcms.fm.fw.user.UserStateNotificationHandler;
+
+import rcms.fm.resource.CommandException;
 import rcms.fm.resource.QualifiedGroup;
 import rcms.fm.resource.QualifiedResource;
+import rcms.fm.resource.QualifiedResourceContainer;
 import rcms.fm.resource.QualifiedResourceContainerException;
+import rcms.fm.resource.qualifiedresource.FunctionManager;
 import rcms.fm.resource.qualifiedresource.JobControl;
 import rcms.fm.resource.qualifiedresource.XdaqApplication;
 import rcms.fm.resource.qualifiedresource.XdaqApplicationContainer;
 import rcms.fm.resource.qualifiedresource.XdaqExecutive;
+
+import rcms.resourceservice.db.Group;
+import rcms.resourceservice.db.resource.Resource;
+
 import rcms.stateFormat.StateNotification;
 import rcms.statemachine.definition.Input;
 import rcms.util.logger.RCMSLogger;
 import rcms.xdaqctl.XDAQParameter;
+import rcms.xdaqctl.XDAQMessage;
 
 import rcms.util.logsession.LogSessionConnector;
 import rcms.util.logsession.LogSessionException;
@@ -43,13 +120,22 @@ import rcms.utilities.runinfo.RunInfoConnectorIF;
 import rcms.utilities.runinfo.RunInfoException;
 import rcms.utilities.runinfo.RunNumberData;
 import rcms.utilities.runinfo.RunSequenceNumber;
-import rcms.fm.fw.parameter.Parameter;
+
+//
+import net.hep.cms.xdaqctl.WSESubscription;
+import net.hep.cms.xdaqctl.XDAQException;
+import net.hep.cms.xdaqctl.XDAQMessageException;
+import net.hep.cms.xdaqctl.XDAQTimeoutException;
+import net.hep.cms.xdaqctl.XMASMessage;
+import net.hep.cms.xdaqctl.xdata.FlashList;
+import net.hep.cms.xdaqctl.xdata.SimpleItem;
+import net.hep.cms.xdaqctl.xdata.XDataType;
 
 import rcms.fm.gem.gemLevelOne.util.GEMUtil;
 /**
- * 
+ *
  * Main Event Handler class for GEM Level 1 Function Manager.
- * 
+ *
  * @author Andrea Petrucci, Alexander Oh, Michele Gulmini
  * Adapted for GEM by Jared Sturdy
  */
@@ -79,12 +165,12 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
     // Connector to log session db, used to create session identifiers
     public LogSessionConnector logSessionConnector;
-    
+
     /**
      * Handle to utility class
      */
     private GEMUtil GEMUtil;
-	
+
     public GEMEventHandler() throws rcms.fm.fw.EventHandlerException {
 	// this handler inherits UserStateNotificationHandler
 	// so it is already registered for StateNotification events
@@ -95,8 +181,6 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	addAction(GEMStates.INITIALIZING,	    "initAction"                );
 	addAction(GEMStates.CONFIGURING, 	    "configureAction"           );
 	addAction(GEMStates.HALTING,     	    "haltAction"                );
-	addAction(GEMStates.PREPARING_TTSTEST_MODE, "preparingTTSTestModeAction");
-	addAction(GEMStates.TESTING_TTS,    	    "testingTTSAction"          );
 	addAction(GEMStates.PAUSING,     	    "pauseAction"               );
 	addAction(GEMStates.RECOVERING,  	    "recoverAction"             );
 	addAction(GEMStates.RESETTING,   	    "resetAction"               );
@@ -104,11 +188,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	addAction(GEMStates.STARTING,    	    "startAction"               );
 	addAction(GEMStates.STOPPING,    	    "stopAction"                );
 
-        addAction(GEMStates.FIXINGSOFTERROR,             "fixSoftErrorAction");
-
+        addAction(GEMStates.RUNNING,                  "runningAction"                 );  // for testing with external inputs
         addAction(GEMStates.RUNNINGDEGRADED,          "runningDegradedAction"         );  // for testing with external inputs
         addAction(GEMStates.RUNNINGSOFTERRORDETECTED, "runningSoftErrorDetectedAction");  // for testing with external inputs
-        addAction(GEMStates.RUNNING,                  "runningAction"                 );  // for testing with external inputs
+        addAction(GEMStates.FIXINGSOFTERROR,          "fixSoftErrorAction"            );
+
+	addAction(GEMStates.PREPARING_TTSTEST_MODE, "preparingTTSTestModeAction");
+	addAction(GEMStates.TESTING_TTS,    	    "testingTTSAction"          );
 
         scheduler = Executors.newScheduledThreadPool(1);
     }
@@ -118,18 +204,18 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	functionManager = (GEMFunctionManager) getUserFunctionManager();
 	qualifiedGroup  = functionManager.getQualifiedGroup();
 	// Unique id for each configuration
-	
+
 	int session_id = functionManager.getQualifiedGroup().getGroup().getDirectory().getId();
 	functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.SID, new IntegerT(session_id)));
-	
+
 	// instantiate utility
 	GEMUtil = new GEMUtil(functionManager);
-	
+
 	ttsSetter = new TTSSetter();
 	ttsSetterFuture = null;
-	
+
 	// debug
-	logger.debug("GEM levelOneFM init() called: functionManager=" + functionManager );
+	logger.debug("[GEMEventHandler init] GEM levelOneFM init() called: functionManager=" + functionManager );
 	// call renderers
 	//GEMUtil.renderMainGui();
     }
@@ -154,7 +240,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    //GEMUtil.setParameter(action ,"Initializing" );
 
 	    // debug
-	    logger.debug("initAction called.");
+	    logger.debug("[GEMEventHandler initAction] initAction called.");
 
 	    // set action
 	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
@@ -175,7 +261,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		sendCMSError(errMsg);
 
 		//log error
-		logger.error(errMsg,e);
+		logger.error("[GEMEventHandler initAction] "+errMsg,e);
 
 		// go to error state
 		functionManager.fireEvent(GEMInputs.SETERROR);
@@ -184,17 +270,16 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // find xdaq applications
 	    List<QualifiedResource> xdaqList = qualifiedGroup.seekQualifiedResourcesOfType(new XdaqApplication());
 	    functionManager.containerXdaqApplication = new XdaqApplicationContainer(xdaqList);
-	    logger.debug("Application list : " + xdaqList.size() );
+	    logger.debug("[GEMEventHandler initAction] Application list : " + xdaqList.size() );
 
 	    // set paraterts from properties
 	    GEMUtil.setParameterFromProperties();
-			
+
 	    // render gui
 	    GEMUtil.renderMainGui();
-			
-	    functionManager.containerGEMSupervisor = 
-		new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass(
-                                                                                                             "gem::supervisor::Application"));
+
+	    functionManager.containerGEMSupervisor =
+		new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("gem::supervisor::GEMSupervisor"));
 
 	    // go to HALT
 	    functionManager.fireEvent( GEMInputs.SETHALTED );
@@ -205,15 +290,16 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
 
 	    // parameters for cross checks (RCMS task #12155)
-	    ParameterSet parameters = getUserFunctionManager().getLastInput().getParameterSet();
-	    IntegerT sid             = (IntegerT)parameters.get(GEMParameters.SID            ).getValue();
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.SID, sid));
+	    ParameterSet  parameters = getUserFunctionManager().getLastInput().getParameterSet();
+	    IntegerT             sid = (IntegerT)parameters.get(GEMParameters.SID).getValue();
 	    StringT  global_conf_key = (StringT)parameters.get(GEMParameters.GLOBAL_CONF_KEY).getValue();
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.INITIALIZED_WITH_SID            , sid             ));
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY, global_conf_key ));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.SID, sid));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.INITIALIZED_WITH_SID,
+                                                                                         sid));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY,
+                                                                                        global_conf_key ));
 
-
-	    logger.info("initAction Executed");
+	    logger.info("[GEMEventHandler initAction] initAction Executed");
 	}
     }
 
@@ -225,7 +311,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // triggered by State Notification from child resource
 
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    return;
@@ -238,12 +324,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // let's command the child resources
 
 	    // debug
-	    logger.debug("resetAction called.");
+	    logger.debug("[GEMEventHandler resetAction] resetAction called.");
 
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Resetting")));
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE, new StringT(
-															 functionManager.getState().getStateString())));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("Resetting")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+                                                                                        new StringT(functionManager.getState().getStateString())));
 
 	    // destroy xdaq
 	    destroyXDAQ();
@@ -258,7 +345,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    }
 	    catch (Exception e) {
 		String errorMess = e.getMessage();
-		logger.error(errorMess);
+		logger.error("[GEMEventHandler resetAction] "+errorMess);
 		throw new UserActionException(errorMess);
 	    }
 
@@ -268,8 +355,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // Clean-up of the Function Manager parameters
 	    cleanUpFMParameters();
 
-	    logger.info("resetAction Executed");
-	}	
+	    logger.info("[GEMEventHandler resetAction] resetAction Executed");
+	}
     }
 
     public void recoverAction(Object obj) throws UserActionException {
@@ -279,7 +366,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // triggered by State Notification from child resource
 
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    return;
@@ -288,7 +375,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	else if (obj instanceof StateEnteredEvent) {
 
 	    System.out.println("Executing recoverAction");
-	    logger.info("Executing recoverAction");
+	    logger.info("[GEMEventHandler recoverAction] Executing recoverAction");
 
 	    // set action
 	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("recovering")));
@@ -296,7 +383,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 											GEMParameters.STATE,new StringT(functionManager.getState().getStateString())));
 
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    // leave intermediate state
@@ -305,7 +392,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // Clean-up of the Function Manager parameters
 	    cleanUpFMParameters();
 
-	    logger.info("recoverAction Executed");
+	    logger.info("[GEMEventHandler recoverAction] recoverAction Executed");
 	}
     }
 
@@ -330,7 +417,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
 	else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing configureAction");
-	    logger.info("Executing configureAction");
+	    logger.info("[GEMEventHandler configureAction] Executing configureAction");
 
 
 	    // check that we have a gem supervisor to control
@@ -355,7 +442,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		try {
 		    parameterSet.add( new CommandParameter<StringT>(GEMParameters.RUN_TYPE, new StringT("Default")));
 		} catch (ParameterException e) {
-		    logger.error("Could not default the run type to Default",e);
+		    logger.error("[GEMEventHandler configureAction] Could not default the run type to Default",e);
 		    functionManager.fireEvent(GEMInputs.SETERROR);
 		}
 	    }
@@ -368,14 +455,14 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.RUN_TYPE,new StringT(runType)));
 
 
-	    // set run type parameter			
+	    // set run type parameter
 	    try {
 		XDAQParameter xdaqParam = ((XdaqApplication)
 					   functionManager.containerGEMSupervisor.getApplications().get(0))
 		    .getXDAQParameter();
 
 		// select RunType of gem supervisor.
-		// this parameter is used to differentiate between 
+		// this parameter is used to differentiate between
 		// 1) calibration run
 		// 2) global run
 		// since level one is only used in global runs we hardwire
@@ -384,12 +471,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		xdaqParam.select("RunType");
 		xdaqParam.setValue("RunType", runType);
 		xdaqParam.send();
-				
+
 
 	    } catch (Exception e) {
-		logger.error(getClass().toString() +
-			     "Failed to set run type Default to gem supervisor xdaq application. (Value is hardwired in the code) ", e);
-
+		logger.error("[GEMEventHandler configureAction] "+getClass().toString() +
+			     "Failed to set run type Default to gem supervisor xdaq application."+
+                             " (Value is hardwired in the code) ", e);
+                
 		functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
 
@@ -398,7 +486,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		functionManager.containerGEMSupervisor.execute(GEMInputs.CONFIGURE);
 
 	    } catch (Exception e) {
-		logger.error(getClass().toString() +
+		logger.error("[GEMEventHandler configureAction] "+getClass().toString() +
 			     "Failed to Configure gem supervisor xdaq application.", e);
 
 		functionManager.fireEvent(GEMInputs.SETERROR);
@@ -419,7 +507,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT> (GEMParameters.CONFIGURED_WITH_FED_ENABLE_MASK, fed_enable_mask));
 
 
-	    logger.info("configureAction Executed");
+	    logger.info("[GEMEventHandler configureAction] configureAction Executed");
 	}
     }
 
@@ -447,8 +535,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
 	else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing startAction");
-	    logger.info("Executing startAction");
-
+	    logger.info("[GEMEventHandler startAction] Executing startAction");
 
 	    // check that we have a gem supervisor to control
 	    if (functionManager.containerGEMSupervisor.getApplications().size() == 0) {
@@ -458,8 +545,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    }
 
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("starting")));
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE, new StringT("Running")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("starting")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+                                                                                        new StringT("Running")));
 
 	    // get the parameters of the command
 	    ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
@@ -471,131 +560,123 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    if (parameterSet.size()==0 || parameterSet.get(GEMParameters.RUN_NUMBER) == null )  {
 		// go to error, we require parameters
 		String errMsg = "startAction: no parameters given with start command";
-		
+
 		// log remark
-		logger.info(errMsg);
-	
+		logger.info("[GEMEventHandler startAction] "+errMsg);
+
 		RunInfoConnectorIF ric = functionManager.getRunInfoConnector();
-		if ( ric != null )
-		    {
-			if ( runNumberGenerator == null )
-			    {
-				logger.info("Creating RunNumberGenerator (RunSequenceNumber) ");
-				runNumberGenerator = new RunSequenceNumber(ric,functionManager.getOwner(),functionManager.getParameterSet().
-									   get(GEMParameters.SEQ_NAME).getValue().toString());
-			    }
+		if ( ric != null ) {
+                    if ( runNumberGenerator == null ) {
+                        logger.info("[GEMEventHandler startAction] Creating RunNumberGenerator (RunSequenceNumber) ");
+                        runNumberGenerator = new RunSequenceNumber(ric,functionManager.getOwner(),
+                                                                   functionManager.getParameterSet().
+                                                                   get(GEMParameters.SEQ_NAME).getValue().toString());
+                    }
 
-			if ( runNumberGenerator != null )
-			    {
-				runNumberData = runNumberGenerator.createRunSequenceNumber(new Integer(functionManager.getParameterSet().get(GEMParameters.SID).
-												       getValue().toString()));
-			    }
+                    if ( runNumberGenerator != null ) {
+                        runNumberData = runNumberGenerator.createRunSequenceNumber(new Integer(functionManager.getParameterSet().
+                                                                                               get(GEMParameters.SID).
+                                                                                               getValue().toString()));
+                    }
 
-			if ( runNumberData != null )
-			    {
-				runNumber =  runNumberData.getRunNumber();
-				System.out.println("Generated RunNumber\n"+runNumberData.toString());
-				localRunNumber = true;
-			    }
-			else
-			    {
-				logger.error("Error generating RunNumber");
-			    }
-		    }
-		else
-		    {
-			logger.error("Failed to create RunNumberGenerator");
-		    }
-	    }
-	    else
-		{
-		    // get the run number from the start command
-		    runNumber =((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
-		}
-      
-	    if ( runNumber != null )
-		{
-		    // Set the run number in the Function Manager parameters
-		    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.RUN_NUMBER,new IntegerT(runNumber)));
-		}
-	    else
-		{
-		    logger.error("Cannot find and/or generator RunNumber");
-		}
-    
+                    if ( runNumberData != null ) {
+                        runNumber =  runNumberData.getRunNumber();
+                        System.out.println("Generated RunNumber\n"+runNumberData.toString());
+                        localRunNumber = true;
+                    } else {
+                        logger.error("[GEMEventHandler startAction] Error generating RunNumber");
+                    }
+                } else {
+                    logger.error("[GEMEventHandler startAction] Failed to create RunNumberGenerator");
+                }
+	    } else {
+                // get the run number from the start command
+                runNumber =((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
+            }
+
+	    if ( runNumber != null ) {
+                // Set the run number in the Function Manager parameters
+                functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.RUN_NUMBER,
+                                                                                             new IntegerT(runNumber)));
+            } else {
+                logger.error("[GEMEventHandler startAction] Cannot find and/or generator RunNumber");
+            }
+
 	    publishRunInfo(true);
 
 
-	    /*    
+	    /*
 	    // default to -1
 	    try {
 	    parameterSet.add( new CommandParameter<IntegerT>(GEMParameters.RUN_NUMBER, new IntegerT(-1)));
 	    } catch (ParameterException e) {
-	    logger.error("Could not default the run number to -1",e);
+	    logger.error("[GEMEventHandler startAction] Could not default the run number to -1",e);
 	    functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
-		    
+
 	    // log this
-	    logger.warn("No run number given, defaulting to -1.");
+	    logger.warn("[GEMEventHandler startAction] No run number given, defaulting to -1.");
 	    */
-		    
-		
-		
+
+
+
 	    // get the run number from the start command
 	    //Integer runNumber = ((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
-		
+
 	    // Set the run number in the Function Manager parameters
 	    //functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.RUN_NUMBER,new IntegerT(-1)));
-		
+
 	    //			set run number parameter
 	    try {
 		XDAQParameter xdaqParam = ((XdaqApplication)
 					   functionManager.containerGEMSupervisor.getApplications().get(0)).getXDAQParameter();
-		    
+
 		xdaqParam.select("RunNumber");
 		ParameterSet<CommandParameter> commandParam = getUserFunctionManager().getLastInput().getParameterSet();
 		if (commandParam == null) {
-		    logger.error(getClass().toString() +"Failded to Enable XDAQ, no run # specified.");
+		    logger.error("[GEMEventHandler startAction] "+getClass().toString()+
+                                 "Failded to Enable XDAQ, no run # specified.");
 		    functionManager.fireEvent(GEMInputs.SETERROR);
 		}
-		logger.debug(getClass().toString() + "Run #: " + runNumber);
-		    
+		logger.debug("[GEMEventHandler startAction] "+getClass().toString()+
+                             "Run #: " + runNumber);
+
 		xdaqParam.setValue("RunNumber", runNumber.toString());
 		xdaqParam.send();
-		    
+
 	    } catch (Exception e) {
-		logger.error(getClass().toString() + "Failed to Enable gem supervisor XDAQ application.", e);
-		    
+		logger.error("[GEMEventHandler startAction] "+getClass().toString()+
+                             "Failed to Enable gem supervisor XDAQ application.", e);
+
 		functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
-		
+
 	    // send Enable
 	    try {
 		functionManager.containerGEMSupervisor.execute(new Input("Start"));
-			    
+
 	    } catch (Exception e) {
-		logger.error(getClass().toString() + "Failed to Enable gem supervisor XDAQ application.", e);
-			    
+		logger.error("[GEMEventHandler startAction] "+getClass().toString()+
+                             "Failed to Enable gem supervisor XDAQ application.", e);
+
 		functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
-			
-	    logger.debug("GEMLeadingActions.start ... done.");
-			
-			
-	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
-			
+
+	    logger.debug("[GEMEventHandler startAction] GEMLeadingActions.start ... done.");
+
+            // set action
+            functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+
 	    // parameters for cross checks (RCMS task #12155)
 	    ParameterSet parameters = getUserFunctionManager().getLastInput().getParameterSet();
 	    IntegerT run_number      = (IntegerT)parameters.get(GEMParameters.RUN_NUMBER).getValue();
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.STARTED_WITH_RUN_NUMBER, run_number));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.STARTED_WITH_RUN_NUMBER,
+                                                                                         run_number));
 
-
-	    logger.debug("startAction Executed");
-			
-	}
+            logger.debug("[GEMEventHandler startAction] startAction Executed");
+        }
     }
-    
+
     public void pauseAction(Object obj) throws UserActionException {
 
 	if (obj instanceof StateNotification) {
@@ -603,32 +684,31 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // triggered by State Notification from child resource
 
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    return;
-	}
-
-	else if (obj instanceof StateEnteredEvent) {	
+	} else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing pauseAction");
-	    logger.info("Executing pauseAction");
+	    logger.info("[GEMEventHandler pauseAction] Executing pauseAction");
 
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("pausing")));
-
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("pausing")));
+            
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    // leave intermediate state
 	    functionManager.fireEvent( GEMInputs.SETPAUSED );
-
+            
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
-			
-	    logger.debug("pausingAction Executed");
-			
-	}
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("")));
+
+            logger.debug("[GEMEventHandler pauseAction] pauseAction Executed");
+        }
     }
 
     public void stopAction(Object obj) throws UserActionException {
@@ -648,42 +728,43 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    functionManager.fireEvent( GEMInputs.SETCONFIGURED );
 
 	    return;
-	}
-
-	else if (obj instanceof StateEnteredEvent) {	
+	} else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing stopAction");
-	    logger.info("Executing stopAction");
-
+	    logger.info("[GEMEventHandler stopAction] Executing stopAction");
+            
 	    // check that we have a gem supervisor to control
 	    if (functionManager.containerGEMSupervisor.getApplications().size() == 0) {
 		// nothing to control, go to configured immediately
 		functionManager.fireEvent( GEMInputs.SETCONFIGURED );
 		return;
 	    }
-
+            
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("stopping")));
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE, new StringT("Halted")));
-			
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("stopping")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+                                                                                        new StringT("Halted")));
+            
 	    //Run Info
 	    publishRunInfo(false);
-
+            
 	    // send Stop
 	    try {
 		functionManager.containerGEMSupervisor.execute(new Input("Stop"));
 
 	    } catch (Exception e) {
-		logger.error(getClass().toString() + "Failed to Stop XDAQ.", e);
+		logger.error("[GEMEventHandler stopAction] "+getClass().toString()+
+                             "Failed to Stop XDAQ.", e);
 
 		functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
 
 
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
-			
-	    logger.debug("stopAction Executed");
-			
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("")));
+
+	    logger.debug("[GEMEventHandler stopAction] stopAction Executed");
 	}
     }
     public void resumeAction(Object obj) throws UserActionException {
@@ -693,21 +774,20 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // triggered by State Notification from child resource
 
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    return;
-	}
-
-	else if (obj instanceof StateEnteredEvent) {	
+	} else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing resumeAction");
-	    logger.info("Executing resumeAction");
-
+	    logger.info("[GEMEventHandler resumeAction] Executing resumeAction");
+            
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("resuming")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("resuming")));
 
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    // leave intermediate state
@@ -716,8 +796,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // Clean-up of the Function Manager parameters
 	    cleanUpFMParameters();
 
-	    logger.debug("resumeAction Executed");
-
+	    logger.debug("[GEMEventHandler resumeAction] resumeAction Executed");
 	}
     }
 
@@ -738,11 +817,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    functionManager.fireEvent( GEMInputs.SETHALTED );
 
 	    return;
-	}
-
-	else if (obj instanceof StateEnteredEvent) {
+	} else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing haltAction");
-	    logger.info("Executing haltAction");
+	    logger.info("[GEMEventHandler haltAction] Executing haltAction");
 
 	    // check that we have a gem supervisor to control
 	    if (functionManager.containerGEMSupervisor.getApplications().size() == 0) {
@@ -752,14 +829,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    }
 
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("halting")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("halting")));
 
 	    // send Halt
 	    try {
 		functionManager.containerGEMSupervisor.execute(new Input("Halt"));
-
 	    } catch (Exception e) {
-		logger.error(getClass().toString() + "Failed to Halt XDAQ.", e);
+		logger.error("[GEMEventHandler haltAction] "+getClass().toString()+
+                             "Failed to Halt XDAQ.", e);
 
 		functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
@@ -775,9 +853,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // Clean-up of the Function Manager parameters
 	    cleanUpFMParameters();
 
-	    logger.debug("haltAction Executed");
+	    logger.debug("[GEMEventHandler haltAction] haltAction Executed");
 	}
-    }	
+    }
 
     public void preparingTTSTestModeAction(Object obj) throws UserActionException {
 
@@ -786,37 +864,33 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // triggered by State Notification from child resource
 
 	    StateNotification sn = (StateNotification)obj;
-			
+
 	    if (sn.getToState().equals(GEMStates.CONFIGURED.getStateString())) {
 		// configure is send in state entered part (below)
 		// here we receive "Configured" from supervisor.
 		// send a enable now.
-		try {                                                                                           
+		try {
 		    functionManager.containerGEMSupervisor.execute(new Input("Start"));
 		} catch (QualifiedResourceContainerException e) {
-		    logger.error("Could not enable gem supervisor.",e);
+		    logger.error("[GEMEventHandler preparingTTSTestModeActionAction] Could not enable gem supervisor.",e);
 		    functionManager.fireEvent(GEMInputs.SETERROR);
 		}
-	    }
-	    else if ( sn.getToState().equals(GEMStates.RUNNING.getStateString()) ) {
+	    } else if ( sn.getToState().equals(GEMStates.RUNNING.getStateString()) ) {
 		// recveived runnning state. now we can
 		// leave intermediate state
 		functionManager.fireEvent( GEMInputs.SETTTSTEST_MODE );
-	    }
-	    else {
+	    } else {
 		// don't understand state, go to error.
-		logger.error("Unexpected state notification in state " 
-			     + functionManager.getState().toString() 
-			     + ", received state :" 
+		logger.error("[GEMEventHandler preparingTTSTestModeActionAction] Unexpected state notification in state "
+			     + functionManager.getState().toString()
+			     + ", received state :"
 			     + sn.getToState());
 		functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
 	    return;
-	}
-
-	else if (obj instanceof StateEnteredEvent) {
+	} else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing preparingTestModeAction");
-	    logger.info("Executing preparingTestModeAction");
+	    logger.info("[GEMEventHandler preparingTTSTestModeActionAction] Executing preparingTestModeAction");
 
 	    // check that we have a gem supervisor to control
 	    if (functionManager.containerGEMSupervisor.getApplications().size() == 0) {
@@ -824,22 +898,21 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		functionManager.fireEvent( GEMInputs.SETTTSTEST_MODE );
 		return;
 	    }
-
+            
 	    // set action
 	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("preparingTestMode")));
 
 	    // set run type parameter
 	    try {
-		XDAQParameter xdaqParam = ((XdaqApplication)
-					   functionManager.containerGEMSupervisor.getApplications().get(0))
-		    .getXDAQParameter();
+		XDAQParameter xdaqParam = ((XdaqApplication)functionManager.containerGEMSupervisor.getApplications().get(0))
+                    .getXDAQParameter();
 
 		xdaqParam.select("RunType");
 		xdaqParam.setValue("RunType", "sTTS_Test");
 		xdaqParam.send();
 
 	    } catch (Exception e) {
-		logger.error(getClass().toString() +
+		logger.error("[GEMEventHandler preparingTTSTestModeAction] "+getClass().toString()+
 			     "Failed to set run type: " + "sTTS_Test", e);
 
 		functionManager.fireEvent(GEMInputs.SETERROR);
@@ -847,21 +920,20 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
 	    try {
 		functionManager.containerGEMSupervisor.execute(new Input("Configure"));
-
-
 	    } catch (Exception e) {
-		logger.error(getClass().toString() +
+		logger.error("[GEMEventHandler preparingTTSTestModeActionAction] "+getClass().toString()+
 			     "Failed to TTSPrepare XDAQ.", e);
 
 		functionManager.fireEvent(GEMInputs.SETERROR);
 	    }
 
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("")));
 
-	    logger.debug("preparingTestModeAction Executed");
+	    logger.debug("[GEMEventHandler preparingTTSTestModeActionAction] preparingTestModeAction Executed");
 	}
-    }	
+    }
 
     public void testingTTSAction(Object obj) throws UserActionException {
 
@@ -870,18 +942,17 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // triggered by State Notification from child resource
 
 	    /************************************************
-	     * PUT HERE YOUR CODE							
+	     * PUT HERE YOUR CODE
 	     ***********************************************/
 
 	    return;
-	}
-
-	else if (obj instanceof StateEnteredEvent) {
+	} else if (obj instanceof StateEnteredEvent) {
 	    System.out.println("Executing testingTTSAction");
-	    logger.info("Executing testingTTSAction");
-
+	    logger.info("[GEMEventHandler testingTTSAction] Executing testingTTSAction");
+            
 	    // set action
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("testing TTS")));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                        new StringT("testing TTS")));
 
 	    // get the parameters of the command
 	    ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
@@ -889,67 +960,64 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // check parameter set
 	    if (parameterSet.size()==0 || parameterSet.get(GEMParameters.TTS_TEST_FED_ID) == null ||
 		parameterSet.get(GEMParameters.TTS_TEST_MODE) == null ||
-		((StringT)parameterSet.get(GEMParameters.TTS_TEST_MODE).getValue()).equals("") || 
+		((StringT)parameterSet.get(GEMParameters.TTS_TEST_MODE).getValue()).equals("") ||
 		parameterSet.get(GEMParameters.TTS_TEST_PATTERN) == null ||
 		((StringT)parameterSet.get(GEMParameters.TTS_TEST_PATTERN).getValue()).equals("") ||
-		parameterSet.get(GEMParameters.TTS_TEST_SEQUENCE_REPEAT) == null)
-		{
-
-		    // go to error, we require parameters
-		    String errMsg = "testingTTSAction: no parameters given with TestTTS command.";
-
-		    // log error
-		    logger.error(errMsg);
-
-		    // notify error
-		    sendCMSError(errMsg);
-
-		    //go to error state
-		    functionManager.fireEvent( GEMInputs.SETERROR );
-
-		}
-
-	    Integer fedId = ((IntegerT)parameterSet.get(GEMParameters.TTS_TEST_FED_ID).getValue()).getInteger();
-	    String mode = ((StringT)parameterSet.get(GEMParameters.TTS_TEST_MODE).getValue()).getString();
+		parameterSet.get(GEMParameters.TTS_TEST_SEQUENCE_REPEAT) == null) {
+                
+                // go to error, we require parameters
+                String errMsg = "testingTTSAction: no parameters given with TestTTS command.";
+                
+                // log error
+                logger.error("[GEMEventHandler testingTTSAction] "+errMsg);
+                
+                // notify error
+                sendCMSError(errMsg);
+                
+                //go to error state
+                functionManager.fireEvent( GEMInputs.SETERROR );
+            }
+            
+	    Integer  fedId = ((IntegerT)parameterSet.get(GEMParameters.TTS_TEST_FED_ID).getValue()).getInteger();
+	    String    mode = ((StringT)parameterSet.get(GEMParameters.TTS_TEST_MODE).getValue()).getString();
 	    String pattern = ((StringT)parameterSet.get(GEMParameters.TTS_TEST_PATTERN).getValue()).getString();
 	    Integer cycles = ((IntegerT)parameterSet.get(GEMParameters.TTS_TEST_SEQUENCE_REPEAT).getValue()).getInteger();
 
 
 	    // Set last parameters in the Function Manager parameters
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID,new IntegerT(fedId)));
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.TTS_TEST_MODE,new StringT(mode)));
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.TTS_TEST_PATTERN,new StringT(pattern)));
-	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_SEQUENCE_REPEAT,new IntegerT(cycles)));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID,
+                                                                                         new IntegerT(fedId)));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.TTS_TEST_MODE,
+                                                                                        new StringT(mode)));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.TTS_TEST_PATTERN,
+                                                                                        new StringT(pattern)));
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_SEQUENCE_REPEAT,
+                                                                                         new IntegerT(cycles)));
 
 	    // debug
-	    logger.debug("Using parameters: fedId=" + fedId + "mode=" + mode + " pattern=" + pattern + " cycles=" + cycles );
+	    logger.debug("[GEMEventHandler testingTTSAction] Using parameters: fedId=" + fedId+
+                         "mode=" + mode + " pattern=" + pattern + " cycles=" + cycles );
 
 	    // find out which application controls the fedId.
 
 	    int crate, slot, bits, repeat;
-		
+
 	    int fedID = ((IntegerT)parameterSet.get(GEMParameters.TTS_TEST_FED_ID).getValue()).getInteger();
 	    crate = getCrateNumber(fedID);
-	    slot = getSlotNumber(fedID);
-	    bits = Integer.parseInt(
-				    ((StringT)parameterSet.get(
-							       GEMParameters.TTS_TEST_PATTERN)
-				     .getValue()).getString());
+	    slot  = getSlotNumber(fedID);
+	    bits  = Integer.parseInt(((StringT)parameterSet.get(GEMParameters.TTS_TEST_PATTERN)
+                                      .getValue()).getString());
 	    if (((StringT)parameterSet.get(GEMParameters.TTS_TEST_PATTERN)
 		 .getValue()).getString().equals("PATTERN")) {
 		repeat = 0;
 	    } else {  // CYCLE
-		repeat = ((IntegerT)parameterSet.get(
-						     GEMParameters.TTS_TEST_SEQUENCE_REPEAT)
-			  .getValue()).getInteger();
+		repeat = ((IntegerT)parameterSet.get(GEMParameters.TTS_TEST_SEQUENCE_REPEAT).getValue()).getInteger();
 	    }
-
+            
 	    ttsSetter.config(crate, slot, bits, repeat);
 	    if (ttsSetterFuture == null) {
-		ttsSetterFuture = scheduler.scheduleWithFixedDelay(
-								   ttsSetter, 0, 10, MILLISECONDS);
+		ttsSetterFuture = scheduler.scheduleWithFixedDelay(ttsSetter, 0, 10, MILLISECONDS);
 	    }
-
 
 	    // leave intermediate state
 	    functionManager.fireEvent( GEMInputs.SETTTSTEST_MODE );
@@ -957,29 +1025,30 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    // set action
 	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 
-	    logger.debug("preparingTestModeAction Executed");
+	    logger.debug("[GEMEventHandler testingTTSAction] testingTTSAction Executed");
 	}
-    }	
+    }
 
     @SuppressWarnings("unchecked")
 	private void sendCMSError(String errMessage){
-
+        
 	// create a new error notification msg
 	CMSError error = functionManager.getErrorFactory().getCMSError();
 	error.setDateTime(new Date().toString());
 	error.setMessage(errMessage);
-
+        
 	// update error msg parameter for GUI
 	functionManager.getParameterSet().get(GEMParameters.ERROR_MSG).setValue(new StringT(errMessage));
-
+        
 	// send error
 	try {
 	    functionManager.getParentErrorNotifier().sendError(error);
 	} catch (Exception e) {
-	    logger.warn(functionManager.getClass().toString() + ": Failed to send error mesage " + errMessage);
+	    logger.warn("[GEMEventHandler sendCMSError] "+functionManager.getClass().toString()+
+                        ": Failed to send error mesage " + errMessage);
 	}
     }
-
+    
     private void cleanUpFMParameters() {
 	// Clean-up of the Function Manager parameters
 	functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,       new StringT("")));
@@ -1002,7 +1071,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             } else {
                 runInfo = new RunInfo(ric,runNumber);
             }
-            
+
             runInfo.setNameSpace(GEMParameters.GEM_NS);
             if ( localRunNumber ) {
                 try {
@@ -1010,78 +1079,67 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                     runInfo.publishRunInfo("RunNumber", runNumber.toString());
                     // runInfo.publish(runNumber);
                 } catch ( RunInfoException e ) {
-                    logger.error("RunInfoException: "+e.toString());
+                    logger.error("[GEMEventHandler publishRunInfo] RunInfoException: "+e.toString());
                 }
             }
         }
     }
     // Record LhcStatus info
     /*
-      try
-      {
+      try {
       lhcStatus = LhcStatus.fetchLhcStatus();
       Class c = lhcStatus.getClass();
       Field fields [] = c.getFields();
-      for ( int i=0; i<fields.length; i++)
-      {
+      for ( int i=0; i<fields.length; i++) {
       String fieldName = fields[i].getName();
       Object value = fields[i].get(lhcStatus);
       String type = fields[i].getType().getName();
 
-      if ( type.equals("java.lang.String") )
-      {
+      if ( type.equals("java.lang.String") ) {
       StringT sValue = new StringT((String)value);
       Parameter<StringT> p = new Parameter<StringT>(fieldName,sValue);
       runInfo.publishWithHistory(p);
-      }
-      else if ( type.equals("int" ) )
-      {
+      } else if ( type.equals("int" ) ) {
       IntegerT iValue = new IntegerT((Integer)value);
       Parameter<IntegerT> p = new Parameter<IntegerT>(fieldName,iValue);
       runInfo.publishWithHistory(p);
       }
       }
+      } catch ( Exception e ) {
+      logger.warn("[GEMEventHandler publishRunInfo] "+e.toString());
       }
-     
-      catch ( Exception e )
-      {
-      logger.warn(e.toString());
-      }
-      }
-      else
-
-      {
-      logger.error("Cannot find RunInfoConnectorIF");
+      } else {
+      logger.error("[GEMEventHandler publishRunInfo] Cannot find RunInfoConnectorIF");
       }
       }
     */
 
     private void destroyXDAQ() throws UserActionException {
-	functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT(functionManager.getState().getStateString())));
-	
-	// get executives and their job controls 
+	functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+                                                                                    new StringT(functionManager.getState()
+                                                                                                .getStateString())));
+
+	// get executives and their job controls
 	List<QualifiedResource> listExecutive = qualifiedGroup
 	    .seekQualifiedResourcesOfType(new XdaqExecutive());
 
-
 	for (QualifiedResource ex : listExecutive) {
 	    ((XdaqExecutive)ex).killMe();
-	    logger.debug("killMe() called on " + ex.getResource().getURL());
+	    logger.debug("[GEMEventHandler destroyxDAQ] killMe() called on " + ex.getResource().getURL());
 	}
     }
 
     private void killAllXDAQ() throws UserActionException {
-
-	// get executives and their job controls 
+	// get executives and their job controls
 	List<QualifiedResource> listJC = qualifiedGroup
 	    .seekQualifiedResourcesOfType(new JobControl());
 
 	for (QualifiedResource jc : listJC) {
 	    ((JobControl)jc).killAll();
-	    logger.debug("killAll() called on " + jc.getResource().getURL());
+	    logger.debug("[GEMEventHandler killAllxDAQ] killAll() called on " + jc.getResource().getURL());
 	}
     }
-	
+
     /* */
     private int getCrateNumber(int fed) {
 	int crate = 1;
@@ -1097,32 +1155,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
     /* */
     private int getSlotNumber(int fed) {
-	int slot = 0;
+        // all AMC13s in slot 13
+	int slot = 13;
 
 	switch (fed) {
-	case 760: slot = 2; break; // TF
-            
-	case 750: slot = 8; break; // plus 1
-	case 841: slot = 4; break;
-	case 842: slot = 5; break;
-	case 843: slot = 6; break;
-	case 844: slot = 7; break;
-	case 845: slot = 9; break;
-	case 846: slot = 10; break;
-	case 847: slot = 11; break;
-	case 848: slot = 12; break;
-	case 849: slot = 13; break;
+	case 760: slot = 13; break; // TF
 
-	case 752: slot = 8; break; // plus 2
-	case 831: slot = 4; break;
-	case 832: slot = 5; break;
-	case 833: slot = 6; break;
-	case 834: slot = 7; break;
-	case 835: slot = 9; break;
-	case 836: slot = 10; break;
-	case 837: slot = 11; break;
-	case 838: slot = 12; break;
-	case 839: slot = 13; break;
+	case 750: slot = 13; break; // plus 1
+
+	case 752: slot = 13; break; // plus 2
 	}
 
 	return slot;
@@ -1132,38 +1173,36 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	private int crate, slot, bits;
 	private int repeat = 0;
 
-	public synchronized void config(
-					int crate, int slot, int bits, int repeat) {
-	    this.crate = crate;
-	    this.slot = slot;
-	    this.bits = bits;
+	public synchronized void config(int crate, int slot, int bits, int repeat) {
+	    this.crate  = crate;
+	    this.slot   = slot;
+	    this.bits   = bits;
 	    this.repeat = repeat * 16;
-
+            
 	    if (this.repeat == 0) {
 		this.repeat = 1;
 	    }
 	}
-
+        
 	public void run() {
 	    if (repeat > 0) {
 		try {
-		    logger.debug("TTSSetter: " +
-				 crate + " " + slot + " " + bits + " " + repeat);
-
-		    svTTSParameter.setValue("TTSCrate", "" + crate);
-		    svTTSParameter.setValue("TTSSlot", "" + slot);
-		    svTTSParameter.setValue("TTSBits", "" + bits);
-		    svTTSParameter.send();
-		    functionManager.containerGEMSupervisor.execute(new Input("SetTTS"));
-
-		    bits = (bits + 1) % 16;  // prepare for the next shot.
-		    repeat--;
-
-		    if (repeat == 0) {
-			functionManager.fireEvent(GEMInputs.SETTTSTEST_MODE);
-		    }
+                    logger.debug("TTSSetter: " + crate + " " + slot + " " + bits + " " + repeat);
+                    
+                    svTTSParameter.setValue("TTSCrate", "" + crate);
+                    svTTSParameter.setValue("TTSSlot", "" + slot);
+                    svTTSParameter.setValue("TTSBits", "" + bits);
+                    svTTSParameter.send();
+                    functionManager.containerGEMSupervisor.execute(new Input("SetTTS"));
+                    
+                    bits = (bits + 1) % 16;  // prepare for the next shot.
+                    repeat--;
+                    
+                    if (repeat == 0) {
+                        functionManager.fireEvent(GEMInputs.SETTTSTEST_MODE);
+                    }
 		} catch (Exception e) {
-		    logger.error("TTSSetter", e);
+		    logger.error("[GEMEventHandler run] TTSSetter", e);
 		    functionManager.fireEvent(GEMInputs.SETERROR);
 		}
 	    }

@@ -69,6 +69,8 @@ public class GEMParameters {
     public static final String GEM_CALIB_KEYS_AVAILABLE ="GEM_CALIB_KEYS_AVAILABLE";
     public static final String GEM_CALIB_KEY            ="GEM_CALIB_KEY";
     public static final String LOCAL_CONF_KEY           ="LOCAL_CONF_KEY";
+    public static final String LOCAL_RUN_TYPE           ="LOCAL_RUN_TYPE";
+    public static final String LOCAL_RUN_MODE           ="LOCAL_RUN_MODE";
 
 
     public static final String TPG_KEY         = "TPG_KEY";

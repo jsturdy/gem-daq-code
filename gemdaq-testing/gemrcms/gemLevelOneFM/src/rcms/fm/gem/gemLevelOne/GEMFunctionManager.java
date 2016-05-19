@@ -139,13 +139,13 @@ public class GEMFunctionManager extends UserFunctionManager {
      * This method is called by the framework when the Function Manager is created.
      */
     public void createAction(ParameterSet<CommandParameter> pars) throws UserActionException {
-	String message = "[GEM] gemLevelOneFM createAction called.";
+	String message = "[GEMFunctionManager createAction] gemLevelOneFM createAction called.";
 	System.out.println(message);
 	logger.debug(      message);
 
 	GEMUtil.killOrphanedExecutives();
 
-	message = "[GEM] gemLevelOneFM createAction executed.";
+	message = "[GEMFunctionManager createAction] gemLevelOneFM createAction executed.";
 	System.out.println(message);
 	logger.debug(      message);
     }
@@ -156,12 +156,10 @@ public class GEMFunctionManager extends UserFunctionManager {
      * This method is called by the framework when the Function Manager is destroyed.
      */
     public void destroyAction() throws UserActionException {
-	String message = "[GEM] gemLevelOneFM destroyAction called.";
+	String message = "[GEMFunctionManager destroyAction] gemLevelOneFM destroyAction called.";
 
 	System.out.println(message);
 	logger.debug(      message);
-
-	logger.debug("[GEM] gemLevelOneFM destroyAction");
 
 	QualifiedGroup group = getQualifiedGroup();
 
@@ -171,11 +169,11 @@ public class GEMFunctionManager extends UserFunctionManager {
 	list = group.seekQualifiedResourcesOfType(new XdaqExecutive());
 
 	for (QualifiedResource r: list) {
-	    logger.debug("==== killing " + r.getURI());
+	    logger.debug("[GEMFunctionManager destroyAction] ==== killing " + r.getURI());
 	    try {
 		((XdaqExecutive)r).killMe();
 	    } catch (Exception e) {
-		logger.error("Could not destroy a XDAQ executive " + r.getURI(), e);
+		logger.error("[GEMFunctionManager destroyAction] Could not destroy a XDAQ executive " + r.getURI(), e);
 	    }
 	}
 
@@ -183,7 +181,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 	list = group.seekQualifiedResourcesOfType(new FunctionManager());
 
 	for (QualifiedResource r: list) {
-	    logger.debug("==== killing " + r.getURI());
+	    logger.debug("[GEMFunctionManager destroyAction] ==== killing " + r.getURI());
 	    
 	    FunctionManager fm = (FunctionManager)r;
 	    
@@ -191,12 +189,12 @@ public class GEMFunctionManager extends UserFunctionManager {
 		try {
 		    fm.destroy();
 		} catch (Exception e) {
-		    logger.error("Could not destroy a FM " + r.getURI(), e);
+		    logger.error("[GEMFunctionManager destroyAction] Could not destroy a FM " + r.getURI(), e);
 		}
 	    }
 	}
 	
-	message = "[GEM] gemLevelOneFM destroyAction executed";
+	message = "[GEMFunctionManager destroyAction] gemLevelOneFM destroyAction executed";
 	System.out.println(message);
 	logger.debug(      message);
     }
@@ -248,19 +246,19 @@ public class GEMFunctionManager extends UserFunctionManager {
         String description = getQualifiedGroup().getGroup().getDirectory().getFullPath();
         int sessionId = 0;
         
-        logger.debug("[GEM base] Log session connector: " + logSessionConnector );
+        logger.debug("[GEMFunctionManager getSessionId] Log session connector: " + logSessionConnector );
         
         if (logSessionConnector != null) {
             try {
                 sessionId = logSessionConnector.createSession( user, description );
-                logger.debug("[GEM base] New session Id obtained =" + sessionId );
+                logger.debug("[GEMFunctionManager getSessionId] New session Id obtained =" + sessionId );
+            } catch (LogSessionException e1) {
+                logger.warn("[GEMFunctionManager getSessionId] Could not get session ID, using default = " +
+                            sessionId + ". Exception: ",e1);
             }
-            catch (LogSessionException e1) {
-                logger.warn("[GEM base] Could not get session ID, using default = " + sessionId + ". Exception: ",e1);
-            }
-        }
-        else {
-            logger.warn("[GEM base] logSessionConnector = " + logSessionConnector + ", using default = " + sessionId + ".");
+        } else {
+            logger.warn("[GEMFunctionManager getSessionId] logSessionConnector = " + logSessionConnector +
+                        ", using default = " + sessionId + ".");
         }
 
         // put the session ID into parameter set

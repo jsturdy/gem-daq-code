@@ -190,16 +190,22 @@ public class GEMUtil {
     public void killOrphanedExecutives() {
 	String pathToOrphanHandler = myGetRscConfElement( "pathToOrphanHandler" );
 	if ( pathToOrphanHandler == null ){
-	    logger.warn("No orphan handler script found in the configuration of this Function Manager.");
+            String message = "[GEMUtil killOrphanedExecutives] No orphan handler script found in"+
+                " the configuration of this Function Manager.";
+	    logger.warn(message);
 	    return;
 	}
 	if ( pathToOrphanHandler == "" ){
-	    logger.warn("No orphan handler script found in the configuration of this Function Manager.");
+            String message = "[GEMUtil killOrphanedExecutives] No orphan handler script found in"+
+                " the configuration of this Function Manager.";
+	    logger.warn(message);
 	    return;
 	}
 
-	System.out.println("Orphan handler script '"+pathToOrphanHandler+"' will be used.");
-	logger.debug("Orphan handler script '"+pathToOrphanHandler+"' will be used.");
+        String message = "[GEMUtil killOrphanedExecutives] Orphan handler script '"
+            +pathToOrphanHandler+"' will be used.";
+	System.out.println(message);
+	logger.debug(      message);
 	    
 	List<QualifiedResource> jobcontrols = functionManager.getQualifiedGroup().seekQualifiedResourcesOfType(new JobControl());
 	for (QualifiedResource jc: jobcontrols) {
@@ -218,11 +224,14 @@ public class GEMUtil {
 			    String environment = "USER=" + user;
 			    String jid = pathToOrphanHandler + "_" + Integer.toString( exe.getURL().getPort() );
 			    ((JobControl)jc).start(pathToOrphanHandler,args,environment,user,jid);
-			    logger.debug("Issued to JobControl " + jc.getURL() + " the command: " + environment + " " + pathToOrphanHandler + " " + args + ", jid=" + jid );
+                            message = "[GEMUtil killOrphanedExecutives] Issued to JobControl " +
+                                jc.getURL() + " the command: " + environment + " " + pathToOrphanHandler +
+                                " " + args + ", jid=" + jid;
+			    logger.debug(message);
 			    orphanHandlingJIDs.add( jid );
-			}
-			else{
-			    logger.error( "XdaqExecutiveConfiguration is null for " + exe.toString() ); 
+			} else {
+                            message = "[GEMUtil killOrphanedExecutives] XdaqExecutiveConfiguration is null for " + exe.toString() 
+			    logger.error(message); 
 			}
 		    }
 		}
@@ -230,11 +239,15 @@ public class GEMUtil {
 		wait( 1000 );
 		// Clean up orphan-handling job entries
 		for ( String jid : orphanHandlingJIDs ){
-		    logger.debug("Killing orphan handling job " + jid + " of JobControl " + jc.getURL() );
+                    message = "[GEMUtil killOrphanedExecutives] Killing orphan handling job " +
+                        jid + " of JobControl " + jc.getURL();
+		    logger.debug(message);
 		    ((JobControl)jc).killJid( jid );
 		}
 	    } catch (Exception e) {
-		logger.error( "Failed to execute orphan handler on JobControl " + jc.getURL(), e);
+		message = "[GEMUtil killOrphanedExecutives] Failed to execute orphan handler on JobControl " +
+                    jc.getURL();
+		logger.error(message, e);
 	    }
 	}
     }
@@ -251,7 +264,8 @@ public class GEMUtil {
 	  hwcfgKey="hwcfg_cessy_default";
 	  }
 	  // debug
-	  logger.info("prepareHwcfgKey() hwcfgKey = " + hwcfgKey);
+          String message = "[GEMUtil prepareHwcfgKey] prepareHwcfgKey() hwcfgKey = " + hwcfgKey);
+	  logger.info(message;
 	  // put it into the corresponding parameter
 	  functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.HWCFG_KEY,new StringT(hwcfgKey)) );
 
@@ -263,7 +277,9 @@ public class GEMUtil {
 	  // and find ttc partitions. not used for role name and alike.
 		
 	  // debug
-	  logger.info("prepareHwcfgKey() from DAQ hwcfgKey = " + functionManager.getParameterSet().get(GEMParameters.HWCFG_KEY).getValue().toString());
+          message = "[GEMUtil prepareHwcfgKey] prepareHwcfgKey() from DAQ hwcfgKey = " +
+          functionManager.getParameterSet().get(GEMParameters.HWCFG_KEY).getValue().toString();
+	  logger.info(message);
 
 	  // get hwcfg element
 	  String hwcfgGEMName = myGetRscConfElement( "hwcfgGEMName" );
@@ -274,7 +290,8 @@ public class GEMUtil {
 	  }
 
 	  // debug
-	  logger.info("prepareHwcfgKey() hwcfgGEMName = " + hwcfgGEMName );
+          message = "[GEMUtil prepareHwcfgKey] prepareHwcfgKey() hwcfgGEMName = " + hwcfgGEMName ;
+	  logger.info(message);
 
 	  // put it into the corresponding parameter
 	  functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.HWCFG_GEM_NAME, new StringT(hwcfgGEMName)) );
@@ -298,11 +315,14 @@ public class GEMUtil {
     public void setParameterFromProperties() {
 		
 	List<ConfigProperty> lp = functionManager.getGroup().getThisResource().getProperties();
-	logger.info("start properties");
+        String message = "[GEMUtil setParameterFromProperties] start properties";
+	logger.info(message);
 	for (ConfigProperty p : lp) {
-	    logger.info("geting properties" + p.getName());
+            message = "[GEMUtil setParameterFromProperties] geting properties" + p.getName();
+	    logger.info(message);
 	    if (p.getName().equals("Calibration_Keys")) {
-		logger.info("ends properties");
+                message = "[GEMUtil setParameterFromProperties] ends properties";
+		logger.info(message);
 		functionManager.getParameterSet().get(GEMParameters.GEM_CALIB_KEYS_AVAILABLE)
 		    .setValue(new StringT( p.getValue() ));
 	    }
