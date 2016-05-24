@@ -21,8 +21,8 @@ class VFAT_histogram: public Hardware_histogram
       FiredChannels   = new TH1F("FiredChannels", "FiredChannels", 128,  0, 128);
       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
-      latencyScan = new TH1F("latencyScan", "Latency Scan", 255,  0, 255);
-      thresholdScanChip = new TH1F("thresholdScan","Threshold Scan",256,0,256);
+      latencyScan = new TH1F("latencyScan", "Latency Scan", 50,  0, 50);
+      thresholdScanChip = new TH1F("thresholdScan","Threshold Scan",100,-20,80);
       TDirectory * scandir = gDirectory->mkdir("Threshold_Scans");
       scandir->cd();
       for (int i = 0; i < 128; i++){

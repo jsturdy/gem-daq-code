@@ -1,7 +1,7 @@
 #define DEBUG 1
 #define NVFAT 24
 #define NETA 8
-#include <iomanip> 
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -71,12 +71,12 @@ public:
     ofilename = ifilename.substr(0,ifilename.size()-9);
     ofilename += ".analyzed.root";
     ofile = new TFile(ofilename.c_str(), "RECREATE");
-    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: File for histograms created" << std::endl;   
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: File for histograms created" << std::endl;
 
-    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fetching hardware" << std::endl;   
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fetching hardware" << std::endl;
     this->fetchHardware();
 
-    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;
     this->bookAllHistograms();
     this->fillAllHistograms();
   }
@@ -158,7 +158,7 @@ private:
       v_amc = a13->amcs();
 
       char diramc13[30];        //filename for AMC13 directory
-      diramc13[0]='\0';         
+      diramc13[0]='\0';
       char serial_ch[20];       //char used to put serial number into directory name
       serial_ch[0] = '\0';
       int serial = v_amc13[a13_c].nAMC();  //obtains the serial number from the AMC13 Event
@@ -175,7 +175,7 @@ private:
       /* LOOP THROUGH AMCs */
       for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
         v_geb = a->gebs();
-        char diramc[30];        //filename for AMC directory  
+        char diramc[30];        //filename for AMC directory
         diramc[0]='\0';
         char aslot_ch[2];       //char used to put AMC slot number inot directory name
         aslot_ch[0] = '\0';
@@ -187,14 +187,14 @@ private:
         m_amcH = new AMC_histogram(ofilename, gDirectory->mkdir(diramc), aslot_ch);
         m_amcH->bookHistograms();
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC13 AMCs size " << m_amc13H->amcsH().size() << std::endl;
-        m_RunType = v_amc[a_c].Rtype();  //obtain the run type 
+        m_RunType = v_amc[a_c].Rtype();  //obtain the run type
         g_c=0;
 
 	      /* LOOP THROUGH GEBs */
         for(auto g=v_geb.begin(); g!=v_geb.end();g++){
           v_vfat=g->vfats();
           char dirgeb[30];    //filename for GEB directory
-          dirgeb[0]='\0';    
+          dirgeb[0]='\0';
           char g_ch[2];       //char used to put GEB number into directory name
           g_ch[0]='\0';
           int g_inputID = g->InputID();
@@ -218,12 +218,13 @@ private:
 	        /* LOOP THROUGH VFATs */
           for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
             char dirvfat[30];   //filename for VFAT directory
-            dirvfat[0]='\0';    
-            char vslot_ch[2];   //char used to put VFAT number into directory name
+            dirvfat[0]='\0';
+            char vslot_ch[5];   //char used to put VFAT number into directory name
             vslot_ch[0] = '\0';
-            std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));     
+            std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));
             int vslot = slotInfo_->GEBslotIndex(v->ChipID());  //converts Chip ID into VFAT slot number
-            sprintf(vslot_ch, "%d", vslot);
+            //sprintf(vslot_ch, "%d", vslot);
+            sprintf(vslot_ch, "0x%03x", v->ChipID());
             strcat(dirvfat,"VFAT-");
             strcat(dirvfat, vslot_ch);
             int vID = v->ChipID();
