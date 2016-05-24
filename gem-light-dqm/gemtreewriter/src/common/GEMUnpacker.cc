@@ -176,6 +176,8 @@ int main (int argc, char** argv)
   std::string isFedKit = argv[2];
 
   GEMUnpacker * m_unpacker = new GEMUnpacker(ifile, isFedKit);
+  std::cout << "Created GEMUnpacker with " << ifile << ", unpacking" << std::endl;
   m_unpacker->unpack();
+  std::cout << "Finished unpacking" << std::endl;
   delete m_unpacker;
 }
