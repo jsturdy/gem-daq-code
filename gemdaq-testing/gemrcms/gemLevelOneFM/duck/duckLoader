@@ -4,8 +4,10 @@ duck_jar=$RCMS_HOME/framework/resourceservice/db/tools/parser/script/duck.jar
 
 host=localhost
 port=3306
-name=rs3
-user=rcms
+#name=rs3
+name=gem904_rs
+#user=rcms
+user=gemtop
 type=MYSQL
 
 if [[ $1 = --* ]]
