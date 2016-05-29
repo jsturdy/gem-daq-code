@@ -134,5 +134,9 @@ td {cursor: pointer;}
 }
 .span3 {  
       height: 550px !important;
-      overflow: scroll;
+      overflow: auto;
+}
+.span2 {  
+      height: 350px !important;
+      overflow: auto;
 }

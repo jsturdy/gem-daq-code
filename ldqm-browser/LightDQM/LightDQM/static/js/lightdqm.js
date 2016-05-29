@@ -57,3 +57,9 @@ $("#table tr").click(function(){
 //        window.document.location = ref;
 //                        }); 
 //});
+
+/* Responsive width when using the bootstrap affix plugin (width became absolute) with a fluid grid */
+$(function(){
+var sideBarNavWidth=$('#leftcolumn').width() - parseInt($('#sidebarnav').css('paddingLeft')) - parseInt($('#sidebarnav').css('paddingRight'));
+$('#sidebarnav').css('width', sideBarNavWidth);
+});
