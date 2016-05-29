@@ -21,8 +21,8 @@ class VFAT_histogram: public Hardware_histogram
       FiredChannels   = new TH1F("FiredChannels", "FiredChannels", 128,  0, 128);
       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
-      latencyScan = new TH1F("latencyScan", "Latency Scan", 50,  100, 200);
-      thresholdScanChip = new TH1F("thresholdScan","Threshold Scan",100,-20,80);
+      latencyScan = new TH1F("latencyScan", "Latency Scan", 255,  0, 255);
+      thresholdScanChip = new TH1F("thresholdScan","Threshold Scan",256,0,256);
       TDirectory * scandir = gDirectory->mkdir("Threshold_Scans");
       scandir->cd();
       for (int i = 0; i < 128; i++){
@@ -66,11 +66,11 @@ class VFAT_histogram: public Hardware_histogram
             channelFired = true;
           }
         }
-      }// end loop on channels
-      if (channelFired) {
-	latencyScan->Fill(latency);
-	thresholdScanChip->Fill(deltaV);
+        if (channelFired) {
+          latencyScan->Fill(latency);
+          thresholdScanChip->Fill(deltaV);
         }
+      }// end loop on channels
     }
   private:
     TH1F* b1010;
