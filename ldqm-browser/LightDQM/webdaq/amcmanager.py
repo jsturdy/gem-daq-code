@@ -19,9 +19,9 @@ class AMCmanager:
       raise ValueError('AMC %s is missing!' %(sn))
 
   def reset(self):
-    writeRegister(self.glib,"GLIB.DAQ.CONTROL", 0x8)
     writeRegister(self.glib,"GLIB.DAQ.CONTROL.DAQ_LINK_RESET",0x1)
     writeRegister(self.glib,"GLIB.DAQ.CONTROL.DAQ_LINK_RESET",0x0)
+    writeRegister(self.glib,"GLIB.DAQ.CONTROL", 0x8)
 
   def activateGTX(self):
     c = 0
@@ -61,9 +61,9 @@ class AMCmanager:
     self.status += '<tr><th>CORRUPTED VFAT BLOCKS COUNTER</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.COUNTERS.CORRUPT_VFAT_BLK_CNT"),readRegister(self.glib,"GLIB.DAQ.GTX1.COUNTERS.CORRUPT_VFAT_BLK_CNT"))
     self.status += '<tr><th>EVENT COUNTER</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.COUNTERS.EVN"),readRegister(self.glib,"GLIB.DAQ.GTX1.COUNTERS.EVN"))
     self.status += '<tr><th>STATUS</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.STATUS"),readRegister(self.glib,"GLIB.DAQ.GTX1.STATUS"))
-    self.status += '<tr><th>MAX DAV TIMER</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.DAV_STATS.MAX_DAV_TIMER"),readRegister(self.glib,"GLIB.DAQ.GTX1.DAV_STATS.MAX_DAV_TIMER"))
-    self.status += '<tr><th>LAST DAV TIMER</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.DAV_STATS.MAX_DAV_TIMER"),readRegister(self.glib,"GLIB.DAQ.GTX1.DAV_STATS.MAX_DAV_TIMER"))
-    self.status += '<tr><th>DAV TIMEOUT</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.DAV_TIMEOUT"),readRegister(self.glib,"GLIB.DAQ.GTX1.DAV_TIMEOUT"))
+    self.status += '<tr><th>MAX DAV TIMER</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.COUNTERS.MAX_DAV_TIMER"),readRegister(self.glib,"GLIB.DAQ.GTX1.COUNTERS.MAX_DAV_TIMER"))
+    self.status += '<tr><th>LAST DAV TIMER</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.COUNTERS.MAX_DAV_TIMER"),readRegister(self.glib,"GLIB.DAQ.GTX1.COUNTERS.MAX_DAV_TIMER"))
+#    self.status += '<tr><th>DAV TIMEOUT</th><td>0x%08X</td><td>0x%08X</td></tr>' % (readRegister(self.glib,"GLIB.DAQ.GTX0.DAV_TIMEOUT"),readRegister(self.glib,"GLIB.DAQ.GTX1.DAV_TIMEOUT"))
     self. status += '</table>'
     #DEBUG TABLE
     if verbosity>1:
