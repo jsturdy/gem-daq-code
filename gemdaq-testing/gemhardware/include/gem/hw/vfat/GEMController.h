@@ -1,5 +1,5 @@
-#ifndef gem_hw_vfat_GEMController_h
-#define gem_hw_vfat_GEMController_h
+#ifndef GEM_HW_VFAT_GEMCONTROLLER_H
+#define GEM_HW_VFAT_GEMCONTROLLER_H
 
 #include <string>
 
@@ -218,7 +218,7 @@ namespace gem {
 
           std::map<std::string,uint32_t>    vfatFullRegs_;
           std::map<std::string,uint8_t>     vfatRegs_;
-          gem::hw::vfat::VFAT2ControlParams vfatParams_;
+          gem::hw::vfat::VFAT2ControlParams m_vfatParams;
 
         private:
           std::vector<std::string>          nodes_;
@@ -238,19 +238,19 @@ namespace gem {
           xdata::String device_;
           xdata::String settingsFile_;
 
-          std::vector<std::string> crateIds; 
+          std::vector<std::string> crateIds;
           std::vector<xercesc::DOMNode *> crateNodes;
-          std::vector<std::string> MCHIds; 
-          std::vector<std::string> AMCIds; 
-          std::vector<std::string> GLIBIds; 
-          std::vector<std::string> OHIds; 
-          std::vector<std::string> VFAT2Ids; 
+          std::vector<std::string> MCHIds;
+          std::vector<std::string> AMCIds;
+          std::vector<std::string> GLIBIds;
+          std::vector<std::string> OHIds;
+          std::vector<std::string> VFAT2Ids;
           int currentCrate;
           std::string currentCrateId;
           std::string fileWarning;
           std::string fileError;
-	  
-          log4cplus::Logger gemLogger_;
+
+          log4cplus::Logger m_gemLogger;
 
           class GEMControllerPanelWeb {
           public:
@@ -274,14 +274,10 @@ namespace gem {
             static void setParametersByXML();
 
 
-          };//end class GEMControllerPanelWeb
-        }; //end class GEMController
+          };  // class GEMControllerPanelWeb
+        };  // class GEMController
+    }  // namespace gem::hw::vfat
+  }  // namespace gem::hw
+}  // namespace gem
 
-    }//end namespace gem::hw::vfat
-
-  }//end namespace gem::hw
-
-}//end namespace gem
-
-#endif
-
+#endif  // GEM_HW_VFAT_GEMCONTROLLER_H

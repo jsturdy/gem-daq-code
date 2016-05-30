@@ -3,7 +3,7 @@
 	      xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
 	      xmlns:xc="http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30">
 
-  <xc:Context url="http://gem904daq01:5022">
+  <xc:Context url="http://cms-elli:2017">
     <xc:Application class="gem::hwMonitor::gemHwMonitorWeb" id="254" instance="0" network="local">
     </xc:Application>
     
@@ -18,9 +18,9 @@
     </xc:Application>
     -->
 
-    <xc:Module>${BUILD_HOME}/gemdaq-testing/gemHwMonitor/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgem_hwMonitor.so</xc:Module>
-    <xc:Module>${BUILD_HOME}/gemdaq-testing/gembase/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgem_base.so</xc:Module>
-    <xc:Module>${BUILD_HOME}/gemdaq-testing/gemhardware/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgem_hw.so</xc:Module>
+    <xc:Module>${BUILD_HOME}/gemdaq-testing/gemHwMonitor/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgemhardwareMonitor.so</xc:Module>
+    <xc:Module>${BUILD_HOME}/gemdaq-testing/gembase/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgembase.so</xc:Module>
+    <xc:Module>${BUILD_HOME}/gemdaq-testing/gemhardware/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgemhardware.so</xc:Module>
     
   </xc:Context>
 

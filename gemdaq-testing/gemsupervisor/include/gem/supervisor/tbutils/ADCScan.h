@@ -1,5 +1,5 @@
-#ifndef gem_supervisor_tbutils_ADCScan_h
-#define gem_supervisor_tbutils_ADCScan_h
+#ifndef GEM_SUPERVISOR_TBUTILS_ADCSCAN_H
+#define GEM_SUPERVISOR_TBUTILS_ADCSCAN_H
 
 #include <map>
 #include <string>
@@ -55,6 +55,8 @@ namespace gem {
       class HwVFAT2;
     }
   }
+
+  typedef std::shared_ptr<hw::vfat::HwVFAT2 > vfat_shared_ptr;
   
   namespace supervisor {
     namespace tbutils {
@@ -193,7 +195,7 @@ namespace gem {
           uint32_t curDACValue;
           uint64_t stepSize_, samplesTaken_;
           bool is_working_, is_initialized_, is_configured_, is_running_;
-          gem::hw::vfat::HwVFAT2* vfatDevice_;
+	  vfat_shared_ptr vfatDevice_;
 	  
           //dac register mapping
           //dacMap[regName] = <ADC to read, DAC Mode>
@@ -206,7 +208,8 @@ namespace gem {
 	  
         };
 
-    } //end namespace gem::supervisor::tbutils
-  } //end namespace gem::supervisor
-} //end namespace gem
-#endif
+    }  // namespace gem::supervisor::tbutils
+  }  // namespace gem::supervisor
+}  // namespace gem
+
+#endif  // GEM_SUPERVISOR_TBUTILS_ADCSCAN_H

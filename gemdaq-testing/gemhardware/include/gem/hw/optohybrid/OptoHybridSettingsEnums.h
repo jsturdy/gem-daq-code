@@ -1,5 +1,5 @@
-#ifndef gem_hw_optohybrid_OptoHybridSettingsEnums_h
-#define gem_hw_optohybrid_OptoHybridSettingsEnums_h
+#ifndef GEM_HW_OPTOHYBRID_OPTOHYBRIDSETTINGSENUMS_H
+#define GEM_HW_OPTOHYBRID_OPTOHYBRIDSETTINGSENUMS_H
 
 namespace gem {
   namespace hw {
@@ -64,25 +64,43 @@ namespace gem {
         struct TriggerMode { //Trigger mode settings
           enum ETriggerMode { //Trigger mode settings
             GLIB     = 0x0, //Take the triggers coming from the GLIB
-            EXTERNAL = 0x1, //Use the triggers coming from the LEMO connector
-            BOTH     = 0x2, //Use all sources of triggers
+            FIRMWARE = 0x1, //Take the triggers coming from the firmware module
+            EXTERNAL = 0x2, //Use the triggers coming from the LEMO connector
+            LOOPBACK = 0x3, //Use looped back s-bits
+            ALL      = 0x4, //Use all sources of triggers
           } TriggerMode;
         };
-	
-      }; //end class OptoHybridSettings
-      
-    }//end namespace gem::hw::optohybrid
-    
-  }//end namespace gem::hw
-  
-}//end namespace gem
 
-//typedef the struct for access to the members via struct::VALUE
-typedef gem::hw::optohybrid::OptoHybridLinkSettings::LinkBitMasks   OptoHybridLinkBitMasks;
-typedef gem::hw::optohybrid::OptoHybridLinkSettings::LinkBitShifts  OptoHybridLinkBitShifts;
+        struct L1ACountMode { //L1A mode count settings
+          enum EL1ACountMode { //L1A mode count settings
+            EXTERNAL = 0x0, //Count the triggers coming from the LEMO connector
+            INTERNAL = 0x1, //Count the triggers coming from the GLIB
+            DELAYED  = 0x2, //Count the delayed triggers
+            TOTAL    = 0x3, //Count triggers from all sources
+          } L1ACountMode;
+        };
 
-//typedef the enum for casting and access
-typedef gem::hw::optohybrid::OptoHybridSettings::RunMode::ERunMode                 OptoHybridRunMode;
-typedef gem::hw::optohybrid::OptoHybridSettings::TriggerMode::ETriggerMode         OptoHybridTrigMode;
+        struct CalPulseCountMode { //CalPulse mode settings
+          enum ECalPulseCountMode { //CalPulse mode settings
+            EXTERNAL = 0x0, //Take the triggers coming from the GLIB
+            INTERNAL = 0x1, //Use the triggers coming from the LEMO connector
+            DELAYED  = 0x2, //Use all sources of triggers
+            TOTAL    = 0x3, //Use all sources of triggers
+          } CalPulseCountMode;
+        };
 
-#endif
+      };  // class OptoHybridSettings
+    }  // namespace gem::hw::optohybrid
+  }  // namespace gem::hw
+
+  //typedef the struct for access to the members via struct::VALUE
+  typedef gem::hw::optohybrid::OptoHybridLinkSettings::LinkBitMasks   OptoHybridLinkBitMasks;
+  typedef gem::hw::optohybrid::OptoHybridLinkSettings::LinkBitShifts  OptoHybridLinkBitShifts;
+
+  //typedef the enum for casting and access
+  typedef gem::hw::optohybrid::OptoHybridSettings::RunMode::ERunMode         OptoHybridRunMode;
+  typedef gem::hw::optohybrid::OptoHybridSettings::TriggerMode::ETriggerMode OptoHybridTrigMode;
+
+}  // namespace gem
+
+#endif  // GEM_HW_OPTOHYBRID_OPTOHYBRIDSETTINGSENUMS_H
