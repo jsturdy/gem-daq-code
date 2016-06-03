@@ -3,7 +3,7 @@
  * description: Monitor application for GLIB cards
  *              structure borrowed from TCDS core, with nods to HCAL and EMU code
  * author: J. Sturdy
- * date: 
+ * date:
  */
 
 #include "gem/hw/glib/HwGLIB.h"
@@ -82,7 +82,7 @@ void gem::hw::glib::GLIBMonitor::setupHwMonitoring()
   addMonitorable("SYSTEM", "HWMonitoring",
                  std::make_pair("CPLD_LOCK", "GLIB.SYSTEM.STATUS.CDCE_LOCK"),
                  GEMUpdateType::HW32, "hex");
-  
+
 
   addMonitorableSet("IPBus", "HWMonitoring");
   addMonitorable("IPBus", "HWMonitoring",
@@ -143,21 +143,94 @@ void gem::hw::glib::GLIBMonitor::setupHwMonitoring()
                  std::make_pair("STATUS", "GLIB.DAQ.STATUS"),
                  GEMUpdateType::HW32, "hex");
   addMonitorable("DAQ", "HWMonitoring",
-                 std::make_pair("FLAGS", "GLIB.DAQ.FLAGS"),
+                 std::make_pair("NOTINTABLE_ERR", "GLIB.DAQ.EXT_STATUS.NOTINTABLE_ERR"),
                  GEMUpdateType::HW32, "hex");
   addMonitorable("DAQ", "HWMonitoring",
-                 std::make_pair("CORRUPT_CNT", "GLIB.DAQ.CORRUPT_CNT"),
+                 std::make_pair("DISPER_ERR", "GLIB.DAQ.EXT_STATUS.DISPER_ERR"),
                  GEMUpdateType::HW32, "hex");
   addMonitorable("DAQ", "HWMonitoring",
-                 std::make_pair("EVT_BUILT", "GLIB.DAQ.EVT_BUILT"),
+                 std::make_pair("EVT_SENT", "GLIB.DAQ.EXT_STATUS.EVT_SENT"),
                  GEMUpdateType::HW32, "hex");
   addMonitorable("DAQ", "HWMonitoring",
-                 std::make_pair("EVT_SENT", "GLIB.DAQ.EVT_SENT"),
+                 std::make_pair("L1AID", "GLIB.DAQ.EXT_STATUS.L1AID"),
                  GEMUpdateType::HW32, "hex");
   addMonitorable("DAQ", "HWMonitoring",
-                 std::make_pair("L1AID", "GLIB.DAQ.L1AID"),
+                 std::make_pair("MAX_DAV_TIMER", "GLIB.DAQ.EXT_STATUS.MAX_DAV_TIMER"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("LAST_DAV_TIMER", "GLIB.DAQ.EXT_STATUS.LAST_DAV_TIMER"),
                  GEMUpdateType::HW32, "hex");
 
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("INPUT_TIMEOUT", "GLIB.DAQ.EXT_CONTROL.INPUT_TIMEOUT"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("RUN_TYPE", "GLIB.DAQ.EXT_CONTROL.RUN_TYPE"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("RUN_PARAMS", "GLIB.DAQ.EXT_CONTROL.RUN_PARAMS"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("SBIT_RATE", "GLIB.DAQ.SBIT_RATE"),
+                 GEMUpdateType::HW32, "hex");
+
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_STATUS", "GLIB.DAQ.GTX0.STATUS"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_CORRUPT_VFAT_BLK_CNT", "GLIB.DAQ.GTX0.COUNTERS.CORRUPT_VFAT_BLK_CNT"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_EVN", "GLIB.DAQ.GTX0.COUNTERS.EVN"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_DAV_TIMEOUT", "GLIB.DAQ.GTX0.CONTROL.DAV_TIMEOUT"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_MAX_DAV_TIMER", "GLIB.DAQ.GTX0.COUNTERS.MAX_DAV_TIMER"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_LAST_DAV_TIMER", "GLIB.DAQ.GTX0.COUNTERS.LAST_DAV_TIMER"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_CLUSTER_01", "GLIB.DAQ.GTX0_CLUSTER_01"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX0_CLUSTER_23", "GLIB.DAQ.GTX0_CLUSTER_23"),
+                 GEMUpdateType::HW32, "hex");
+
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_STATUS", "GLIB.DAQ.GTX1.STATUS"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_CORRUPT_VFAT_BLK_CNT", "GLIB.DAQ.GTX1.COUNTERS.CORRUPT_VFAT_BLK_CNT"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_EVN", "GLIB.DAQ.GTX1.COUNTERS.EVN"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_DAV_TIMEOUT", "GLIB.DAQ.GTX1.CONTROL.DAV_TIMEOUT"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_MAX_DAV_TIMER", "GLIB.DAQ.GTX1.COUNTERS.MAX_DAV_TIMER"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_LAST_DAV_TIMER", "GLIB.DAQ.GTX1.COUNTERS.LAST_DAV_TIMER"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_CLUSTER_01", "GLIB.DAQ.GTX1_CLUSTER_01"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("DAQ", "HWMonitoring",
+                 std::make_pair("GTX1_CLUSTER_23", "GLIB.DAQ.GTX1_CLUSTER_23"),
+                 GEMUpdateType::HW32, "hex");
+
+  addMonitorableSet("TTC", "HWMonitoring");
+  addMonitorable("TTC", "HWMonitoring",
+                 std::make_pair("TTC_CONTROL", "GLIB.TTC.CONTROL"),
+                 GEMUpdateType::HW32, "hex");
+  addMonitorable("TTC", "HWMonitoring",
+                 std::make_pair("TTC_SPY", "GLIB.TTC.SPY"),
+                 GEMUpdateType::HW32, "hex");
   updateMonitorables();
 }
 
@@ -170,6 +243,7 @@ void gem::hw::glib::GLIBMonitor::updateMonitorables()
 {
   // define how to update the desired values
   // get SYSTEM monitorables
+  // can this be split into two loops, one just to do a list read, the second to fill the InfoSpace with the returned values
   DEBUG("GLIBMonitor: Updating monitorables");
   for (auto monlist = m_monitorableSetsMap.begin(); monlist != m_monitorableSetsMap.end(); ++monlist) {
     DEBUG("GLIBMonitor: Updating monitorables in set " << monlist->first);
@@ -228,9 +302,9 @@ void gem::hw::glib::GLIBMonitor::buildMonitorPage(xgi::Output* out)
     WARN("Unable to find item set HWMonitoring in monitor");
     return;
   }
-  
+
   auto monsets = m_infoSpaceMonitorableSetMap.find("HWMonitoring")->second;
-  
+
   // loop over the list of monitor sets and grab the monitorables from each one
   // create a div tab for each set, and a table for each set of values
   *out << "<div class=\"xdaq-tab-wrapper\">" << std::endl;
@@ -244,18 +318,18 @@ void gem::hw::glib::GLIBMonitor::buildMonitorPage(xgi::Output* out)
          << cgicc::th()    << "Register address" << cgicc::th() << std::endl
          << cgicc::th()    << "Description"      << cgicc::th() << std::endl
          << cgicc::tr()    << std::endl //close
-         << cgicc::thead() << std::endl 
+         << cgicc::thead() << std::endl
          << "<tbody>" << std::endl;
-    
+
     for (auto monitem = m_monitorableSetsMap.find(*monset)->second.begin();
          monitem != m_monitorableSetsMap.find(*monset)->second.end(); ++monitem) {
       *out << "<tr>"    << std::endl;
-      
+
       *out << "<td>"    << std::endl
            << monitem->first
            << "</td>"   << std::endl;
-        
-      DEBUG(monitem->first << " formatted to "
+
+      DEBUG("GLIBMonitor::" << monitem->first << " formatted to "
             << (monitem->second.infoSpace)->getFormattedItem(monitem->first,monitem->second.format));
       //this will be repeated for every GLIBMonitor in the GLIBManager..., need a better unique ID
       *out << "<td id=\"" << monitem->second.infoSpace->name() << "-" << monitem->first << "\">" << std::endl
@@ -277,19 +351,19 @@ void gem::hw::glib::GLIBMonitor::buildMonitorPage(xgi::Output* out)
          << "</div>"    << std::endl;
   }
   *out << "</div>"  << std::endl;
-  
+
 }
 
 void gem::hw::glib::GLIBMonitor::reset()
 {
-  //have to get rid of the timer 
+  //have to get rid of the timer
   DEBUG("GEMMonitor::reset");
   for (auto infoSpace = m_infoSpaceMap.begin(); infoSpace != m_infoSpaceMap.end(); ++infoSpace) {
-    DEBUG("GEMMonitor::reset removing " << infoSpace->first << " from m_timer");
+    DEBUG("GLIBMonitor::reset removing " << infoSpace->first << " from p_timer");
     try {
-      m_timer->remove(infoSpace->first);
+      p_timer->remove(infoSpace->first);
     } catch (toolbox::task::exception::Exception& te) {
-      ERROR("Caught exception while removing timer task " << infoSpace->first << " " << te.what());
+      ERROR("GLIBMonitor::Caught exception while removing timer task " << infoSpace->first << " " << te.what());
     }
   }
   stopMonitoring();
@@ -297,10 +371,10 @@ void gem::hw::glib::GLIBMonitor::reset()
   try {
     toolbox::task::getTimerFactory()->removeTimer(m_timerName);
   } catch (toolbox::task::exception::Exception& te) {
-    ERROR("Caught exception while removing timer " << m_timerName << " " << te.what());
+    ERROR("GLIBMonitor::Caught exception while removing timer " << m_timerName << " " << te.what());
   }
-  
-  DEBUG("GEMMonitor::reset - clearing all maps");
+
+  DEBUG("GLIBMonitor::reset - clearing all maps");
   m_infoSpaceMap.clear();
   m_infoSpaceMonitorableSetMap.clear();
   m_monitorableSetInfoSpaceMap.clear();
