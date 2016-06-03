@@ -1,0 +1,12 @@
+* text=auto
+
+# diff mods
+*.py   diff=python
+*.h    diff=cpp
+*.hh   diff=cpp
+*.hpp  diff=cpp
+*.cc   diff=cpp
+*.cpp  diff=cpp
+*.java diff=java
+*.html diff=html
+*.htm  diff=html

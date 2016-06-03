@@ -1,13 +1,13 @@
-#ifndef gem_readout_GEMDataAMCformat_h
-#define gem_readout_GEMDataAMCformat_h
-
-#include "gem/readout/GEMslotContents.h"
+#ifndef GEM_READOUT_GEMDATAAMCFORMAT_H
+#define GEM_READOUT_GEMDATAAMCFORMAT_H
 
 #include <iostream>
 #include <iomanip> 
 #include <fstream>
 #include <string>
 #include <vector>
+
+#include "gem/readout/GEMslotContents.h"
 
 namespace gem {
   namespace readout {
@@ -57,7 +57,7 @@ namespace gem {
 
       static bool writeGEMhd1Binary(std::string file, int event, const GEMData& gem) {
         std::ofstream outf(file.c_str(), std::ios_base::app | std::ios::binary );
-        if ( event<0) return false;
+        if (event < 0) return false;
         if (!outf.is_open()) return false;
         uint64_t cdfHeader = 0x5fffffffffffffff;
         uint64_t amc13Header1 = 0xff1ffffffffffff0;
@@ -361,12 +361,24 @@ namespace gem {
         std::ofstream outf(file.c_str(), std::ios_base::app | std::ios::binary );
         if ( event<0) return false;
         if (!outf.is_open()) return false;
-        outf.write( (char*)&vfat.BC,     sizeof(vfat.BC));
-        outf.write( (char*)&vfat.EC,     sizeof(vfat.EC));
-        outf.write( (char*)&vfat.ChipID, sizeof(vfat.ChipID));
-        outf.write( (char*)&vfat.msData, sizeof(vfat.msData));
-        outf.write( (char*)&vfat.lsData, sizeof(vfat.lsData));  
-        outf.write( (char*)&vfat.crc,    sizeof(vfat.crc));
+        uint64_t w1;
+        uint64_t w2;
+        uint64_t w3;
+        uint64_t bc = vfat.BC;
+        uint64_t ec = vfat.EC;
+        uint64_t ci = vfat.ChipID;
+        w1 = 0xffffffffffffffff & ((bc <<48) | (ec << 32) | (ci << 16) | (vfat.msData >> 48));
+        w2 = 0xffffffffffffffff & ((vfat.msData <<16) | (vfat.lsData >> 48));
+        w3 = 0xffffffffffffffff & ((vfat.lsData <<16) | (vfat.crc ));
+        outf.write( (char*)&w1,     sizeof(w1));
+        outf.write( (char*)&w2,     sizeof(w2));
+        outf.write( (char*)&w3,     sizeof(w3));
+        //outf.write( (char*)&vfat.BC,     sizeof(vfat.BC));
+        //outf.write( (char*)&vfat.EC,     sizeof(vfat.EC));
+        //outf.write( (char*)&vfat.ChipID, sizeof(vfat.ChipID));
+        //outf.write( (char*)&vfat.msData, sizeof(vfat.msData));
+        //outf.write( (char*)&vfat.lsData, sizeof(vfat.lsData));  
+        //outf.write( (char*)&vfat.crc,    sizeof(vfat.crc));
         //outf.write( (char*)&vfat.BXfrOH, sizeof(vfat.BXfrOH));
         outf.close();
         return true;
@@ -482,7 +494,11 @@ namespace gem {
         outf.close();
         return true;
       };	  
-    }; /// end struct GEMDataAMCformat
-  } //end namespace gem::readout
-} //end namespace gem
-#endif
+    };  // struct GEMDataAMCformat
+  }  // namespace gem::readout
+  typedef gem::readout::GEMDataAMCformat::GEMData  AMCGEMData;
+  typedef gem::readout::GEMDataAMCformat::GEBData  AMCGEBData;
+  typedef gem::readout::GEMDataAMCformat::VFATData AMCVFATData;
+}  // namespace gem
+
+#endif  // GEM_READOUT_GEMDATAAMCFORMAT_H
